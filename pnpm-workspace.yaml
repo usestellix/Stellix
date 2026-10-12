@@ -1,0 +1,14 @@
+packages:
+  - packages/*
+  - apps/*
+
+# SECURITY §8: no dependency version younger than 14 days (in minutes).
+# Applies to transitive dependencies too.
+minimumReleaseAge: 20160
+
+# CLAUDE.md §4: exact versions only.
+saveExact: true
+
+# Dependency build scripts are denied unless reviewed and listed here.
+strictDepBuilds: true
+allowBuilds: {}

@@ -1,0 +1,10 @@
+{
+  // Root-level tooling files only (eslint.config.mjs). Packages have their own tsconfig.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "types": ["node"]
+  },
+  "include": ["eslint.config.mjs", "scripts/*.mjs"]
+}

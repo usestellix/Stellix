@@ -17,6 +17,8 @@ Chrome MV3 shell built with WXT + React + Tailwind. Read root `CLAUDE.md`, `docs
 - Bigints cross messaging as decimal strings.
 - All user-facing error text comes from `src/ui/errorCopy.ts`, keyed by `ErrorCode`.
 - No `eval`, `new Function`, inline scripts, remote code, or CSP changes.
+- Extension APIs via `import { browser } from "wxt/browser"` (the raw `chrome` object on Chromium). WXT auto-imports are disabled (`imports: false`); import everything explicitly.
+- The dev build's manifest has extra permissions and a relaxed CSP for hot reload (ADR 0004). Only `pnpm build` output must satisfy the manifest rules, and `scripts/check-manifest.mjs` checks it.
 
 ## Layout
 ```
@@ -29,4 +31,4 @@ src/
 ```
 
 ## Verify before done
-`pnpm typecheck && pnpm lint && pnpm test`, then load with `pnpm dev` and walk every state for the screens you touched (docs/UI_FLOWS.md). For SW changes, terminate the worker from `chrome://serviceworker-internals` mid-flow and confirm recovery.
+`pnpm typecheck && pnpm lint && pnpm test`, then run `pnpm dev`, load `apps/extension/.output/chrome-mv3-dev` as an unpacked extension in `chrome://extensions` (WXT doesn't launch a browser because `web-ext` isn't installed), and walk every state for the screens you touched (docs/UI_FLOWS.md). For SW changes, terminate the worker from `chrome://serviceworker-internals` mid-flow and confirm recovery.

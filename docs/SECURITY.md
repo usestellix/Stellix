@@ -64,6 +64,8 @@ Adding any permission or manifest key above requires an ADR describing why and w
 
 Keep the MV3 default for extension pages (`script-src 'self'; object-src 'self'`). Never add `unsafe-eval` or remote script sources. No `eval`, `new Function`, `setTimeout(string)`, or inline `<script>`.
 
+Dependencies count too: zod 4 probes `Function("")` to decide whether to JIT-compile parsers, so `apps/extension/src/messaging/protocol.ts` sets `z.config({ jitless: true })` and the probe never runs. The dev build (`pnpm dev`) relaxes the CSP for hot reload; see ADR 0004. Release builds are checked by `scripts/check-manifest.mjs`.
+
 ### 4.3 Message validation
 
 Every handler: check `sender.id`, check `sender.url` prefix, zod-parse the payload, check the request type is allowed from that page (onboarding-only types). Unknown types → reject. See ARCHITECTURE §5.
@@ -100,7 +102,8 @@ At SW startup: `chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CO
 ## 8. Dependency policy
 
 - Exact versions only. Lockfile committed and reviewed in every PR that changes it.
-- No version younger than 14 days.
+- No version younger than 14 days. Enforced by pnpm's `minimumReleaseAge: 20160` in `pnpm-workspace.yaml`, which also covers transitive dependencies. Dependency build scripts are denied unless listed in `allowBuilds` (currently none).
+- GitHub Actions are pinned by commit SHA, using releases at least 14 days old.
 - Crypto: `@noble/*` and `@scure/*` (audited, zero-dependency) for hashes, KDF, and BIP39. WebCrypto for AES-GCM.
 - `packages/core` deps must be pure JS with no Node built-ins and no postinstall scripts.
 - Run `pnpm audit` in CI; triage findings, don't blindly auto-upgrade.

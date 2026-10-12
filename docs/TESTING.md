@@ -63,12 +63,14 @@ Load the unpacked built extension in a persistent Chromium context:
 
 ```ts
 const context = await chromium.launchPersistentContext(userDataDir, {
-  headless: false, // extensions need headed mode or Chromium's new headless; use the configuration Playwright docs recommend for extensions at setup time
+  channel: "chromium", // bundled Chromium supports extensions headless (playwright.dev/docs/chrome-extensions)
   args: [`--disable-extensions-except=${extPath}`, `--load-extension=${extPath}`],
 });
 ```
 
-Get the extension ID from the service worker URL, then open `chrome-extension://<id>/popup.html` and `onboarding.html` as pages.
+Get the extension ID from the service worker URL, then open `chrome-extension://<id>/popup.html` and `onboarding.html` as pages. Fixtures live in `apps/extension/e2e/fixtures.ts`. `pnpm test:e2e` builds first and tests `.output/chrome-mv3`. Set `STELLIX_EXTENSION_DIR` to test another build (e.g. the `wxt` dev build; the manifest-permission test skips there, see ADR 0004).
+
+To terminate the SW, use CDP `ServiceWorker.stopAllWorkers` from a page session. Playwright emits no new `serviceworker` event when an extension worker restarts, so watch `ServiceWorker.workerVersionUpdated` running status to prove the stop and the restart.
 
 Required flows (testnet, live network):
 1. Create wallet → verify words → password → popup unlocked → Friendbot → balance shows.

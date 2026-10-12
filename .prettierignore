@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+node_modules
+.output
+.wxt
+test-results
+playwright-report
+
+# Hand-authored docs are not reformatted.
+*.md
