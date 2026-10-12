@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* Design tokens (CONVENTIONS §6). Tailwind v4 is configured in CSS, not tailwind.config.ts. */
+@theme {
+  --color-surface: #ffffff;
+  --color-ink: #111827;
+  --color-muted: #6b7280;
+  --color-line: #e5e7eb;
+  --color-accent: #1d4ed8;
+  --color-accent-fg: #ffffff;
+  --color-testnet-bg: #fef3c7;
+  --color-testnet-fg: #92400e;
+  --color-mainnet-bg: #fee2e2;
+  --color-mainnet-fg: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #111827;
+    --color-ink: #f9fafb;
+    --color-muted: #9ca3af;
+    --color-line: #374151;
+    --color-accent: #3b82f6;
+    --color-testnet-bg: #451a03;
+    --color-testnet-fg: #fcd34d;
+    --color-mainnet-bg: #450a0a;
+    --color-mainnet-fg: #fca5a5;
+  }
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}

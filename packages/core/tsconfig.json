@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // WebWorker gives fetch / crypto types without window or document (ADR 0002).
+    "lib": ["ES2022", "WebWorker"],
+    "types": []
+  },
+  "include": ["src", "vitest.config.ts", "vitest.testnet.config.ts"]
+}

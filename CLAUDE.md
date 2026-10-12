@@ -138,7 +138,8 @@ pnpm test                     # unit tests across workspaces (Vitest)
 pnpm test:testnet             # integration tests against Stellar testnet (needs network)
 pnpm test:e2e                 # Playwright E2E against the built extension
 pnpm typecheck                # tsc --noEmit across workspaces
-pnpm lint                     # ESLint
+pnpm lint                     # ESLint + core restriction self-test
+pnpm format:check             # Prettier (CI runs this too)
 pnpm zip                      # WXT store-ready zip
 ```
 

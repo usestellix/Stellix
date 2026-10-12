@@ -83,7 +83,7 @@ Core functions that need storage or time take a `Platform` (or the specific piec
 All UI → SW communication uses `chrome.runtime.sendMessage` with a typed envelope:
 
 ```ts
-type Request  = { id: string; type: RequestType; payload: unknown };
+type Request  = { id: string /* uuid */; type: RequestType; payload?: unknown }; // undefined payload arrives as a missing key (JSON)
 type Response =
   | { id: string; ok: true;  data: unknown }
   | { id: string; ok: false; error: { code: ErrorCode; message: string } };
@@ -92,17 +92,19 @@ type Response =
 The handler in `background.ts`:
 
 1. Rejects if `sender.id !== chrome.runtime.id`.
-2. Rejects if `sender.url` does not start with `chrome.runtime.getURL('')`.
+2. Rejects if `sender.url` does not start with `chrome.runtime.getURL('')`, or its path is not a known extension page (`/popup.html`, `/onboarding.html`). Then parses the envelope (unknown `type` or extra keys → `INVALID_REQUEST`) and rejects if the type isn't allowed from that page.
 3. Parses `payload` with the zod schema registered for `type`; rejects on failure.
 4. Calls `touchActivity()` (updates `lastActivityAt`) for any request other than `GET_STATUS`.
-5. Executes, catches everything, maps to `StellixError`, returns a `Response`.
+5. Executes, validates the handler's result against the type's result schema, catches everything, maps to `StellixError`, returns a `Response`.
 6. Returns `true` from the listener to keep the channel open for async work.
+
+No message is handled until SW startup work (access level, migrations) has finished; the listener itself is registered synchronously at worker start. Implementation: `apps/extension/src/messaging/` (`protocol.ts` registers each type's payload schema, result schema, allowed pages, and whether it counts as activity).
 
 ### Request types (MVP)
 
 | Type | Payload | Returns | Requires unlocked |
 |---|---|---|---|
-| `GET_STATUS` | — | `{ hasVault, unlocked, network, activeAccountIndex }` | No |
+| `GET_STATUS` | — | `{ hasVault, unlocked, network, activeAccountIndex }` (`activeAccountIndex` is `null` until an account exists) | No |
 | `ONBOARD_GENERATE` | — | `{ words: string[] }` (onboarding page only) | No |
 | `ONBOARD_CREATE` | `{ password, verifiedIndices }` | `{ accounts }` | No |
 | `ONBOARD_IMPORT` | `{ mnemonic, password }` | `{ accounts }` (after discovery) | No |

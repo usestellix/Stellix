@@ -23,6 +23,8 @@
 }
 ```
 
+TypeScript is pinned to 6.0.x: typescript-eslint does not support TypeScript 7 (its peer range is `<6.1.0`). TS 6 defaults `types` to `[]`, so each package lists the ambient types it needs.
+
 - No `any`. Use `unknown` and narrow (zod or type guards).
 - No non-null assertions (`!`) except in tests.
 - No enums; use string-literal unions + `as const` objects.
@@ -85,7 +87,8 @@ export type ErrorCode =
 - Function components and hooks only.
 - One screen per file under `ui/screens/`; shared pieces under `ui/components/`.
 - No secrets in React state, props, or context — ever.
-- Tailwind for styling; design tokens (colors, spacing) in `tailwind.config.ts`.
+- Tailwind (v4) for styling; design tokens (colors, spacing) in the `@theme` block of `apps/extension/src/ui/theme.css`. Tailwind v4 is configured in CSS; there is no `tailwind.config.ts`.
+- Extension APIs come from `import { browser } from "wxt/browser"`, which is the raw `chrome` object on Chromium (no polyfill) and keeps the Firefox build working. Docs still say `chrome.*`; they mean the same API.
 - All user-visible strings in one place per screen (preparing for i18n later; no i18n library in MVP).
 
 ## 7. Linting & formatting
@@ -93,8 +96,10 @@ export type ErrorCode =
 - ESLint with `@typescript-eslint` strict-type-checked config, plus:
   - `no-console` (except in `core/log.ts`)
   - `no-restricted-imports`: in `packages/core`, forbid `react`, `react-native`, `webextension-polyfill`, `wxt*`, and Node built-ins (`fs`, `path`, `crypto` as a module, `buffer`).
-  - `no-restricted-globals`: in `packages/core`, forbid `chrome`, `browser`, `window`, `document`, `localStorage`.
-- Prettier, default settings, 100 col.
+  - `no-restricted-globals`: in `packages/core`, forbid `chrome`, `browser`, `window`, `document`, `localStorage`, plus `sessionStorage`, `indexedDB`, `EventSource`, `self`, `navigator`.
+  - `no-restricted-properties`: in `packages/core`, forbid the same names via `globalThis.*`, and `Math.random`.
+  - `scripts/check-lint-restrictions.mjs` runs as part of `pnpm lint` and fails if any of these restrictions stops firing.
+- Prettier, default settings, 100 col. Markdown is excluded, so docs stay hand-formatted.
 
 ## 8. Git
 
