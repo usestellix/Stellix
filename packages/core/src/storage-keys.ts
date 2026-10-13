@@ -11,6 +11,8 @@ export const SESSION_KEYS = {
   sessionKey: "sessionKey",
   lastActivityAt: "lastActivityAt",
   pendingOnboarding: "pendingOnboarding",
+  /** `{ failures, lockedUntil }`. Survives lock; cleared on successful unlock and on browser exit. */
+  unlockThrottle: "unlockThrottle",
 } as const;
 
 export const PREPARED_TX_KEY_PREFIX = "preparedTx:";

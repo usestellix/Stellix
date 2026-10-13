@@ -34,6 +34,7 @@ Milestones are ordered by dependency. Each has exit criteria; a milestone is don
 - Account discovery on import (real).
 - Home screen: balance card (total / available / reserved), unfunded state, Friendbot on testnet, network badge, account switcher.
 - Settings: network switch with mainnet confirmation, custom Horizon URL with passphrase probe, auto-lock timer.
+- Settings → Security screens for the M1 handlers: Reveal recovery phrase (onboarding tab in reveal mode), Change password, Reset wallet (typed "RESET"). Accounts screen (add, rename, switch).
 
 **Exit:** balances correct for funded/unfunded/multi-subentry accounts (fixtures); Friendbot works; mainnet switch guarded; network badge always visible.
 

@@ -9,11 +9,13 @@ export const ERROR_COPY: Readonly<Record<ErrorCode, string>> = {
   INVALID_PASSWORD: "That password isn't right. Try again.",
   VAULT_NOT_FOUND: "No wallet found on this device. Create or import one to get started.",
   VAULT_CORRUPT: "Your wallet data couldn't be read. Restore it with your recovery phrase.",
+  UNLOCK_THROTTLED: "Too many attempts. Wait 30 seconds and try again.",
   // onboarding
   INVALID_MNEMONIC_WORD:
     "One or more words aren't in the recovery phrase word list. Check the highlighted words.",
   INVALID_MNEMONIC_CHECKSUM: "This recovery phrase isn't valid. Check the words and their order.",
   VERIFICATION_FAILED: "That word doesn't match your recovery phrase. Check what you wrote down.",
+  ONBOARDING_EXPIRED: "This setup session expired. Start again — you'll get a new recovery phrase.",
   // input
   INVALID_ADDRESS: "This isn't a valid Stellar address. Addresses start with G or M.",
   SECRET_KEY_ENTERED:
