@@ -15,6 +15,22 @@ export {
   type Logger,
   type LoggerOptions,
 } from "./log.js";
+export {
+  assertAccountIndex,
+  deriveKeypair,
+  derivePublicKey,
+  mnemonicToSeed,
+} from "./keys/derive.js";
+export {
+  CREATE_WORD_COUNT,
+  IMPORT_WORD_COUNTS,
+  MNEMONIC_WORDLIST,
+  generateMnemonic,
+  isMnemonicWord,
+  normalizeMnemonic,
+  parseMnemonic,
+  unknownWordPositions,
+} from "./keys/mnemonic.js";
 export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./network/network-id.js";
 export type { KeyValueStore, Platform } from "./platform.js";
 export { getStatus, type WalletStatus } from "./services/get-status.js";

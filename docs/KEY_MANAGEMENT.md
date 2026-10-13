@@ -21,7 +21,7 @@ SEP-0005 specifies:
 
 1. `seed = BIP39 mnemonicToSeed(mnemonic, passphrase = "")` → 64 bytes (PBKDF2-HMAC-SHA512, 2048 rounds, salt `"mnemonic" + passphrase`).
 2. Derive with **SLIP-0010 for ed25519** along path `m/44'/148'/x'`, where `x` is the account index. All levels are hardened (ed25519 under SLIP-0010 supports hardened derivation only).
-3. The 32-byte private key at that node is the ed25519 secret seed: `Keypair.fromRawEd25519Seed(Buffer.from(key))`.
+3. The 32-byte private key at that node is the ed25519 secret seed: `Keypair.fromRawEd25519Seed(key)`. It's imported from `@stellar/stellar-sdk/base`; SDK 17 takes a plain `Uint8Array`, so core never needs `Buffer`.
 
 Implementation:
 
@@ -33,10 +33,11 @@ export function derivePublicKey(seed: Uint8Array, index: number): string  // G..
 
 - `index` is a non-negative integer < 2³¹.
 - Use an audited SLIP-0010 implementation (`micro-key-producer`'s slip10 module or equivalent). Do not hand-roll HMAC chains.
+- We use `micro-key-producer`. It's built on audited noble primitives, but the slip10 module itself has no separate audit, so it's also tested against the SLIP-0010 spec's own ed25519 vectors (`slip0010.vectors.ts`).
 
 ### Test vectors — mandatory
 
-SEP-0005 publishes test vectors (mnemonics with expected `G...`/`S...` for indices 0–9, including a 24-word vector and a vector with a passphrase). Copy them **verbatim** from the spec into `packages/core/src/keys/__tests__/sep0005.vectors.ts`. Every vector without a passphrase must pass. (Keep the passphrase vector in the file but skipped, with a comment, until passphrase support exists.)
+SEP-0005 publishes test vectors (mnemonics with expected `G...`/`S...` for indices 0–9, including a 24-word vector and a vector with a passphrase). Copy them **verbatim** from the spec into `packages/core/src/keys/__tests__/sep0005.vectors.ts`. `scripts/extract-test-vectors.mjs` regenerates both vector files mechanically. It fetches each spec at a pinned commit and verifies its SHA-256. Every vector without a passphrase must pass. (Keep the passphrase vector in the file but skipped, with a comment, until passphrase support exists.)
 
 **Never generate expected values yourself.** If the spec can't be fetched, stop and ask.
 
