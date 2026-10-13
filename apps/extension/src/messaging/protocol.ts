@@ -1,4 +1,13 @@
-import { ERROR_CODES, NETWORK_IDS, type ErrorCode, type WalletStatus } from "@stellix/core";
+import {
+  CREATE_WORD_COUNT,
+  ERROR_CODES,
+  NETWORK_IDS,
+  RESET_CONFIRMATION,
+  VERIFY_WORD_COUNT,
+  accountMetaSchema,
+  type ErrorCode,
+  type WalletStatus,
+} from "@stellix/core";
 import { z } from "zod";
 
 // Zod 4 otherwise probes `Function("")` to decide whether to JIT-compile parsers. MV3 CSP blocks
@@ -17,16 +26,23 @@ export const EXTENSION_PAGES = {
 
 export type ExtensionPage = keyof typeof EXTENSION_PAGES;
 
-export const REQUEST_TYPES = ["GET_STATUS"] as const;
+export const REQUEST_TYPES = [
+  "GET_STATUS",
+  "ONBOARD_GENERATE",
+  "ONBOARD_CREATE",
+  "ONBOARD_IMPORT",
+  "UNLOCK",
+  "LOCK",
+  "LIST_ACCOUNTS",
+  "ADD_ACCOUNT",
+  "RENAME_ACCOUNT",
+  "SET_ACTIVE_ACCOUNT",
+  "REVEAL_PHRASE",
+  "CHANGE_PASSWORD",
+  "RESET_WALLET",
+] as const;
 
 export type RequestType = (typeof REQUEST_TYPES)[number];
-
-const walletStatusSchema = z.strictObject({
-  hasVault: z.boolean(),
-  unlocked: z.boolean(),
-  network: z.enum(NETWORK_IDS),
-  activeAccountIndex: z.number().int().nonnegative().nullable(),
-}) satisfies z.ZodType<WalletStatus>;
 
 export interface RequestDefinition<
   P extends z.ZodType = z.ZodType,
@@ -46,12 +62,120 @@ function defineRequest<P extends z.ZodType, R extends z.ZodType>(
   return def;
 }
 
+const BOTH = ["popup", "onboarding"] as const satisfies readonly ExtensionPage[];
+/** Types that carry or return the recovery phrase (ARCHITECTURE §5, SECURITY §4.3). */
+const ONBOARDING_ONLY = ["onboarding"] as const satisfies readonly ExtensionPage[];
+
+// Generous caps: real limits are enforced in core; these bound what crosses the boundary.
+const password = z.string().min(1).max(1024);
+const accountIndex = z
+  .number()
+  .int()
+  .min(0)
+  .max(2 ** 31 - 1);
+const label = z.string().max(64);
+const none = z.undefined();
+
+const walletStatusSchema = z.strictObject({
+  hasVault: z.boolean(),
+  unlocked: z.boolean(),
+  network: z.enum(NETWORK_IDS),
+  activeAccountIndex: z.number().int().nonnegative().nullable(),
+}) satisfies z.ZodType<WalletStatus>;
+
+const accountsResult = z.strictObject({ accounts: z.array(accountMetaSchema) });
+
 export const REQUESTS = {
   GET_STATUS: defineRequest({
-    payload: z.undefined(),
+    payload: none,
     result: walletStatusSchema,
-    allowedFrom: ["popup", "onboarding"],
+    allowedFrom: BOTH,
     countsAsActivity: false,
+  }),
+  ONBOARD_GENERATE: defineRequest({
+    payload: none,
+    result: z.strictObject({
+      words: z.array(z.string()).length(CREATE_WORD_COUNT),
+      verifyPositions: z
+        .array(
+          z
+            .number()
+            .int()
+            .min(0)
+            .max(CREATE_WORD_COUNT - 1),
+        )
+        .length(VERIFY_WORD_COUNT),
+    }),
+    allowedFrom: ONBOARDING_ONLY,
+    countsAsActivity: true,
+  }),
+  ONBOARD_CREATE: defineRequest({
+    payload: z.strictObject({
+      password,
+      answers: z
+        .array(
+          z.strictObject({ position: z.number().int().min(0).max(23), word: z.string().max(64) }),
+        )
+        .max(VERIFY_WORD_COUNT),
+    }),
+    result: accountsResult,
+    allowedFrom: ONBOARDING_ONLY,
+    countsAsActivity: true,
+  }),
+  ONBOARD_IMPORT: defineRequest({
+    payload: z.strictObject({ mnemonic: z.string().max(1024), password }),
+    result: accountsResult,
+    allowedFrom: ONBOARDING_ONLY,
+    countsAsActivity: true,
+  }),
+  UNLOCK: defineRequest({
+    payload: z.strictObject({ password }),
+    result: z.strictObject({ ok: z.literal(true) }),
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  LOCK: defineRequest({ payload: none, result: none, allowedFrom: BOTH, countsAsActivity: true }),
+  LIST_ACCOUNTS: defineRequest({
+    payload: none,
+    result: z.array(accountMetaSchema),
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  ADD_ACCOUNT: defineRequest({
+    payload: z.strictObject({ label: label.optional() }),
+    result: accountMetaSchema,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  RENAME_ACCOUNT: defineRequest({
+    payload: z.strictObject({ index: accountIndex, label }),
+    result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  SET_ACTIVE_ACCOUNT: defineRequest({
+    payload: z.strictObject({ index: accountIndex }),
+    result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  REVEAL_PHRASE: defineRequest({
+    payload: z.strictObject({ password }),
+    result: z.strictObject({ words: z.array(z.string()).min(12).max(24) }),
+    allowedFrom: ONBOARDING_ONLY,
+    countsAsActivity: true,
+  }),
+  CHANGE_PASSWORD: defineRequest({
+    payload: z.strictObject({ current: password, next: password }),
+    result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  RESET_WALLET: defineRequest({
+    payload: z.strictObject({ confirmation: z.literal(RESET_CONFIRMATION) }),
+    result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
   }),
 } satisfies Record<RequestType, RequestDefinition>;
 
@@ -68,7 +192,8 @@ export const requestEnvelopeSchema = z.strictObject({
 export type RequestEnvelope = z.output<typeof requestEnvelopeSchema>;
 
 export const responseSchema = z.discriminatedUnion("ok", [
-  z.strictObject({ id: z.string(), ok: z.literal(true), data: z.unknown() }),
+  // Same as payload: an undefined result (e.g. LOCK) arrives without a `data` key.
+  z.strictObject({ id: z.string(), ok: z.literal(true), data: z.unknown().optional() }),
   z.strictObject({
     id: z.string(),
     ok: z.literal(false),
@@ -77,5 +202,5 @@ export const responseSchema = z.discriminatedUnion("ok", [
 ]);
 
 export type Response =
-  | { id: string; ok: true; data: unknown }
+  | { id: string; ok: true; data?: unknown }
   | { id: string; ok: false; error: { code: ErrorCode; message: string } };

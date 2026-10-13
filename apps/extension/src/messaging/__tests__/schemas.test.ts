@@ -71,7 +71,79 @@ describe("registry", () => {
     expect(Object.keys(REQUESTS).sort()).toEqual([...REQUEST_TYPES].sort());
   });
 
-  it("GET_STATUS does not count as activity", () => {
-    expect(REQUESTS.GET_STATUS.countsAsActivity).toBe(false);
+  it("only GET_STATUS is excluded from activity (ARCHITECTURE §5 step 4)", () => {
+    const passive = Object.entries(REQUESTS)
+      .filter(([, d]) => !d.countsAsActivity)
+      .map(([t]) => t);
+    expect(passive).toEqual(["GET_STATUS"]);
+  });
+});
+
+describe("payload schemas for every request type", () => {
+  const cases: Record<keyof typeof REQUESTS, { valid: unknown[]; invalid: unknown[] }> = {
+    GET_STATUS: { valid: [undefined], invalid: [{}, null] },
+    ONBOARD_GENERATE: { valid: [undefined], invalid: [{}] },
+    ONBOARD_CREATE: {
+      valid: [{ password: "pw", answers: [{ position: 2, word: "abandon" }] }],
+      invalid: [
+        { password: "pw" },
+        { password: "", answers: [] },
+        { password: "pw", answers: [{ position: -1, word: "x" }] },
+        { password: "pw", answers: [{ position: 1, word: "x" }], verifiedIndices: [1] },
+        {
+          password: "pw",
+          answers: Array.from({ length: 4 }, (_, i) => ({ position: i, word: "x" })),
+        },
+      ],
+    },
+    ONBOARD_IMPORT: {
+      valid: [{ mnemonic: "abandon about", password: "pw" }],
+      invalid: [{ mnemonic: "x".repeat(1025), password: "pw" }, { mnemonic: "x" }],
+    },
+    UNLOCK: {
+      valid: [{ password: "pw" }],
+      invalid: [{ password: "" }, { password: 1 }, undefined],
+    },
+    LOCK: { valid: [undefined], invalid: [{}] },
+    LIST_ACCOUNTS: { valid: [undefined], invalid: [{}] },
+    ADD_ACCOUNT: {
+      valid: [{}, { label: "Savings" }],
+      invalid: [undefined, { label: 1 }, { label: "x".repeat(65) }],
+    },
+    RENAME_ACCOUNT: {
+      valid: [{ index: 0, label: "Main" }],
+      invalid: [{ index: -1, label: "x" }, { index: 1.5, label: "x" }, { index: 0 }],
+    },
+    SET_ACTIVE_ACCOUNT: { valid: [{ index: 3 }], invalid: [{ index: "3" }, { index: 2 ** 31 }] },
+    REVEAL_PHRASE: { valid: [{ password: "pw" }], invalid: [{}, { password: "" }] },
+    CHANGE_PASSWORD: {
+      valid: [{ current: "a", next: "b" }],
+      invalid: [{ current: "a" }, { current: "", next: "b" }],
+    },
+    RESET_WALLET: { valid: [{ confirmation: "RESET" }], invalid: [{ confirmation: "reset" }, {}] },
+  };
+
+  for (const [type, { valid, invalid }] of Object.entries(cases)) {
+    const schema = REQUESTS[type as keyof typeof REQUESTS].payload;
+    it.each(valid)(`${type} accepts %j`, (payload) => {
+      expect(schema.safeParse(payload).success).toBe(true);
+    });
+    it.each(invalid)(`${type} rejects %j`, (payload) => {
+      expect(schema.safeParse(payload).success).toBe(false);
+    });
+  }
+});
+
+describe("result schemas", () => {
+  it("REVEAL_PHRASE and ONBOARD_GENERATE only return words in the shapes we expect", () => {
+    expect(
+      REQUESTS.ONBOARD_GENERATE.result.safeParse({ words: ["a"], verifyPositions: [1, 2, 3] })
+        .success,
+    ).toBe(false);
+    expect(REQUESTS.REVEAL_PHRASE.result.safeParse({ words: [], extra: 1 }).success).toBe(false);
+  });
+
+  it("void results accept a missing data key in the response envelope", () => {
+    expect(responseSchema.safeParse({ id: ID, ok: true }).success).toBe(true);
   });
 });
