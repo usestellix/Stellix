@@ -43,6 +43,7 @@ export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./net
 export {
   PASSWORD_MIN_LENGTH,
   assertPasswordPolicy,
+  meetsPasswordPolicy,
   passwordStrength,
   type PasswordStrength,
 } from "./password.js";

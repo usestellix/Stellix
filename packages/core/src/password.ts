@@ -21,9 +21,14 @@ function codePointLength(text: string): number {
   return n;
 }
 
+/** Same rule as assertPasswordPolicy, for inline UI feedback. */
+export function meetsPasswordPolicy(password: string): boolean {
+  return codePointLength(password) >= PASSWORD_MIN_LENGTH;
+}
+
 /** Enforced in the SW; the UI checks the same rule first for inline feedback. */
 export function assertPasswordPolicy(password: string): void {
-  if (codePointLength(password) < PASSWORD_MIN_LENGTH) {
+  if (!meetsPasswordPolicy(password)) {
     throw new StellixError("INVALID_REQUEST", "Password is too short");
   }
 }

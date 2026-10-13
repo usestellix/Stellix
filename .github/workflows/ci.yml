@@ -35,6 +35,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: node scripts/check-manifest.mjs
+      - run: node scripts/check-bundle.mjs
 
   e2e:
     runs-on: ubuntu-24.04

@@ -12,6 +12,11 @@
   --color-testnet-fg: #92400e;
   --color-mainnet-bg: #fee2e2;
   --color-mainnet-fg: #b91c1c;
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fef2f2;
+  --color-success: #15803d;
+  --color-warning-bg: #fffbeb;
+  --color-warning-fg: #92400e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,10 +30,42 @@
     --color-testnet-fg: #fcd34d;
     --color-mainnet-bg: #450a0a;
     --color-mainnet-fg: #fca5a5;
+    --color-danger: #f87171;
+    --color-danger-bg: #450a0a;
+    --color-success: #4ade80;
+    --color-warning-bg: #451a03;
+    --color-warning-fg: #fcd34d;
   }
 }
 
 body {
   background-color: var(--color-surface);
   color: var(--color-ink);
+}
+
+/* UI_FLOWS §10: visible focus rings on every interactive element. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+.animate-shake {
+  animation: shake 0.25s ease-in-out 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-shake {
+    animation: none;
+  }
 }
