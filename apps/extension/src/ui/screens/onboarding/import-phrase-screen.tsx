@@ -7,9 +7,12 @@ import {
   unknownWordPositions,
 } from "@stellix/core";
 import { useEffect, useRef, useState, type ClipboardEvent, type SubmitEvent } from "react";
+import { cx } from "../../cx.js";
 import { Button } from "../../components/button.js";
 import { ErrorText } from "../../components/error-text.js";
+import { inputClass } from "../../components/field.js";
 import { errorCopy } from "../../errorCopy.js";
+import { StepHeading } from "./onboarding-shell.js";
 
 // Import (UI_FLOWS §2.5, KEY_MANAGEMENT §1): one uncontrolled input per word, paste-to-fill,
 // per-word wordlist check, checksum message. Never auto-corrects. Words never enter React state;
@@ -18,17 +21,21 @@ import { errorCopy } from "../../errorCopy.js";
 type WordCount = (typeof IMPORT_WORD_COUNTS)[number];
 
 const COPY = {
-  title: "Import your recovery phrase",
-  body: "Enter your 12- or 24-word recovery phrase. Pasting the whole phrase into the first box fills them all.",
+  title: "Enter your recovery phrase",
+  body: "Paste the whole phrase into the first box to fill them all, or type each word.",
   words: (n: number) => `${String(n)} words`,
   word: (n: number) => `Word ${String(n)}`,
   continue: "Continue",
+  missing: (n: number) => `Enter all ${String(n)} words.`,
 } as const;
 
 export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: string) => void }) {
   const [count, setCount] = useState<WordCount>(12);
   const [unknown, setUnknown] = useState<ReadonlySet<number>>(new Set());
   const [checksumError, setChecksumError] = useState(false);
+  // The summary message appears only after a submit. Blur feedback is the outline alone: inserting
+  // a message on blur shifts the Continue button mid-click, so the click misses (found in review).
+  const [submitted, setSubmitted] = useState<null | "missing" | "unknown">(null);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const pendingFill = useRef<{ from: number; words: string[] } | null>(null);
 
@@ -67,7 +74,7 @@ export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: stri
   };
 
   const onBlur = (index: number) => () => {
-    const value = inputs.current[index]?.value ?? "";
+    const value = (inputs.current[index]?.value ?? "").trim();
     setUnknown((prev) => {
       const next = new Set(prev);
       if (value !== "" && !isMnemonicWord(value)) next.add(index);
@@ -83,7 +90,12 @@ export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: stri
     );
     const bad = new Set(unknownWordPositions(words));
     setUnknown(bad);
-    if (bad.size > 0) return;
+    if (bad.size > 0) {
+      setSubmitted(words.some((w) => w === "") ? "missing" : "unknown");
+      inputs.current[Math.min(...bad)]?.focus();
+      return;
+    }
+    setSubmitted(null);
     try {
       onContinue(parseMnemonic(words.join(" ")));
     } catch {
@@ -92,25 +104,34 @@ export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: stri
   };
 
   return (
-    <form className="space-y-5" onSubmit={submit} data-testid="onboarding-import">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">{COPY.title}</h1>
-        <p className="text-muted">{COPY.body}</p>
-      </div>
-      <div className="flex gap-2" role="radiogroup">
+    <form onSubmit={submit} data-testid="onboarding-import" noValidate>
+      <StepHeading title={COPY.title} body={COPY.body} />
+      <div
+        role="radiogroup"
+        aria-label="Phrase length"
+        className="mb-5 inline-flex rounded-lg bg-fill p-0.5"
+      >
         {IMPORT_WORD_COUNTS.map((n) => (
-          <Button
+          <button
             key={n}
+            type="button"
             role="radio"
             aria-checked={count === n}
-            variant={count === n ? "primary" : "secondary"}
             onClick={() => {
               setCount(n);
               setUnknown(new Set());
+              setChecksumError(false);
+              setSubmitted(null);
             }}
+            className={cx(
+              "h-8 rounded-md px-3.5 text-[13px] font-medium transition-[background-color,box-shadow,color] duration-150",
+              count === n
+                ? "bg-surface text-ink shadow-ring-strong"
+                : "text-muted hover-fine:text-ink",
+            )}
           >
             {COPY.words(n)}
-          </Button>
+          </button>
         ))}
       </div>
       <datalist id="bip39-words">
@@ -120,14 +141,19 @@ export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: stri
       </datalist>
       <ol className="grid grid-cols-3 gap-2">
         {Array.from({ length: count }, (_, i) => (
-          <li key={`${String(count)}-${String(i)}`}>
+          <li key={`${String(count)}-${String(i)}`} className="relative">
+            <span
+              aria-hidden="true"
+              className="tabular pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-[11px] text-faint"
+            >
+              {i + 1}
+            </span>
             <input
               ref={(el) => {
                 inputs.current[i] = el;
               }}
               aria-label={COPY.word(i + 1)}
               data-testid={`import-word-${String(i + 1)}`}
-              placeholder={String(i + 1)}
               list="bip39-words"
               autoComplete="off"
               autoCapitalize="none"
@@ -135,14 +161,19 @@ export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: stri
               aria-invalid={unknown.has(i)}
               onPaste={onPaste(i)}
               onBlur={onBlur(i)}
-              className={`w-full rounded-md border bg-surface px-2 py-1.5 font-mono text-sm ${unknown.has(i) ? "border-danger" : "border-line"}`}
+              className={inputClass(unknown.has(i), "h-9 pl-7 font-mono text-[13px]")}
             />
           </li>
         ))}
       </ol>
-      {unknown.size > 0 && <ErrorText>{errorCopy("INVALID_MNEMONIC_WORD")}</ErrorText>}
-      {checksumError && <ErrorText>{errorCopy("INVALID_MNEMONIC_CHECKSUM")}</ErrorText>}
-      <Button type="submit" className="w-full">
+      <div className="mt-4 space-y-2">
+        {submitted === "missing" && <ErrorText>{COPY.missing(count)}</ErrorText>}
+        {submitted === "unknown" && unknown.size > 0 && (
+          <ErrorText>{errorCopy("INVALID_MNEMONIC_WORD")}</ErrorText>
+        )}
+        {checksumError && <ErrorText>{errorCopy("INVALID_MNEMONIC_CHECKSUM")}</ErrorText>}
+      </div>
+      <Button type="submit" className="mt-6 w-full">
         {COPY.continue}
       </Button>
     </form>

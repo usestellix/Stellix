@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../components/button.js";
+import { Callout } from "../../components/callout.js";
+import { EyeIcon, EyeOffIcon } from "../../components/icons.js";
 import { PhraseGrid } from "../../components/phrase-grid.js";
+import { StepHeading } from "./onboarding-shell.js";
 
-// Show phrase (UI_FLOWS §2.2, SECURITY §6): warning first, grid blurred until "Reveal",
+// Show phrase (UI_FLOWS §2.2, SECURITY §6): warning first, grid hidden until "Reveal",
 // auto-hides after 60 s or when the tab loses focus. No copy button.
 
 const AUTO_HIDE_MS = 60_000;
 
 const COPY = {
-  title: "Your recovery phrase",
+  title: "Write down your recovery phrase",
+  body: "These 12 words, in this order, are the only way to restore your wallet.",
   warning:
-    "Your recovery phrase is the only way to restore your wallet. Anyone who has it can take your funds. Write it on paper. Don't screenshot it.",
+    "Anyone who has these words can take your funds. Write them on paper and keep it somewhere safe. Don't screenshot them or store them online.",
   reveal: "Reveal",
   hide: "Hide",
   continue: "I've written it down",
+  autoHide: "Hides automatically after a minute or when you leave this tab.",
 } as const;
 
 export function ShowPhraseScreen({
@@ -45,13 +50,16 @@ export function ShowPhraseScreen({
   }, [revealed]);
 
   return (
-    <section className="space-y-5" data-testid="onboarding-show">
-      <h1 className="text-2xl font-semibold">{COPY.title}</h1>
-      <p role="note" className="rounded-md bg-warning-bg p-3 text-sm text-warning-fg">
-        {COPY.warning}
-      </p>
-      <PhraseGrid words={words} revealed={revealed} />
-      <div className="flex gap-3">
+    <section data-testid="onboarding-show">
+      <StepHeading title={COPY.title} body={COPY.body} />
+      <div className="space-y-4">
+        <Callout tone="warning">{COPY.warning}</Callout>
+        <div className="rounded-xl bg-surface p-2 shadow-raised">
+          <PhraseGrid words={words} revealed={revealed} />
+        </div>
+        <p className="text-[12px] text-faint">{COPY.autoHide}</p>
+      </div>
+      <div className="mt-7 flex gap-2.5">
         <Button
           variant="secondary"
           onClick={() => {
@@ -59,9 +67,10 @@ export function ShowPhraseScreen({
             setSeen(true);
           }}
         >
+          {revealed ? <EyeOffIcon /> : <EyeIcon />}
           {revealed ? COPY.hide : COPY.reveal}
         </Button>
-        <Button disabled={!seen} onClick={onContinue}>
+        <Button disabled={!seen} onClick={onContinue} className="flex-1">
           {COPY.continue}
         </Button>
       </div>

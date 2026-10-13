@@ -2,9 +2,10 @@ import type { AccountMeta, WalletStatus } from "@stellix/core";
 import { useEffect, useState } from "react";
 import { request } from "../../messaging/client.js";
 import { GroupedAddress, truncateAddress } from "../components/address.js";
-import { Button } from "../components/button.js";
+import { IconButton } from "../components/button.js";
 import { ErrorText } from "../components/error-text.js";
-import { NetworkBadge } from "../components/network-badge.js";
+import { LockIcon } from "../components/icons.js";
+import { PopupHeader } from "../components/popup-header.js";
 import { errorCopy } from "../errorCopy.js";
 import { useAction } from "../hooks/use-request.js";
 
@@ -13,7 +14,7 @@ import { useAction } from "../hooks/use-request.js";
 
 const COPY = {
   lock: "Lock",
-  address: "Your address",
+  address: "Address",
   comingSoon: "Balances and activity arrive in the next update.",
 } as const;
 
@@ -46,37 +47,40 @@ export function UnlockedScreen({
   };
 
   return (
-    <div data-testid="popup" data-screen="unlocked" className="flex h-full flex-col">
-      <header className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium" data-testid="account-label">
-            {account?.label ?? ""}
-          </p>
-          <p className="font-mono text-xs text-muted">
-            {account === null ? "" : truncateAddress(account.publicKey)}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <NetworkBadge network={status.network} />
-          <Button
-            variant="secondary"
-            className="px-3 py-1"
-            onClick={() => void lockNow()}
-            aria-label={COPY.lock}
-          >
-            🔒
-          </Button>
-        </div>
-      </header>
-      <main className="space-y-3 p-4">
+    <div data-testid="popup" data-screen="unlocked" className="flex h-full flex-col bg-surface">
+      <PopupHeader
+        network={status.network}
+        leading={
+          <div className="min-w-0">
+            <p
+              className="truncate text-[14px] font-semibold tracking-[-0.01em]"
+              data-testid="account-label"
+              title={account?.label}
+            >
+              {account?.label ?? " "}
+            </p>
+            <p className="font-mono text-[12px] text-muted" title={account?.publicKey}>
+              {account === null ? " " : truncateAddress(account.publicKey)}
+            </p>
+          </div>
+        }
+        trailing={
+          <IconButton label={COPY.lock} onClick={() => void lockNow()}>
+            <LockIcon size={16} />
+          </IconButton>
+        }
+      />
+      <main className="space-y-4 p-4">
         {state.kind === "error" && <ErrorText>{errorCopy(state.code)}</ErrorText>}
         {account !== null && (
-          <section className="space-y-1">
-            <h2 className="text-xs uppercase tracking-wide text-muted">{COPY.address}</h2>
+          <section className="space-y-2 rounded-xl bg-surface p-4 shadow-raised">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+              {COPY.address}
+            </h2>
             <GroupedAddress address={account.publicKey} />
           </section>
         )}
-        <p className="text-sm text-muted">{COPY.comingSoon}</p>
+        <p className="px-1 text-[13px] text-faint">{COPY.comingSoon}</p>
       </main>
     </div>
   );

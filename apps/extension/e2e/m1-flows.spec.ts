@@ -19,7 +19,7 @@ test("flow 1: create wallet → verify words → password → popup unlocked", a
   await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "unlocked");
   await expect(popup.getByTestId("account-label")).toHaveText("Account 1");
   await expect(popup.getByTestId("full-address")).toHaveText(/^G[A-Z2-7]{3}( [A-Z2-7]{4}){13}$/);
-  await expect(popup.getByTestId("network-badge")).toHaveText("TESTNET");
+  await expect(popup.getByTestId("network-badge")).toHaveText(/^testnet$/i);
 });
 
 test("flow 2: import a known phrase → same G address as SEP-0005", async ({
