@@ -24,6 +24,18 @@ describe("createChromeKeyValueStore", () => {
     expect(await session.get("sessionKey")).toBe("k");
   });
 
+  it("lists keys and clears an area", async () => {
+    const session = createChromeKeyValueStore(fakeBrowser.storage.session);
+    const local = createChromeKeyValueStore(fakeBrowser.storage.local);
+    await session.set("preparedTx:a", 1);
+    await session.set("sessionKey", "k");
+    await local.set("vault", {});
+    expect((await session.keys()).sort()).toEqual(["preparedTx:a", "sessionKey"]);
+    await session.clear();
+    expect(await session.keys()).toEqual([]);
+    expect(await local.keys()).toEqual(["vault"]);
+  });
+
   it("maps storage failures to INTERNAL_ERROR without the browser's message", async () => {
     const failing = {
       ...fakeBrowser.storage.local,

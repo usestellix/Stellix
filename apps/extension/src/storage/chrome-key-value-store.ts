@@ -16,6 +16,13 @@ export function createChromeKeyValueStore(area: Browser.storage.StorageArea): Ke
     async remove(key: string): Promise<void> {
       await guard(() => area.remove(key), "remove");
     },
+    async keys(): Promise<string[]> {
+      // get(null) returns every item; only the keys are used.
+      return Object.keys(await guard(() => area.get(null), "list"));
+    },
+    async clear(): Promise<void> {
+      await guard(() => area.clear(), "clear");
+    },
   };
 }
 

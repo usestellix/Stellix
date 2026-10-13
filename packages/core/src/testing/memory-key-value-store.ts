@@ -20,7 +20,12 @@ export class MemoryKeyValueStore implements KeyValueStore {
     return Promise.resolve();
   }
 
-  keys(): string[] {
-    return [...this.data.keys()];
+  keys(): Promise<string[]> {
+    return Promise.resolve([...this.data.keys()]);
+  }
+
+  clear(): Promise<void> {
+    this.data.clear();
+    return Promise.resolve();
   }
 }

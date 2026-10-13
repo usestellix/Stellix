@@ -14,6 +14,8 @@ Chrome MV3 shell built with WXT + React + Tailwind. Read root `CLAUDE.md`, `docs
 - Auto-lock uses `chrome.alarms` (period 0.5 min), never `setTimeout` in the SW.
 - `GET_STATUS` does not count as user activity.
 - No secrets in React state/props/context. No copy button for the recovery phrase. Phrase blurred until revealed.
+  - The one exception is the onboarding flow component (`ui/screens/onboarding/onboarding-app.tsx`). It holds the generated phrase (or the parsed import phrase) only until the wallet is created or the flow is left. The phrase is never in context and never reaches the popup.
+  - Passwords and imported words use **uncontrolled** inputs, read from the DOM on submit. State holds only derived, non-secret facts: strength level, positions of unknown words.
 - Bigints cross messaging as decimal strings.
 - All user-facing error text comes from `src/ui/errorCopy.ts`, keyed by `ErrorCode`.
 - No `eval`, `new Function`, inline scripts, remote code, or CSP changes.

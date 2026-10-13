@@ -22,22 +22,21 @@ test("manifest permissions are exactly storage and alarms", async ({ serviceWork
   expect(manifest.content_security_policy).toBeUndefined();
 });
 
-test("popup shows status returned by the service worker", async ({ context, extensionId }) => {
+test("popup routes on the status returned by the service worker", async ({
+  context,
+  extensionId,
+}) => {
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-
-  await expect(popup.getByTestId("status")).toHaveAttribute("data-state", "ready");
-  await expect(popup.getByTestId("status-has-vault")).toHaveText("No");
-  await expect(popup.getByTestId("status-unlocked")).toHaveText("No");
-  await expect(popup.getByTestId("status-active-account")).toHaveText("None");
-  await expect(popup.getByTestId("network-badge")).toHaveText("TESTNET");
+  // Fresh install: GET_STATUS says hasVault = false → Welcome (UI_FLOWS §1).
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "welcome");
 });
 
 test("service worker set schemaVersion on first start", async ({ context, extensionId }) => {
   // Open a page first so the GET_STATUS round-trip guarantees startup has finished.
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-  await expect(popup.getByTestId("status")).toHaveAttribute("data-state", "ready");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "welcome");
 
   const stored = await popup.evaluate(() => chrome.storage.local.get("schemaVersion"));
   expect(stored).toEqual({ schemaVersion: 1 });
@@ -46,13 +45,13 @@ test("service worker set schemaVersion on first start", async ({ context, extens
 test("onboarding page loads", async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/onboarding.html`);
-  await expect(page.getByTestId("onboarding")).toBeVisible();
+  await expect(page.getByTestId("onboarding-start")).toBeVisible();
 });
 
 test("status survives service worker termination", async ({ context, extensionId }) => {
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-  await expect(popup.getByTestId("status")).toHaveAttribute("data-state", "ready");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "welcome");
 
   // Track the worker's running status via CDP (Playwright emits no event when an extension
   // worker restarts).
@@ -71,7 +70,6 @@ test("status survives service worker termination", async ({ context, extensionId
 
   // The next message restarts the worker, which must re-run startup before answering.
   await popup.reload();
-  await expect(popup.getByTestId("status")).toHaveAttribute("data-state", "ready");
-  await expect(popup.getByTestId("network-badge")).toHaveText("TESTNET");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "welcome");
   expect(statuses.slice(statuses.lastIndexOf("stopped"))).toContain("running");
 });

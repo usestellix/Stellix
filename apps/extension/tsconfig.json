@@ -10,6 +10,7 @@
     ".wxt/wxt.d.ts",
     "src",
     "e2e",
+    "build",
     "wxt.config.ts",
     "vitest.config.ts",
     "playwright.config.ts"

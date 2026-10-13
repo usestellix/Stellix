@@ -1,5 +1,6 @@
-import { DEFAULT_NETWORK, isNetworkId, type NetworkId } from "../network/network-id.js";
+import type { NetworkId } from "../network/network-id.js";
 import type { Platform } from "../platform.js";
+import { readSettings } from "../settings.js";
 import { PERSISTENT_KEYS, SESSION_KEYS } from "../storage-keys.js";
 
 export interface WalletStatus {
@@ -20,24 +21,16 @@ export async function getStatus(
   const [vault, sessionKey, settings, activeAccountIndex] = await Promise.all([
     platform.persistent.get<unknown>(PERSISTENT_KEYS.vault),
     platform.session.get<unknown>(SESSION_KEYS.sessionKey),
-    platform.persistent.get<unknown>(PERSISTENT_KEYS.settings),
+    readSettings(platform.persistent),
     platform.persistent.get<unknown>(PERSISTENT_KEYS.activeAccountIndex),
   ]);
 
   return {
     hasVault: vault !== undefined,
     unlocked: vault !== undefined && sessionKey !== undefined,
-    network: readNetwork(settings),
+    network: settings.network,
     activeAccountIndex: isAccountIndex(activeAccountIndex) ? activeAccountIndex : null,
   };
-}
-
-function readNetwork(settings: unknown): NetworkId {
-  if (typeof settings === "object" && settings !== null && "network" in settings) {
-    const { network } = settings;
-    if (isNetworkId(network)) return network;
-  }
-  return DEFAULT_NETWORK;
 }
 
 function isAccountIndex(value: unknown): value is number {

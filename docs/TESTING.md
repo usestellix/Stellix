@@ -81,6 +81,15 @@ Required flows (testnet, live network):
 6. Auto-lock: set auto-lock to minimum, advance time (or wait), confirm locked.
 7. Mainnet switch shows confirmation and badge changes (no transactions on mainnet in E2E).
 
+M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the production scrypt N.
+- **Flow 1** stops at "popup unlocked". Friendbot and balance are added in M2.
+- **Flow 2** imports the SEP-0005 Test 5 phrase by paste-to-fill and compares the popup's address with the spec's `G…`, read from the generated vectors file.
+- **Flow 6** writes `lastActivityAt` 16 minutes into the past from the SW, sends no request, and waits for the real 30 s alarm to lock. The auto-lock timer UI is M2.
+- **Also covered:**
+  - the SW-enforced unlock throttle, checked from a fresh popup
+  - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`
+  - `RESET_WALLET` wiping storage and reopening onboarding without the `tabs` permission
+
 ## 4. Manual QA checklist (before each release)
 
 - [ ] Fresh Chrome profile install from the built zip.

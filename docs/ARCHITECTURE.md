@@ -56,7 +56,8 @@ Access level must be `TRUSTED_CONTEXTS` (the default; set it explicitly at SW st
 |---|---|---|
 | `sessionKey` | Raw 32-byte AES key (base64) derived from the password | Lock, auto-lock, browser exit, reset |
 | `lastActivityAt` | epoch ms | Lock |
-| `pendingOnboarding` | `{ mnemonic, createdAt }` during create flow only | Onboarding completes, is abandoned (>30 min), or lock |
+| `pendingOnboarding` | `{ mnemonic, verifyPositions, createdAt }` during create flow only | Onboarding completes, is abandoned (>30 min), or lock |
+| `unlockThrottle` | `{ failures, lockedUntil }`: after 5 consecutive wrong passwords (unlock, reveal, change password), every attempt is refused for 30 s with `UNLOCK_THROTTLED`. Enforced in the SW. | Successful password check, browser exit, reset. **Not** on lock. |
 | `preparedTx:<id>` | `{ xdr, networkId, summary, expiresAt, accountIndex }` | Confirmed, cancelled, expired, lock |
 
 ## 4. Platform interfaces (`packages/core/src/platform.ts`)
@@ -66,6 +67,8 @@ export interface KeyValueStore {
   get<T>(key: string): Promise<T | undefined>;
   set<T>(key: string, value: T): Promise<void>;
   remove(key: string): Promise<void>;
+  keys(): Promise<string[]>;   // e.g. find every preparedTx:* on lock (extension: storage.get(null))
+  clear(): Promise<void>;      // reset wallet
 }
 
 export interface Platform {
@@ -105,8 +108,8 @@ No message is handled until SW startup work (access level, migrations) has finis
 | Type | Payload | Returns | Requires unlocked |
 |---|---|---|---|
 | `GET_STATUS` | — | `{ hasVault, unlocked, network, activeAccountIndex }` (`activeAccountIndex` is `null` until an account exists) | No |
-| `ONBOARD_GENERATE` | — | `{ words: string[] }` (onboarding page only) | No |
-| `ONBOARD_CREATE` | `{ password, verifiedIndices }` | `{ accounts }` | No |
+| `ONBOARD_GENERATE` | — | `{ words: string[], verifyPositions: number[] }` (onboarding page only; the 3 positions are 0-based and chosen by the SW with `crypto.getRandomValues`) | No |
+| `ONBOARD_CREATE` | `{ password, answers: { position, word }[] }`. The SW checks the answers against `pendingOnboarding`; failure → `VERIFICATION_FAILED`, missing or expired → `ONBOARDING_EXPIRED`. | `{ accounts }` | No |
 | `ONBOARD_IMPORT` | `{ mnemonic, password }` | `{ accounts }` (after discovery) | No |
 | `UNLOCK` | `{ password }` | `{ ok }` | No |
 | `LOCK` | — | — | No |

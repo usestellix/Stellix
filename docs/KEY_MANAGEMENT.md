@@ -21,7 +21,7 @@ SEP-0005 specifies:
 
 1. `seed = BIP39 mnemonicToSeed(mnemonic, passphrase = "")` → 64 bytes (PBKDF2-HMAC-SHA512, 2048 rounds, salt `"mnemonic" + passphrase`).
 2. Derive with **SLIP-0010 for ed25519** along path `m/44'/148'/x'`, where `x` is the account index. All levels are hardened (ed25519 under SLIP-0010 supports hardened derivation only).
-3. The 32-byte private key at that node is the ed25519 secret seed: `Keypair.fromRawEd25519Seed(Buffer.from(key))`.
+3. The 32-byte private key at that node is the ed25519 secret seed: `Keypair.fromRawEd25519Seed(key)`. It's imported from `@stellar/stellar-sdk/base`; SDK 17 takes a plain `Uint8Array`, so core never needs `Buffer`.
 
 Implementation:
 
@@ -33,10 +33,11 @@ export function derivePublicKey(seed: Uint8Array, index: number): string  // G..
 
 - `index` is a non-negative integer < 2³¹.
 - Use an audited SLIP-0010 implementation (`micro-key-producer`'s slip10 module or equivalent). Do not hand-roll HMAC chains.
+- We use `micro-key-producer`. It's built on audited noble primitives, but the slip10 module itself has no separate audit, so it's also tested against the SLIP-0010 spec's own ed25519 vectors (`slip0010.vectors.ts`).
 
 ### Test vectors — mandatory
 
-SEP-0005 publishes test vectors (mnemonics with expected `G...`/`S...` for indices 0–9, including a 24-word vector and a vector with a passphrase). Copy them **verbatim** from the spec into `packages/core/src/keys/__tests__/sep0005.vectors.ts`. Every vector without a passphrase must pass. (Keep the passphrase vector in the file but skipped, with a comment, until passphrase support exists.)
+SEP-0005 publishes test vectors (mnemonics with expected `G...`/`S...` for indices 0–9, including a 24-word vector and a vector with a passphrase). Copy them **verbatim** from the spec into `packages/core/src/keys/__tests__/sep0005.vectors.ts`. `scripts/extract-test-vectors.mjs` regenerates both vector files mechanically. It fetches each spec at a pinned commit and verifies its SHA-256. Every vector without a passphrase must pass. (Keep the passphrase vector in the file but skipped, with a comment, until passphrase support exists.)
 
 **Never generate expected values yourself.** If the spec can't be fetched, stop and ask.
 
@@ -103,6 +104,7 @@ Use AES-GCM `additionalData` = the canonical JSON serialization of `{ version, k
 - Default: scrypt `N = 2^17`, `r = 8`, `p = 1`, 32-byte output. That's ~128 MiB of memory and on the order of 1 second in JS on a mid-range laptop.
 - **Benchmark during M1** using `@noble/hashes/scrypt`'s async API in the actual extension service worker. Target 0.5–1.5 s unlock on a mid-range machine. If `2^17` is too slow or runs out of memory in the SW, drop to `2^16` and record the measurement in an ADR.
 - Params live in the header so they can be raised later; upgrade happens on next successful unlock (decrypt with old params, re-encrypt with new).
+- Measured in M1: `2^17` takes about 0.4–0.6 s in a real SW on an Apple M1, so the default stands. Headers are only accepted within `2^15 ≤ N ≤ 2^18`, `r = 8`, `p = 1`, `dkLen = 32`, 16-byte salt and 12-byte IV; anything else is `VAULT_CORRUPT` before scrypt runs. Passwords are NFC-normalized before the KDF. See ADR 0005.
 
 ### 4.4 Encrypt / decrypt
 
@@ -116,7 +118,7 @@ export async function reencryptVault(plaintext: VaultPlaintext, newPassword: str
 
 - Fresh random salt and IV from `crypto.getRandomValues` on every `createVault` / `reencryptVault`. **Never reuse an IV with the same key.**
 - Import the 32-byte KDF output via `crypto.subtle.importKey("raw", key, "AES-GCM", false, ["encrypt","decrypt"])`.
-- Wrong password → `crypto.subtle.decrypt` throws (GCM tag mismatch) → map to `INVALID_PASSWORD`. Do not distinguish "wrong password" from "corrupted vault" to the user beyond that; log a non-secret diagnostic code for corruption if JSON parsing of plaintext fails after a successful decrypt.
+- Wrong password → `crypto.subtle.decrypt` throws (GCM tag mismatch) → map to `INVALID_PASSWORD`. With the session key (`openVaultWithKey`), a tag mismatch means the session key no longer matches the vault → `LOCKED`, so the user unlocks again. Do not distinguish "wrong password" from "corrupted vault" to the user beyond that; log a non-secret diagnostic code for corruption if JSON parsing of plaintext fails after a successful decrypt.
 
 ## 5. Password policy
 

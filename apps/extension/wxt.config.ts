@@ -1,5 +1,10 @@
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "wxt";
+import { bundleModulesReport } from "./build/bundle-modules-report.js";
+
+const OUTPUT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), ".output");
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -15,6 +20,6 @@ export default defineConfig({
     permissions: ["storage", "alarms"],
   },
   vite: () => ({
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), bundleModulesReport(OUTPUT_DIR)],
   }),
 });

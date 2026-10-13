@@ -1,6 +1,7 @@
 import { createLogger, StellixError, type WalletStatus } from "@stellix/core";
 import { describe, expect, it, vi } from "vitest";
 import { createMessageListener, handleMessage, type RouterDeps } from "../router.js";
+import { stubHandlers } from "./stub-handlers.js";
 
 const ID = "8f14e45f-ceea-4e7a-9b7b-2b7f5d0f3c11";
 const BASE = "chrome-extension://abcdefghijklmnop/";
@@ -14,7 +15,7 @@ const STATUS: WalletStatus = {
 
 function deps(overrides: Partial<RouterDeps> = {}): RouterDeps {
   return {
-    handlers: { GET_STATUS: vi.fn(() => Promise.resolve(STATUS)) },
+    handlers: stubHandlers({ GET_STATUS: vi.fn(() => Promise.resolve(STATUS)) }),
     sender: { runtimeId: "abcdefghijklmnop", extensionBaseUrl: BASE },
     ready: Promise.resolve(),
     touchActivity: vi.fn(() => Promise.resolve()),
@@ -79,7 +80,9 @@ describe("handleMessage", () => {
 
   it("passes StellixError codes through", async () => {
     const d = deps({
-      handlers: { GET_STATUS: () => Promise.reject(new StellixError("LOCKED", "locked")) },
+      handlers: stubHandlers({
+        GET_STATUS: () => Promise.reject(new StellixError("LOCKED", "locked")),
+      }),
     });
     const res = await handleMessage({ id: ID, type: "GET_STATUS" }, popup, d);
     expect(res).toEqual({ id: ID, ok: false, error: { code: "LOCKED", message: "locked" } });
@@ -87,7 +90,7 @@ describe("handleMessage", () => {
 
   it("never leaks foreign error text", async () => {
     const d = deps({
-      handlers: { GET_STATUS: () => Promise.reject(new Error("secret seed words")) },
+      handlers: stubHandlers({ GET_STATUS: () => Promise.reject(new Error("secret seed words")) }),
     });
     const res = await handleMessage({ id: ID, type: "GET_STATUS" }, popup, d);
     expect(JSON.stringify(res)).not.toContain("secret");
@@ -96,7 +99,7 @@ describe("handleMessage", () => {
 
   it("rejects handler results that don't match the result schema", async () => {
     const bad = { ...STATUS, mnemonic: "abandon" } as WalletStatus;
-    const d = deps({ handlers: { GET_STATUS: () => Promise.resolve(bad) } });
+    const d = deps({ handlers: stubHandlers({ GET_STATUS: () => Promise.resolve(bad) }) });
     const res = await handleMessage({ id: ID, type: "GET_STATUS" }, popup, d);
     expect(res).toMatchObject({ ok: false, error: { code: "INTERNAL_ERROR" } });
     expect(JSON.stringify(res)).not.toContain("abandon");

@@ -4,6 +4,10 @@ export interface KeyValueStore {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   set<T>(key: string, value: T): Promise<void>;
   remove(key: string): Promise<void>;
+  /** All stored keys (e.g. to find every `preparedTx:*` entry on lock). */
+  keys(): Promise<string[]>;
+  /** Removes every key (reset wallet). */
+  clear(): Promise<void>;
 }
 
 export interface Platform {

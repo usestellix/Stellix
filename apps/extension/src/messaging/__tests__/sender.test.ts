@@ -68,24 +68,36 @@ describe("authorizeRequest", () => {
     ).toBeUndefined();
   });
 
-  it("rejects a type from a page outside its allowedFrom list", () => {
-    // Simulates an onboarding-only type (ONBOARD_GENERATE, REVEAL_PHRASE arrive in M1).
-    const def = REQUESTS.GET_STATUS;
-    const original = def.allowedFrom;
-    def.allowedFrom = ["onboarding"];
-    try {
+  it("onboarding-only types are rejected from the popup and allowed from onboarding", () => {
+    for (const type of [
+      "ONBOARD_GENERATE",
+      "ONBOARD_CREATE",
+      "ONBOARD_IMPORT",
+      "REVEAL_PHRASE",
+    ] as const) {
       expect(
         code(() => {
-          authorizeRequest("GET_STATUS", "popup");
+          authorizeRequest(type, "popup");
         }),
       ).toBe("UNAUTHORIZED_SENDER");
       expect(
         code(() => {
-          authorizeRequest("GET_STATUS", "onboarding");
+          authorizeRequest(type, "onboarding");
         }),
       ).toBeUndefined();
-    } finally {
-      def.allowedFrom = original;
     }
+  });
+
+  it("only the phrase-bearing types are onboarding-only", () => {
+    const onboardingOnly = Object.entries(REQUESTS)
+      .filter(([, def]) => !def.allowedFrom.includes("popup"))
+      .map(([type]) => type)
+      .sort();
+    expect(onboardingOnly).toEqual([
+      "ONBOARD_CREATE",
+      "ONBOARD_GENERATE",
+      "ONBOARD_IMPORT",
+      "REVEAL_PHRASE",
+    ]);
   });
 });
