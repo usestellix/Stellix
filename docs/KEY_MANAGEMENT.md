@@ -104,6 +104,7 @@ Use AES-GCM `additionalData` = the canonical JSON serialization of `{ version, k
 - Default: scrypt `N = 2^17`, `r = 8`, `p = 1`, 32-byte output. That's ~128 MiB of memory and on the order of 1 second in JS on a mid-range laptop.
 - **Benchmark during M1** using `@noble/hashes/scrypt`'s async API in the actual extension service worker. Target 0.5–1.5 s unlock on a mid-range machine. If `2^17` is too slow or runs out of memory in the SW, drop to `2^16` and record the measurement in an ADR.
 - Params live in the header so they can be raised later; upgrade happens on next successful unlock (decrypt with old params, re-encrypt with new).
+- Measured in M1: `2^17` takes about 0.4–0.6 s in a real SW on an Apple M1, so the default stands. Headers are only accepted within `2^15 ≤ N ≤ 2^18`, `r = 8`, `p = 1`, `dkLen = 32`, 16-byte salt and 12-byte IV; anything else is `VAULT_CORRUPT` before scrypt runs. Passwords are NFC-normalized before the KDF. See ADR 0005.
 
 ### 4.4 Encrypt / decrypt
 
@@ -117,7 +118,7 @@ export async function reencryptVault(plaintext: VaultPlaintext, newPassword: str
 
 - Fresh random salt and IV from `crypto.getRandomValues` on every `createVault` / `reencryptVault`. **Never reuse an IV with the same key.**
 - Import the 32-byte KDF output via `crypto.subtle.importKey("raw", key, "AES-GCM", false, ["encrypt","decrypt"])`.
-- Wrong password → `crypto.subtle.decrypt` throws (GCM tag mismatch) → map to `INVALID_PASSWORD`. Do not distinguish "wrong password" from "corrupted vault" to the user beyond that; log a non-secret diagnostic code for corruption if JSON parsing of plaintext fails after a successful decrypt.
+- Wrong password → `crypto.subtle.decrypt` throws (GCM tag mismatch) → map to `INVALID_PASSWORD`. With the session key (`openVaultWithKey`), a tag mismatch means the session key no longer matches the vault → `LOCKED`, so the user unlocks again. Do not distinguish "wrong password" from "corrupted vault" to the user beyond that; log a non-secret diagnostic code for corruption if JSON parsing of plaintext fails after a successful decrypt.
 
 ## 5. Password policy
 

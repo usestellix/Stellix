@@ -34,4 +34,15 @@ export {
 export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./network/network-id.js";
 export type { KeyValueStore, Platform } from "./platform.js";
 export { getStatus, type WalletStatus } from "./services/get-status.js";
+export { DEFAULT_SCRYPT_PARAMS, SCRYPT_BOUNDS, type ScryptParams } from "./vault/kdf.js";
+export type { VaultPlaintext, VaultV1 } from "./vault/schema.js";
+export {
+  createVault,
+  openVault,
+  openVaultWithKey,
+  parseVault,
+  reencryptVault,
+  type KeyBytes,
+  type VaultWithKey,
+} from "./vault/vault.js";
 export { PERSISTENT_KEYS, PREPARED_TX_KEY_PREFIX, SESSION_KEYS } from "./storage-keys.js";
