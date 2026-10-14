@@ -110,7 +110,7 @@ No message is handled until SW startup work (access level, migrations) has finis
 | `GET_STATUS` | — | `{ hasVault, unlocked, network, activeAccountIndex }` (`activeAccountIndex` is `null` until an account exists) | No |
 | `ONBOARD_GENERATE` | — | `{ words: string[], verifyPositions: number[] }` (onboarding page only; the 3 positions are 0-based and chosen by the SW with `crypto.getRandomValues`) | No |
 | `ONBOARD_CREATE` | `{ password, answers: { position, word }[] }`. The SW checks the answers against `pendingOnboarding`; failure → `VERIFICATION_FAILED`, missing or expired → `ONBOARDING_EXPIRED`. | `{ accounts }` | No |
-| `ONBOARD_IMPORT` | `{ mnemonic, password }` | `{ accounts }` (after discovery) | No |
+| `ONBOARD_IMPORT` | `{ mnemonic, password }` | `{ accounts, discoveryIncomplete }` (discovery on the selected network, KEY_MANAGEMENT §3) | No |
 | `UNLOCK` | `{ password }` | `{ ok }` | No |
 | `LOCK` | — | — | No |
 | `LIST_ACCOUNTS` | — | `AccountMeta[]` | No (public data) |
@@ -122,7 +122,9 @@ No message is handled until SW startup work (access level, migrations) has finis
 | `CANCEL_PAYMENT` | `{ preparedId }` | — | No |
 | `REVEAL_PHRASE` | `{ password }` | `{ words }` (onboarding page only) | Re-auth |
 | `CHANGE_PASSWORD` | `{ current, next }` | — | Re-auth |
-| `SET_SETTINGS` | `Partial<Settings>` | `Settings` | No (mainnet switch confirmed in UI) |
+| `GET_SETTINGS` | — | `Settings`. Passive, like `GET_STATUS`: not activity. | No |
+| `SET_SETTINGS` | `{ network?, acknowledgedRealFunds?, autoLockMinutes?, horizonOverride?: { network, url \| null } }`. `network: "mainnet"` requires `acknowledgedRealFunds: true`, or the SW rejects with `INVALID_REQUEST`; the UI confirmation alone isn't enough. Overrides are validated by passphrase probe. | `Settings` | No |
+| `DISCOVER_ACCOUNTS` | — | `{ added, incomplete }`. Appends newly found indices only; never changes existing labels or `activeAccountIndex`. | Yes |
 | `RESET_WALLET` | `{ confirmation: "RESET" }` | — | No |
 
 `ONBOARD_GENERATE` and `REVEAL_PHRASE` must reject unless `sender.url` is the onboarding page URL.

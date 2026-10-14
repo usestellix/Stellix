@@ -29,6 +29,7 @@ export function startBackground(): void {
       handlers: createHandlers({
         platform,
         autoLock,
+        devBuild: import.meta.env.DEV,
         openOnboarding: async () => {
           await browser.tabs.create({ url: browser.runtime.getURL("/onboarding.html") });
         },

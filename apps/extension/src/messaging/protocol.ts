@@ -1,4 +1,5 @@
 import {
+  AUTO_LOCK_MINUTES,
   CREATE_WORD_COUNT,
   ERROR_CODES,
   NETWORK_IDS,
@@ -40,6 +41,9 @@ export const REQUEST_TYPES = [
   "REVEAL_PHRASE",
   "CHANGE_PASSWORD",
   "RESET_WALLET",
+  "GET_SETTINGS",
+  "SET_SETTINGS",
+  "DISCOVER_ACCOUNTS",
 ] as const;
 
 export type RequestType = (typeof REQUEST_TYPES)[number];
@@ -84,6 +88,13 @@ const walletStatusSchema = z.strictObject({
 }) satisfies z.ZodType<WalletStatus>;
 
 const accountsResult = z.strictObject({ accounts: z.array(accountMetaSchema) });
+const networkId = z.enum(NETWORK_IDS);
+const autoLockMinutes = z.union(AUTO_LOCK_MINUTES.map((m) => z.literal(m)));
+const settingsSchema = z.strictObject({
+  network: networkId,
+  horizonOverrides: z.partialRecord(networkId, z.string()),
+  autoLockMinutes,
+});
 const importResult = z.strictObject({
   accounts: z.array(accountMetaSchema),
   discoveryIncomplete: z.boolean(),
@@ -178,6 +189,34 @@ export const REQUESTS = {
   RESET_WALLET: defineRequest({
     payload: z.strictObject({ confirmation: z.literal(RESET_CONFIRMATION) }),
     result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  /** Public. Passive like GET_STATUS: the popup reads it on open to find the Horizon URL. */
+  GET_SETTINGS: defineRequest({
+    payload: none,
+    result: settingsSchema,
+    allowedFrom: BOTH,
+    countsAsActivity: false,
+  }),
+  SET_SETTINGS: defineRequest({
+    payload: z.strictObject({
+      network: networkId.optional(),
+      /** Must be true to switch to mainnet; the SW rejects otherwise (CLAUDE.md §6.14). */
+      acknowledgedRealFunds: z.boolean().optional(),
+      autoLockMinutes: autoLockMinutes.optional(),
+      horizonOverride: z
+        .strictObject({ network: networkId, url: z.string().max(2048).nullable() })
+        .optional(),
+    }),
+    result: settingsSchema,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  /** Requires unlocked. Appends newly found indices only. */
+  DISCOVER_ACCOUNTS: defineRequest({
+    payload: none,
+    result: z.strictObject({ added: z.array(accountMetaSchema), incomplete: z.boolean() }),
     allowedFrom: BOTH,
     countsAsActivity: true,
   }),

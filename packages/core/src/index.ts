@@ -39,7 +39,39 @@ export {
   parseMnemonic,
   unknownWordPositions,
 } from "./keys/mnemonic.js";
-export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./network/config.js";
+export {
+  FALLBACK_BASE_RESERVE_STROOPS,
+  getBaseReserveStroops,
+  type BaseReserveCache,
+} from "./network/base-reserve.js";
+export {
+  DEFAULT_NETWORK,
+  NETWORKS,
+  NETWORK_IDS,
+  horizonUrlFor,
+  isNetworkId,
+  type NetworkConfig,
+  type NetworkId,
+} from "./network/config.js";
+export { fundWithFriendbot } from "./network/friendbot.js";
+export {
+  createHorizonClient,
+  type HorizonClient,
+  type HorizonClientOptions,
+} from "./network/horizon-client.js";
+export {
+  nativeBalanceOf,
+  type AccountRecord,
+  type FeeStats,
+  type HorizonRoot,
+  type LedgerRecord,
+  type NativeBalance,
+} from "./network/horizon-schemas.js";
+export {
+  normalizeHorizonUrl,
+  validateHorizonOverride,
+  type HorizonUrlPolicy,
+} from "./network/horizon-url.js";
 export {
   PASSWORD_MIN_LENGTH,
   assertPasswordPolicy,

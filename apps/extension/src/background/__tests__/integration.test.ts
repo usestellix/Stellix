@@ -1,10 +1,17 @@
-import { DEFAULT_SCRYPT_PARAMS, createLogger, type AccountMeta } from "@stellix/core";
+import {
+  DEFAULT_SCRYPT_PARAMS,
+  createLogger,
+  type AccountMeta,
+  type AccountRecord,
+  type HorizonClient,
+} from "@stellix/core";
 import { createFakePlatform, type FakePlatform } from "@stellix/core/testing";
 import { describe, expect, it, vi } from "vitest";
 import type { RequestType } from "../../messaging/protocol.js";
 import { handleMessage } from "../../messaging/router.js";
 import { AUTOLOCK_ALARM, createAutoLock } from "../autolock.js";
 import { createHandlers, createTouchActivity } from "../handlers.js";
+import { SEP0005_VECTORS } from "../../../../../packages/core/src/keys/__tests__/sep0005.vectors.js";
 import { createFakeAlarms } from "./fake-alarms.js";
 
 // Drives real handlers + real core services through the real router and sender checks.
@@ -16,8 +23,24 @@ const PASSWORD = "correct horse battery";
 const ABANDON =
   "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
 
-function setup() {
+/** Accounts in `funded` exist on the fake Horizon; records are minimal but schema-shaped. */
+function fakeHorizon(funded: Set<string>): HorizonClient & { urls: string[] } {
+  const urls: string[] = [];
+  return {
+    urls,
+    getRoot: () => Promise.reject(new Error("unused")),
+    getLatestLedger: () => Promise.reject(new Error("unused")),
+    getFeeStats: () => Promise.reject(new Error("unused")),
+    getAccount: (id) =>
+      Promise.resolve(funded.has(id) ? ({ id } as unknown as AccountRecord) : null),
+  };
+}
+
+function setup(funded: Set<string> = new Set()) {
+  // Mutable: tests can fund accounts after setup.
   const platform: FakePlatform = createFakePlatform();
+  const horizon = fakeHorizon(funded);
+  const horizonUrls: string[] = [];
   const fakeAlarms = createFakeAlarms();
   const autoLock = createAutoLock(platform, fakeAlarms.api);
   const openOnboarding = vi.fn(() => Promise.resolve());
@@ -27,6 +50,11 @@ function setup() {
       autoLock,
       openOnboarding,
       onboarding: { scryptParams: { ...DEFAULT_SCRYPT_PARAMS, N: 2 ** 15 } },
+      devBuild: false,
+      horizonFor: (url) => {
+        horizonUrls.push(url);
+        return horizon;
+      },
     }),
     sender: { runtimeId: "abcdefghijklmnop", extensionBaseUrl: BASE },
     ready: Promise.resolve(),
@@ -40,7 +68,7 @@ function setup() {
     if (res.ok) return { ok: true as const, data: res.data };
     return { ok: false as const, code: res.error.code };
   };
-  return { platform, fakeAlarms, openOnboarding, send };
+  return { platform, fakeAlarms, openOnboarding, send, horizonUrls, funded };
 }
 
 async function importedWallet() {
@@ -211,5 +239,109 @@ describe("secrets", () => {
     expect(s.fakeAlarms.alarms.size).toBe(0);
     expect(s.openOnboarding).toHaveBeenCalledOnce();
     expect(await s.send("GET_STATUS")).toMatchObject({ data: { hasVault: false } });
+  });
+});
+
+// SEP-0005 Test 5 addresses for the ABANDON phrase (read from the generated vectors file).
+const G = SEP0005_VECTORS.find((v) => v.test === 5)!.accounts.map((a) => a.publicKey);
+
+describe("settings", () => {
+  it("GET_SETTINGS returns defaults and doesn't extend the session", async () => {
+    const s = await importedWallet();
+    const before = await s.platform.session.get("lastActivityAt");
+    s.platform.advance(60_000);
+    expect(await s.send("GET_SETTINGS")).toEqual({
+      ok: true,
+      data: { network: "testnet", horizonOverrides: {}, autoLockMinutes: 15 },
+    });
+    expect(await s.platform.session.get("lastActivityAt")).toBe(before);
+  });
+
+  it("the SW rejects a mainnet switch without acknowledgedRealFunds", async () => {
+    const s = await importedWallet();
+    expect(await s.send("SET_SETTINGS", { network: "mainnet" })).toEqual({
+      ok: false,
+      code: "INVALID_REQUEST",
+    });
+    expect(
+      await s.send("SET_SETTINGS", { network: "mainnet", acknowledgedRealFunds: false }),
+    ).toEqual({
+      ok: false,
+      code: "INVALID_REQUEST",
+    });
+    expect(await s.send("GET_STATUS")).toMatchObject({ data: { network: "testnet" } });
+    expect(
+      await s.send("SET_SETTINGS", { network: "mainnet", acknowledgedRealFunds: true }),
+    ).toMatchObject({
+      ok: true,
+      data: { network: "mainnet" },
+    });
+    expect(await s.send("GET_STATUS")).toMatchObject({ data: { network: "mainnet" } });
+  });
+
+  it("auto-lock timer changes take effect", async () => {
+    const s = await importedWallet();
+    await s.send("SET_SETTINGS", { autoLockMinutes: 5 });
+    s.platform.advance(5 * 60_000 + 1);
+    expect(await s.send("GET_STATUS")).toMatchObject({ data: { unlocked: false } });
+  });
+
+  it("an unreachable custom Horizon is rejected and nothing is saved", async () => {
+    const s = await importedWallet();
+    expect(
+      await s.send("SET_SETTINGS", {
+        horizonOverride: { network: "testnet", url: "https://h.example.com" },
+      }),
+    ).toEqual({ ok: false, code: "NETWORK_ERROR" });
+    expect((await s.send("GET_SETTINGS")).data).toMatchObject({ horizonOverrides: {} });
+  });
+
+  it("rejects non-https overrides before any request", async () => {
+    const s = await importedWallet();
+    expect(
+      await s.send("SET_SETTINGS", {
+        horizonOverride: { network: "testnet", url: "http://h.example.com" },
+      }),
+    ).toEqual({ ok: false, code: "INVALID_HORIZON_URL" });
+  });
+});
+
+describe("discovery", () => {
+  it("ONBOARD_IMPORT discovers funded accounts on the selected network's Horizon", async () => {
+    const s = setup(new Set([G[0]!, G[2]!]));
+    const res = await s.send(
+      "ONBOARD_IMPORT",
+      { mnemonic: ABANDON, password: PASSWORD },
+      ONBOARDING,
+    );
+    expect(res).toMatchObject({
+      ok: true,
+      data: { discoveryIncomplete: false, accounts: [{ index: 0 }, { index: 2 }] },
+    });
+    expect(s.horizonUrls).toEqual(["https://horizon-testnet.stellar.org"]);
+  });
+
+  it("DISCOVER_ACCOUNTS appends only and keeps labels and the active account", async () => {
+    const s = setup(new Set([G[0]!]));
+    await s.send("ONBOARD_IMPORT", { mnemonic: ABANDON, password: PASSWORD }, ONBOARDING);
+    await s.send("RENAME_ACCOUNT", { index: 0, label: "Main" });
+    // Index 1 gets funded later (e.g. used in another wallet), then the user scans.
+    s.funded.add(G[1]!);
+    expect(await s.send("DISCOVER_ACCOUNTS")).toEqual({
+      ok: true,
+      data: { added: [{ index: 1, publicKey: G[1], label: "Account 2" }], incomplete: false },
+    });
+    expect((await s.send("LIST_ACCOUNTS")).data).toEqual([
+      { index: 0, publicKey: G[0], label: "Main" },
+      { index: 1, publicKey: G[1], label: "Account 2" },
+    ]);
+    expect(await s.send("GET_STATUS")).toMatchObject({ data: { activeAccountIndex: 0 } });
+  });
+
+  it("DISCOVER_ACCOUNTS requires unlocked", async () => {
+    const s = setup(new Set([G[0]!]));
+    await s.send("ONBOARD_IMPORT", { mnemonic: ABANDON, password: PASSWORD }, ONBOARDING);
+    await s.send("LOCK");
+    expect(await s.send("DISCOVER_ACCOUNTS")).toEqual({ ok: false, code: "LOCKED" });
   });
 });
