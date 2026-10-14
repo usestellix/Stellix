@@ -1,12 +1,16 @@
 import type { KeyValueStore } from "../platform.js";
 
-/** In-memory KeyValueStore for tests. Values are structured-cloned, like chrome.storage. */
+/**
+ * In-memory KeyValueStore for tests. Like chrome.storage, values are copied and object keys come
+ * back sorted (Chrome stores them in a sorted dictionary), so code that depends on insertion order
+ * fails here, not just in the browser.
+ */
 export class MemoryKeyValueStore implements KeyValueStore {
   private readonly data = new Map<string, unknown>();
 
   get<T>(key: string): Promise<T | undefined> {
     return Promise.resolve(
-      this.data.has(key) ? (structuredClone(this.data.get(key)) as T) : undefined,
+      this.data.has(key) ? (sortKeysDeep(this.data.get(key)) as T) : undefined,
     );
   }
 
@@ -28,4 +32,16 @@ export class MemoryKeyValueStore implements KeyValueStore {
     this.data.clear();
     return Promise.resolve();
   }
+}
+
+function sortKeysDeep(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortKeysDeep);
+  if (typeof value === "object" && value !== null) {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((k) => [k, sortKeysDeep((value as Record<string, unknown>)[k])]),
+    );
+  }
+  return value;
 }

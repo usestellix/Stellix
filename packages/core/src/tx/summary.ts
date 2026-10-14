@@ -99,8 +99,26 @@ export function summarizeTransaction(tx: Transaction, ctx: SummaryContext): Paym
   };
 }
 
-/** Defence in depth at confirm time: the rehydrated tx must summarize to the stored summary. */
+/**
+ * Defence in depth at confirm time: the rehydrated tx must summarize to the stored summary.
+ * Field by field: storage may return keys in a different order (chrome.storage does), so a
+ * serialized comparison raises false alarms (found by E2E).
+ */
 export function assertSameSummary(a: PaymentSummary, b: PaymentSummary): void {
-  if (JSON.stringify(a) !== JSON.stringify(b))
-    refuse("prepared transaction no longer matches its summary");
+  const memoValue = (m: PaymentSummary["memo"]) => (m.type === "none" ? "" : m.value);
+  const same =
+    a.kind === b.kind &&
+    a.source === b.source &&
+    a.destination === b.destination &&
+    a.destinationBase === b.destinationBase &&
+    a.amountStroops === b.amountStroops &&
+    a.feeStroops === b.feeStroops &&
+    a.totalStroops === b.totalStroops &&
+    a.memo.type === b.memo.type &&
+    memoValue(a.memo) === memoValue(b.memo) &&
+    a.network === b.network &&
+    a.expiresAt === b.expiresAt &&
+    a.firstTimeDestination === b.firstTimeDestination &&
+    a.feeEstimated === b.feeEstimated;
+  if (!same) refuse("prepared transaction no longer matches its summary");
 }

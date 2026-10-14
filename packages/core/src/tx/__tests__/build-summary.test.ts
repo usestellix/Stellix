@@ -143,3 +143,26 @@ describe("summary refuses anything unexpected (SECURITY §5.1)", () => {
     }).toThrow(/no longer matches/);
   });
 });
+
+describe("assertSameSummary ignores key order (chrome.storage returns sorted keys)", () => {
+  const sortDeep = (v: unknown): unknown =>
+    Array.isArray(v)
+      ? v.map(sortDeep)
+      : typeof v === "object" && v !== null
+        ? Object.fromEntries(
+            Object.keys(v)
+              .sort()
+              .reverse()
+              .map((k) => [k, sortDeep((v as Record<string, unknown>)[k])]),
+          )
+        : v;
+
+  it("accepts the same summary with every key reordered, including the memo's", () => {
+    const a = summarizeTransaction(build({ memo: { type: "text", value: "x" } }), ctx);
+    const reordered = sortDeep(a) as typeof a;
+    expect(Object.keys(reordered)).not.toEqual(Object.keys(a));
+    expect(() => {
+      assertSameSummary(a, reordered);
+    }).not.toThrow();
+  });
+});
