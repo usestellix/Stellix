@@ -6,6 +6,12 @@ import account_funded from "../../__fixtures__/horizon/account-funded.json" with
 import account_multi_subentry from "../../__fixtures__/horizon/account-multi-subentry.json" with { type: "json" };
 import friendbot_success from "../../__fixtures__/horizon/friendbot-success.json" with { type: "json" };
 import friendbot_already_funded from "../../__fixtures__/horizon/friendbot-already-funded.json" with { type: "json" };
+import submit_async_pending from "../../__fixtures__/horizon/submit-async-pending.json" with { type: "json" };
+import submit_async_bad_seq from "../../__fixtures__/horizon/submit-async-bad-seq.json" with { type: "json" };
+import transaction_success from "../../__fixtures__/horizon/transaction-success.json" with { type: "json" };
+import transaction_failed from "../../__fixtures__/horizon/transaction-failed.json" with { type: "json" };
+import transaction_not_found from "../../__fixtures__/horizon/transaction-not-found.json" with { type: "json" };
+import payments_page from "../../__fixtures__/horizon/payments-page.json" with { type: "json" };
 
 // Captured testnet responses (scripts/capture-horizon-fixtures.mjs), imported as JSON so core
 // tests stay free of Node APIs.
@@ -18,6 +24,12 @@ const FIXTURES = {
   "account-multi-subentry": account_multi_subentry,
   "friendbot-success": friendbot_success,
   "friendbot-already-funded": friendbot_already_funded,
+  "submit-async-pending": submit_async_pending,
+  "submit-async-bad-seq": submit_async_bad_seq,
+  "transaction-success": transaction_success,
+  "transaction-failed": transaction_failed,
+  "transaction-not-found": transaction_not_found,
+  "payments-page": payments_page,
 } as const satisfies Record<string, { status: number; body: unknown }>;
 
 export type FixtureName = keyof typeof FIXTURES;

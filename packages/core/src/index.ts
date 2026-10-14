@@ -175,3 +175,18 @@ export {
   type PaymentInput,
   type ValidatedPayment,
 } from "./tx/validate.js";
+export {
+  TX_TIMEOUT_SECONDS,
+  buildPaymentTransaction,
+  rehydrateTransaction,
+  transactionHashHex,
+  type BuildPaymentParams,
+} from "./tx/build.js";
+export { mapResultCodes, type MappedFailure, type RebuildReason } from "./tx/errors.js";
+export { decodeResultXdr, type ResultCodes } from "./tx/result-codes.js";
+export {
+  assertSameSummary,
+  summarizeTransaction,
+  type PaymentSummary,
+  type SummaryContext,
+} from "./tx/summary.js";
