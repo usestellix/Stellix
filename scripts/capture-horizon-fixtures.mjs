@@ -160,6 +160,100 @@ save(
   ),
 );
 
+// History (M4): one account with every record type the normalizer handles.
+const me = Keypair.random();
+const peer = Keypair.random();
+const merging = Keypair.random();
+await get(`${FRIENDBOT}/?addr=${me.publicKey()}`);
+await get(`${FRIENDBOT}/?addr=${peer.publicKey()}`);
+await get(`${FRIENDBOT}/?addr=${merging.publicKey()}`);
+/** @param {Keypair} kp */
+const seqOf = async (kp) =>
+  /** @type {{ body: { sequence: string } }} */ (await get(`${HORIZON}/accounts/${kp.publicKey()}`))
+    .body.sequence;
+const { MuxedAccount } = await import("@stellar/stellar-sdk/base");
+const peerMuxed = new MuxedAccount(new Account(peer.publicKey(), "0"), "424242").accountId();
+const created = Keypair.random();
+const historyTx = new TransactionBuilder(new Account(me.publicKey(), await seqOf(me)), {
+  fee: "1000",
+  networkPassphrase: PASSPHRASE,
+})
+  .addOperation(
+    Operation.payment({ destination: peer.publicKey(), asset: Asset.native(), amount: "3" }),
+  )
+  .addOperation(
+    Operation.payment({ destination: peerMuxed, asset: Asset.native(), amount: "1.25" }),
+  )
+  .addOperation(Operation.createAccount({ destination: created.publicKey(), startingBalance: "2" }))
+  .addOperation(
+    Operation.pathPaymentStrictSend({
+      sendAsset: Asset.native(),
+      sendAmount: "0.5",
+      destination: peer.publicKey(),
+      destAsset: Asset.native(),
+      destMin: "0.5",
+      path: [],
+    }),
+  )
+  .addMemo(Memo.text("history fixture"))
+  .setTimeout(180)
+  .build();
+historyTx.sign(me);
+await waitFor(/** @type {{ hash: string }} */ ((await submitAsync(historyTx)).body).hash);
+const incoming = signed(
+  peer,
+  await seqOf(peer),
+  Operation.payment({ destination: me.publicKey(), asset: Asset.native(), amount: "7.5" }),
+  Memo.id("9001"),
+);
+await waitFor(/** @type {{ hash: string }} */ ((await submitAsync(incoming)).body).hash);
+const merge = signed(
+  merging,
+  await seqOf(merging),
+  Operation.accountMerge({ destination: me.publicKey() }),
+);
+await waitFor(/** @type {{ hash: string }} */ ((await submitAsync(merge)).body).hash);
+const history = await get(
+  `${HORIZON}/accounts/${me.publicKey()}/payments?order=desc&limit=20&include_failed=false&join=transactions`,
+);
+save("history-page", history);
+save("history-me", {
+  status: 200,
+  body: {
+    id: me.publicKey(),
+    peer: peer.publicKey(),
+    peerMuxed,
+    created: created.publicKey(),
+    merged: merging.publicKey(),
+  },
+});
+const mergeRecord = /** @type {{ _embedded: { records: { id: string; type: string }[] } }} */ (
+  history.body
+)._embedded.records.find((r) => r.type === "account_merge");
+if (mergeRecord === undefined) throw new Error("no account_merge record");
+save("effects-account-merge", await get(`${HORIZON}/operations/${mergeRecord.id}/effects`));
+
+// 25 payments in one transaction (fee_account = me): fee attribution on multi-op transactions
+// and cursor pagination (page 1 = 20 records, page 2 via _links.next).
+let batch = new TransactionBuilder(new Account(me.publicKey(), await seqOf(me)), {
+  fee: "100",
+  networkPassphrase: PASSPHRASE,
+});
+for (let i = 1; i <= 25; i++) {
+  batch = batch.addOperation(
+    Operation.payment({ destination: peer.publicKey(), asset: Asset.native(), amount: String(i) }),
+  );
+}
+const batchTx = batch.setTimeout(180).build();
+batchTx.sign(me);
+await waitFor(/** @type {{ hash: string }} */ ((await submitAsync(batchTx)).body).hash);
+const page1 = await get(
+  `${HORIZON}/accounts/${me.publicKey()}/payments?order=desc&limit=20&include_failed=false&join=transactions`,
+);
+save("history-multiop-page1", page1);
+const next = /** @type {{ _links: { next: { href: string } } }} */ (page1.body)._links.next.href;
+save("history-multiop-page2", await get(next));
+
 const meta = /** @type {{ horizon_version: string; current_protocol_version: number }} */ (
   root.body
 );
