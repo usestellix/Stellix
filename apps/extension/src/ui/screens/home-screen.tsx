@@ -189,34 +189,41 @@ export function HomeScreen({
                 {displayXlm(state.summary.totalStroops)}{" "}
                 <span className="text-[15px] font-medium text-muted">XLM</span>
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink-secondary">
-                <span>
+              {/* Two unbreakable groups: on a long balance "Reserved … ⓘ" wraps as a unit, so the
+                  icon never sits alone on a line. No separator dot: it would dangle on wrap. */}
+              <div
+                className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-ink-secondary"
+                data-testid="balance-breakdown"
+              >
+                <span className="whitespace-nowrap">
                   {COPY.available}:{" "}
                   <span className="tabular font-medium text-ink" data-testid="balance-available">
                     {displayXlm(state.summary.availableStroops)} XLM
                   </span>
                 </span>
-                <span className="text-faint" aria-hidden="true">
-                  ·
-                </span>
-                <span>
-                  {COPY.reserved}:{" "}
-                  <span className="tabular" data-testid="balance-reserved">
-                    {displayXlm(state.summary.reservedStroops)} XLM
-                  </span>
-                </span>
-                <button
-                  type="button"
-                  aria-expanded={showReserve}
-                  aria-label={COPY.reserveInfo}
-                  title={COPY.reserveInfo}
-                  onClick={() => {
-                    setShowReserve((v) => !v);
-                  }}
-                  className="pressable inline-flex size-6 items-center justify-center rounded-full text-muted hover-fine:bg-fill hover-fine:text-ink"
+                <span
+                  className="inline-flex items-center gap-1 whitespace-nowrap"
+                  data-testid="balance-reserved-group"
                 >
-                  <InfoIcon size={14} />
-                </button>
+                  <span>
+                    {COPY.reserved}:{" "}
+                    <span className="tabular" data-testid="balance-reserved">
+                      {displayXlm(state.summary.reservedStroops)} XLM
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    aria-expanded={showReserve}
+                    aria-label={COPY.reserveInfo}
+                    title={COPY.reserveInfo}
+                    onClick={() => {
+                      setShowReserve((v) => !v);
+                    }}
+                    className="pressable inline-flex size-6 items-center justify-center rounded-full text-muted hover-fine:bg-fill hover-fine:text-ink"
+                  >
+                    <InfoIcon size={14} />
+                  </button>
+                </span>
               </div>
               {showReserve && (
                 <p className="mt-2 text-[12px] leading-5 text-muted">{COPY.reserveExplain}</p>
