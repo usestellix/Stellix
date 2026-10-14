@@ -85,6 +85,14 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
 - **Flow 1** stops at "popup unlocked". Friendbot and balance are added in M2.
 - **Flow 2** imports the SEP-0005 Test 5 phrase by paste-to-fill and compares the popup's address with the spec's `G…`, read from the generated vectors file.
 - **Flow 6** writes `lastActivityAt` 16 minutes into the past from the SW, sends no request, and waits for the real 30 s alarm to lock. The auto-lock timer UI is M2.
+- **M2 (`e2e/m2-flows.spec.ts`, live testnet):**
+  - Flow 1 completes with Friendbot: 10,000 total, 9,999 available, 1 reserved.
+  - Flow 7: the mainnet `<dialog>` is gated by its checkbox, and the SW refuses `SET_SETTINGS` without `acknowledgedRealFunds`.
+  - Import discovers a pre-funded index 1 of a fresh phrase.
+  - Accounts: add, rename, switch.
+  - Settings: auto-lock, custom Horizon (https + passphrase probe), About.
+  - Security: change password, reveal phrase in its own tab, reset.
+  - Blocking Horizon with `context.route` shows the error state with the greyed last-known balance.
 - **Also covered:**
   - the SW-enforced unlock throttle, checked from a fresh popup
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`

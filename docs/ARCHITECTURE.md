@@ -59,6 +59,7 @@ Access level must be `TRUSTED_CONTEXTS` (the default; set it explicitly at SW st
 | `pendingOnboarding` | `{ mnemonic, verifyPositions, createdAt }` during create flow only | Onboarding completes, is abandoned (>30 min), or lock |
 | `unlockThrottle` | `{ failures, lockedUntil }`: after 5 consecutive wrong passwords (unlock, reveal, change password), every attempt is refused for 30 s with `UNLOCK_THROTTLED`. Enforced in the SW. | Successful password check, browser exit, reset. **Not** on lock. |
 | `preparedTx:<id>` | `{ xdr, networkId, summary, expiresAt, accountIndex }` | Confirmed, cancelled, expired, lock |
+| `ui:*` | Written **directly by the popup** (a trusted extension page). Public data only: `ui:baseReserve:<network>`, `ui:lastBalance:<network>:<G>` (last balance + "as of" time), `ui:fundedSeen:<network>:<G>` (for the "testnet was reset" notice). | Browser exit, reset. Not on lock (public data). |
 
 ## 4. Platform interfaces (`packages/core/src/platform.ts`)
 

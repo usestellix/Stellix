@@ -31,8 +31,9 @@ export function useStatus(): { state: StatusState; refresh: () => void } {
     };
   }, [generation]);
 
+  // Revalidate in place: keep the current screen while the SW answers. Resetting to "loading"
+  // would unmount the unlocked app and drop the user's place (e.g. inside Settings).
   const refresh = useCallback(() => {
-    setState({ kind: "loading" });
     setGeneration((g) => g + 1);
   }, []);
 

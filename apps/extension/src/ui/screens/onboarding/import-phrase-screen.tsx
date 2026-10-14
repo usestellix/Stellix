@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState, type ClipboardEvent, type SubmitEvent } from "react";
 import { cx } from "../../cx.js";
 import { Button } from "../../components/button.js";
+import { Callout } from "../../components/callout.js";
 import { ErrorText } from "../../components/error-text.js";
 import { inputClass } from "../../components/field.js";
 import { errorCopy } from "../../errorCopy.js";
@@ -27,6 +28,8 @@ const COPY = {
   word: (n: number) => `Word ${String(n)}`,
   continue: "Continue",
   missing: (n: number) => `Enter all ${String(n)} words.`,
+  // Approved wording (M2).
+  note: "Importing doesn't move your funds. This phrase still controls the same accounts in any other wallet where you've used it. Anyone with this phrase can take your funds.",
 } as const;
 
 export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: string) => void }) {
@@ -106,6 +109,9 @@ export function ImportPhraseScreen({ onContinue }: { onContinue: (mnemonic: stri
   return (
     <form onSubmit={submit} data-testid="onboarding-import" noValidate>
       <StepHeading title={COPY.title} body={COPY.body} />
+      <div className="mb-5">
+        <Callout>{COPY.note}</Callout>
+      </div>
       <div
         role="radiogroup"
         aria-label="Phrase length"

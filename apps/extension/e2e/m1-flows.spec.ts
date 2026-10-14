@@ -16,7 +16,7 @@ test("flow 1: create wallet → verify words → password → popup unlocked", a
 }) => {
   await createWalletViaUi(context, extensionId);
   const popup = await openPopup(context, extensionId);
-  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "unlocked");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
   await expect(popup.getByTestId("account-label")).toHaveText("Account 1");
   await expect(popup.getByTestId("full-address")).toHaveText(/^G[A-Z2-7]{3}( [A-Z2-7]{4}){13}$/);
   await expect(popup.getByTestId("network-badge")).toHaveText(/^testnet$/i);
@@ -28,7 +28,7 @@ test("flow 2: import a known phrase → same G address as SEP-0005", async ({
 }) => {
   await importWalletViaUi(context, extensionId, TEST5.mnemonic);
   const popup = await openPopup(context, extensionId);
-  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "unlocked");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
   const shown = (await popup.getByTestId("full-address").innerText()).replaceAll(" ", "");
   expect(shown).toBe(TEST5.accounts[0]!.publicKey);
 });
@@ -49,7 +49,7 @@ test("flow 4: lock → wrong password → error → correct password → unlocke
 
   await popup.getByLabel("Password").fill(PASSWORD);
   await popup.getByRole("button", { name: "Unlock" }).click();
-  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "unlocked");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
 });
 
 test("unlock throttle is enforced by the SW, not the popup", async ({ context, extensionId }) => {
@@ -74,7 +74,7 @@ test("flow 5: unlocked session survives service worker termination", async ({
 }) => {
   await importWalletViaUi(context, extensionId, TEST5.mnemonic);
   const popup = await openPopup(context, extensionId);
-  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "unlocked");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
 
   const cdp = await context.newCDPSession(popup);
   const statuses: string[] = [];
@@ -87,7 +87,7 @@ test("flow 5: unlocked session survives service worker termination", async ({
   await expect.poll(() => statuses.at(-1)).toBe("stopped");
 
   await popup.reload();
-  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "unlocked");
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
   expect(statuses.slice(statuses.lastIndexOf("stopped"))).toContain("running");
 });
 

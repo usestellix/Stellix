@@ -88,3 +88,74 @@ export function ShieldIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Settings: sliders (a sun-like cog read as "brightness" in review). */
+export function GearIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3.5 6h6.25M13.75 6h2.75M3.5 14h2.75M10.25 14h6.25" />
+      <circle cx="11.75" cy="6" r="2" />
+      <circle cx="8.25" cy="14" r="2" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m8 5 5 5-5 5" />
+    </Icon>
+  );
+}
+
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m5 8 5 5 5-5" />
+    </Icon>
+  );
+}
+
+export function InfoIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="10" r="7.25" />
+      <path d="M10 9v4.5" />
+      <path d="M10 6.5h.01" strokeWidth={2} />
+    </Icon>
+  );
+}
+
+export function PlusIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M10 4.5v11M4.5 10h11" />
+    </Icon>
+  );
+}
+
+export function PencilIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m12.5 4.5 3 3L7.25 15.75H4.25v-3L12.5 4.5Z" />
+    </Icon>
+  );
+}
+
+export function ExternalIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M11.5 4.25h4.25V8.5M15.5 4.5 9 11" />
+      <path d="M13.75 11.5v3.25a1 1 0 0 1-1 1h-7.5a1 1 0 0 1-1-1v-7.5a1 1 0 0 1 1-1H8.5" />
+    </Icon>
+  );
+}
+
+export function RefreshIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M15.75 10a5.75 5.75 0 1 1-1.7-4.08" />
+      <path d="M15.75 3.75v3.5h-3.5" />
+    </Icon>
+  );
+}
