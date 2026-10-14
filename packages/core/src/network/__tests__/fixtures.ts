@@ -1,0 +1,60 @@
+import root from "../../__fixtures__/horizon/root.json" with { type: "json" };
+import ledgers_latest from "../../__fixtures__/horizon/ledgers-latest.json" with { type: "json" };
+import fee_stats from "../../__fixtures__/horizon/fee-stats.json" with { type: "json" };
+import account_not_found from "../../__fixtures__/horizon/account-not-found.json" with { type: "json" };
+import account_funded from "../../__fixtures__/horizon/account-funded.json" with { type: "json" };
+import account_multi_subentry from "../../__fixtures__/horizon/account-multi-subentry.json" with { type: "json" };
+import friendbot_success from "../../__fixtures__/horizon/friendbot-success.json" with { type: "json" };
+import friendbot_already_funded from "../../__fixtures__/horizon/friendbot-already-funded.json" with { type: "json" };
+
+// Captured testnet responses (scripts/capture-horizon-fixtures.mjs), imported as JSON so core
+// tests stay free of Node APIs.
+const FIXTURES = {
+  root: root,
+  "ledgers-latest": ledgers_latest,
+  "fee-stats": fee_stats,
+  "account-not-found": account_not_found,
+  "account-funded": account_funded,
+  "account-multi-subentry": account_multi_subentry,
+  "friendbot-success": friendbot_success,
+  "friendbot-already-funded": friendbot_already_funded,
+} as const satisfies Record<string, { status: number; body: unknown }>;
+
+export type FixtureName = keyof typeof FIXTURES;
+
+export function fixture(name: FixtureName): { status: number; body: unknown } {
+  return structuredClone(FIXTURES[name]);
+}
+
+/** A scripted fetch: each call returns the next response (or throws the next error). */
+export function scriptedFetch(
+  steps: (Response | Error | ((url: string, init?: RequestInit) => Response))[],
+) {
+  const calls: { url: string; init: RequestInit | undefined }[] = [];
+  const fn = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      input instanceof URL ? input.toString() : typeof input === "string" ? input : input.url;
+    calls.push({ url, init });
+    const step = steps.shift();
+    if (step === undefined) return Promise.reject(new Error("no more scripted responses"));
+    if (step instanceof Error) return Promise.reject(step);
+    return Promise.resolve(typeof step === "function" ? step(url, init) : step);
+  }) as typeof fetch;
+  return { fetch: fn, calls };
+}
+
+export function json(
+  status: number,
+  body: unknown,
+  headers: Record<string, string> = {},
+): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json", ...headers },
+  });
+}
+
+export function fromFixture(name: FixtureName): Response {
+  const f = fixture(name);
+  return json(f.status, f.body);
+}

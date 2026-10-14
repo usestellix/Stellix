@@ -39,7 +39,7 @@ export function SetPasswordScreen({
 }: {
   workingText: string;
   submit: (password: string) => Promise<unknown>;
-  onDone: () => void;
+  onDone: (result: unknown) => void;
   onExpired: () => void;
 }) {
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -64,7 +64,7 @@ export function SetPasswordScreen({
     }
     setFieldError(null);
     const result = await action.run(() => submit(password));
-    if (result.ok) onDone();
+    if (result.ok) onDone(result.value);
     else if (result.code === "ONBOARDING_EXPIRED") onExpired();
   };
 
@@ -103,7 +103,7 @@ export function SetPasswordScreen({
           }}
           hint={fieldError === "mismatch" ? <ErrorText>{COPY.mismatch}</ErrorText> : undefined}
         />
-        <Callout>{COPY.notice}</Callout>
+        <Callout tone="security">{COPY.notice}</Callout>
         {action.state.kind === "error" && <ErrorText>{errorCopy(action.state.code)}</ErrorText>}
       </div>
       <Button type="submit" busy={working} className="mt-8 w-full">

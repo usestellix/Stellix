@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DEFAULT_NETWORK, NETWORK_IDS, type NetworkId } from "./network/network-id.js";
+import { DEFAULT_NETWORK, NETWORK_IDS, type NetworkId } from "./network/config.js";
 import type { KeyValueStore } from "./platform.js";
 import { PERSISTENT_KEYS } from "./storage-keys.js";
 

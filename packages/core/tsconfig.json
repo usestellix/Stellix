@@ -3,7 +3,8 @@
   "compilerOptions": {
     // WebWorker gives fetch / crypto types without window or document (ADR 0002).
     "lib": ["ES2022", "WebWorker"],
-    "types": []
+    "types": [],
+    "resolveJsonModule": true
   },
   "include": ["src", "vitest.config.ts", "vitest.testnet.config.ts"]
 }

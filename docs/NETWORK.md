@@ -42,7 +42,7 @@ export const NETWORKS: Record<NetworkId, NetworkConfig> = {
 ```
 
 - `settings.horizonOverrides[networkId]` replaces `horizonUrl` when set. Validate: must be `https://` (allow `http://localhost` only in dev builds). On save, probe `GET /` and check the returned `network_passphrase` equals the network's passphrase; reject the override otherwise. This catches pointing "mainnet" at a testnet Horizon.
-- Before the M1 milestone closes, check the current status of SDF's public Horizon (SDF has been steering ecosystem services toward Stellar RPC). The `HorizonClient` interface (§2) exists so the backend can be swapped without touching callers.
+- Horizon status was checked on 2026-10-14. It's end-of-life but maintained, and it's still the only SDF API with per-account history. See ADR 0006. The `HorizonClient` interface (§2) exists so the backend can be swapped without touching callers.
 
 ## 2. `HorizonClient` interface
 

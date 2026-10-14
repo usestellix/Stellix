@@ -71,11 +71,11 @@ describe("registry", () => {
     expect(Object.keys(REQUESTS).sort()).toEqual([...REQUEST_TYPES].sort());
   });
 
-  it("only GET_STATUS is excluded from activity (ARCHITECTURE §5 step 4)", () => {
+  it("only the passive reads are excluded from activity (ARCHITECTURE §5 step 4)", () => {
     const passive = Object.entries(REQUESTS)
       .filter(([, d]) => !d.countsAsActivity)
       .map(([t]) => t);
-    expect(passive).toEqual(["GET_STATUS"]);
+    expect(passive).toEqual(["GET_STATUS", "GET_SETTINGS"]);
   });
 });
 
@@ -121,6 +121,25 @@ describe("payload schemas for every request type", () => {
       invalid: [{ current: "a" }, { current: "", next: "b" }],
     },
     RESET_WALLET: { valid: [{ confirmation: "RESET" }], invalid: [{ confirmation: "reset" }, {}] },
+    GET_SETTINGS: { valid: [undefined], invalid: [{}] },
+    SET_SETTINGS: {
+      valid: [
+        {},
+        { network: "mainnet", acknowledgedRealFunds: true },
+        { autoLockMinutes: 30 },
+        { horizonOverride: { network: "testnet", url: "https://h.example" } },
+        { horizonOverride: { network: "mainnet", url: null } },
+      ],
+      invalid: [
+        { network: "devnet" },
+        { autoLockMinutes: 7 },
+        { horizonOverride: { network: "testnet" } },
+        { horizonOverride: { network: "testnet", url: "x".repeat(2049) } },
+        { network: "mainnet", acknowledgedRealFunds: "yes" },
+        { theme: "dark" },
+      ],
+    },
+    DISCOVER_ACCOUNTS: { valid: [undefined], invalid: [{}] },
   };
 
   for (const [type, { valid, invalid }] of Object.entries(cases)) {

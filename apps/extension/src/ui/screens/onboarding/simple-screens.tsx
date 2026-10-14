@@ -22,6 +22,8 @@ const COPY = {
   alreadyBody:
     "Open Stellix from the toolbar. To start over, reset the wallet from Settings first.",
   restart: "Start again",
+  // KEY_MANAGEMENT §3.
+  discoveryIncomplete: "Couldn't check for other accounts — you can add them later in Accounts.",
 } as const;
 
 function ChoiceButton({
@@ -77,14 +79,17 @@ export function StartScreen({
   );
 }
 
-export function DoneScreen() {
+export function DoneScreen({ discoveryIncomplete = false }: { discoveryIncomplete?: boolean }) {
   return (
     <section data-testid="onboarding-done">
       <div className="mb-6 flex size-11 items-center justify-center rounded-full bg-fill text-success">
         <CheckIcon size={22} strokeWidth={2} />
       </div>
       <StepHeading title={COPY.doneTitle} body={COPY.doneBody} />
-      <Callout>{COPY.pinHint}</Callout>
+      <div className="space-y-3">
+        {discoveryIncomplete && <Callout tone="warning">{COPY.discoveryIncomplete}</Callout>}
+        <Callout>{COPY.pinHint}</Callout>
+      </div>
     </section>
   );
 }

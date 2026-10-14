@@ -64,7 +64,9 @@ Milestones are ordered by dependency. Each has exit criteria; a milestone is don
 - Incident-response doc (SECURITY §10).
 - External review of `core/keys`, `core/vault`, `core/tx`, and the SW message handler before enabling mainnet in a public release.
 
-**Exit:** public testnet-default release on the Chrome Web Store.
+- Mainnet Horizon provider chosen and documented: operator, history retention, rate limits, privacy terms (ADR 0006).
+
+**Exit:** public testnet-default release on the Chrome Web Store; mainnet Horizon provider chosen and documented (ADR 0006).
 
 ---
 

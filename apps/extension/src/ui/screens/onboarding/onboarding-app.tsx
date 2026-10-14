@@ -7,6 +7,7 @@ import { Spinner } from "../../components/spinner.js";
 import { errorCopy } from "../../errorCopy.js";
 import { useAction } from "../../hooks/use-request.js";
 import { ImportPhraseScreen } from "./import-phrase-screen.js";
+import { RevealPhraseScreen } from "./reveal-phrase-screen.js";
 import { OnboardingShell } from "./onboarding-shell.js";
 import { SetPasswordScreen } from "./set-password-screen.js";
 import { ShowPhraseScreen } from "./show-phrase-screen.js";
@@ -28,7 +29,8 @@ type Step =
   | { kind: "import" }
   | { kind: "import-password"; mnemonic: string }
   | { kind: "expired" }
-  | { kind: "done" };
+  | { kind: "reveal" }
+  | { kind: "done"; discoveryIncomplete: boolean };
 
 const CREATE_STEPS = 3;
 const IMPORT_STEPS = 2;
@@ -41,7 +43,10 @@ export function OnboardingApp() {
     let current = true;
     void request("GET_STATUS", undefined).then(
       (status) => {
-        if (current) setStep(status.hasVault ? { kind: "already" } : { kind: "start" });
+        // ?mode=reveal comes from Settings → Reveal recovery phrase. The URL carries no secret.
+        const reveal = new URLSearchParams(window.location.search).get("mode") === "reveal";
+        if (current)
+          setStep(status.hasVault ? { kind: reveal ? "reveal" : "already" } : { kind: "start" });
       },
       () => {
         if (current) setStep({ kind: "start" });
@@ -138,7 +143,7 @@ export function OnboardingApp() {
           workingText="Securing your wallet"
           submit={(password) => request("ONBOARD_CREATE", { password, answers: step.answers })}
           onDone={() => {
-            setStep({ kind: "done" });
+            setStep({ kind: "done", discoveryIncomplete: false });
           }}
           onExpired={() => {
             setStep({ kind: "expired" });
@@ -164,10 +169,15 @@ export function OnboardingApp() {
       };
       body = (
         <SetPasswordScreen
-          workingText="Securing your wallet"
+          workingText="Finding your accounts"
           submit={(password) => request("ONBOARD_IMPORT", { mnemonic: step.mnemonic, password })}
-          onDone={() => {
-            setStep({ kind: "done" });
+          onDone={(result) => {
+            const incomplete =
+              typeof result === "object" &&
+              result !== null &&
+              "discoveryIncomplete" in result &&
+              result.discoveryIncomplete === true;
+            setStep({ kind: "done", discoveryIncomplete: incomplete });
           }}
           onExpired={toStart}
         />
@@ -176,8 +186,11 @@ export function OnboardingApp() {
     case "expired":
       body = <ExpiredScreen onRestart={() => void startCreate()} />;
       break;
+    case "reveal":
+      body = <RevealPhraseScreen />;
+      break;
     case "done":
-      body = <DoneScreen />;
+      body = <DoneScreen discoveryIncomplete={step.discoveryIncomplete} />;
       break;
   }
 

@@ -39,7 +39,39 @@ export {
   parseMnemonic,
   unknownWordPositions,
 } from "./keys/mnemonic.js";
-export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./network/network-id.js";
+export {
+  FALLBACK_BASE_RESERVE_STROOPS,
+  getBaseReserveStroops,
+  type BaseReserveCache,
+} from "./network/base-reserve.js";
+export {
+  DEFAULT_NETWORK,
+  NETWORKS,
+  NETWORK_IDS,
+  horizonUrlFor,
+  isNetworkId,
+  type NetworkConfig,
+  type NetworkId,
+} from "./network/config.js";
+export { fundWithFriendbot } from "./network/friendbot.js";
+export {
+  createHorizonClient,
+  type HorizonClient,
+  type HorizonClientOptions,
+} from "./network/horizon-client.js";
+export {
+  nativeBalanceOf,
+  type AccountRecord,
+  type FeeStats,
+  type HorizonRoot,
+  type LedgerRecord,
+  type NativeBalance,
+} from "./network/horizon-schemas.js";
+export {
+  normalizeHorizonUrl,
+  validateHorizonOverride,
+  type HorizonUrlPolicy,
+} from "./network/horizon-url.js";
 export {
   PASSWORD_MIN_LENGTH,
   assertPasswordPolicy,
@@ -48,12 +80,27 @@ export {
   type PasswordStrength,
 } from "./password.js";
 export type { KeyValueStore, Platform } from "./platform.js";
-export { addAccount, listAccounts, renameAccount, setActiveAccount } from "./services/accounts.js";
+export {
+  addAccount,
+  discoverAccounts,
+  listAccounts,
+  renameAccount,
+  setActiveAccount,
+} from "./services/accounts.js";
+export {
+  DISCOVERY_MAX_INDEX,
+  GAP_LIMIT,
+  discoverUsedIndices,
+  type DiscoveryResult,
+} from "./services/discovery.js";
+export { updateSettings, type SettingsDeps, type SettingsPatch } from "./services/settings.js";
 export {
   ONBOARDING_TTL_MS,
   VERIFY_WORD_COUNT,
   createWallet,
+  derivePublicKeys,
   importWallet,
+  type ImportResult,
   startOnboarding,
   type OnboardingOptions,
   type VerifyAnswer,
@@ -89,3 +136,19 @@ export {
   type VaultWithKey,
 } from "./vault/vault.js";
 export { PERSISTENT_KEYS, PREPARED_TX_KEY_PREFIX, SESSION_KEYS } from "./storage-keys.js";
+export { isMultisig, summarizeAccount, type AccountSummary } from "./stellar/account-summary.js";
+export { isAccountId, isMuxedAddress, looksLikeSecretSeed } from "./stellar/address.js";
+export {
+  INT64_MAX,
+  STROOPS_PER_XLM,
+  formatXlm,
+  parseHorizonAmount,
+  parseXlm,
+  type FormatXlmOptions,
+} from "./stellar/amount.js";
+export {
+  availableStroops,
+  minimumBalanceStroops,
+  minimumStartingBalanceStroops,
+  type ReserveInputs,
+} from "./stellar/reserve.js";

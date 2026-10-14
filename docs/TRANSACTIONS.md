@@ -141,7 +141,12 @@ On SW startup, for each `inflight:<hash>` in session storage, resume resolution 
 
 ## 7. Friendbot (testnet only)
 
-`core/network/friendbot.ts`: `GET {friendbotUrl}?addr={G}`. Success → refetch account. "Account already exists" response → treat as success. Not exposed when network = mainnet; the function must throw `NOT_AVAILABLE_ON_NETWORK` if called on mainnet.
+`core/network/friendbot.ts`: `GET {friendbotUrl}/?addr={G}`. Friendbot's own response never decides the outcome. Live, "already funded" is a 400 problem document, and a timeout can still have funded the account. After **any** response or error, refetch the account from Horizon:
+- funded → success
+- still unfunded → `FRIENDBOT_FAILED` (retryable)
+- the refetch itself fails → that Horizon error (e.g. `NETWORK_ERROR`)
+
+A 5xx or timeout is never shown as success. Not exposed when network = mainnet; the function throws `NOT_AVAILABLE_ON_NETWORK` if called on mainnet.
 
 ## 8. Error mapping (`core/tx/errors.ts`)
 

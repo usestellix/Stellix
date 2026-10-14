@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@stellar/stellar-sdk": "17.1.0",
     "@types/node": "24.19.0",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",

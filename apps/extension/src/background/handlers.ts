@@ -1,6 +1,14 @@
 import {
   addAccount,
   changePassword,
+  createHorizonClient,
+  discoverAccounts,
+  horizonUrlFor,
+  readSettings,
+  updateSettings,
+  validateHorizonOverride,
+  type HorizonClient,
+  type SettingsPatch,
   createWallet,
   getStatus,
   importWallet,
@@ -31,6 +39,10 @@ export interface HandlerDeps {
   openOnboarding: () => Promise<void>;
   /** Tests only: lower scrypt N within bounds. */
   onboarding?: OnboardingOptions;
+  /** Dev builds may point a network at http://localhost Horizon (NETWORK.md §1). */
+  devBuild: boolean;
+  /** Tests inject a fake; production builds a client for the network's effective URL. */
+  horizonFor?: (url: string) => HorizonClient;
 }
 
 /** For handlers with no result: awaits the work and returns `undefined` explicitly. */
@@ -43,6 +55,13 @@ export function createHandlers(deps: HandlerDeps): Handlers {
   const { platform, autoLock } = deps;
   const serial = createSerialQueue();
   const opts = deps.onboarding ?? {};
+  const makeClient = deps.horizonFor ?? ((url: string) => createHorizonClient(url, platform));
+
+  /** Horizon for the currently selected network, honouring a validated override. */
+  const currentHorizon = async (): Promise<HorizonClient> => {
+    const settings = await readSettings(platform.persistent);
+    return makeClient(horizonUrlFor(settings.network, settings.horizonOverrides));
+  };
 
   /** Unlocking operations end with a running auto-lock alarm. */
   const unlocked = async <T>(result: T): Promise<T> => {
@@ -59,7 +78,9 @@ export function createHandlers(deps: HandlerDeps): Handlers {
     ONBOARD_CREATE: (p) =>
       serial(async () => unlocked({ accounts: await createWallet(platform, p, opts) })),
     ONBOARD_IMPORT: (p) =>
-      serial(async () => unlocked({ accounts: await importWallet(platform, p, opts) })),
+      serial(async () =>
+        unlocked(await importWallet(platform, p, { ...opts, horizon: await currentHorizon() })),
+      ),
     UNLOCK: ({ password }) =>
       serial(async () => {
         await unlock(platform, password);
@@ -80,6 +101,15 @@ export function createHandlers(deps: HandlerDeps): Handlers {
         await changePassword(platform, p, opts.scryptParams);
         return done(autoLock.ensure());
       }),
+    GET_SETTINGS: () => readSettings(platform.persistent),
+    SET_SETTINGS: (payload) =>
+      serial(() =>
+        updateSettings(platform, toSettingsPatch(payload), {
+          validateHorizonOverride: (url, network) =>
+            validateHorizonOverride(url, network, { allowLocalhost: deps.devBuild }, platform),
+        }),
+      ),
+    DISCOVER_ACCOUNTS: () => serial(async () => discoverAccounts(platform, await currentHorizon())),
     RESET_WALLET: ({ confirmation }) =>
       serial(async () => {
         await resetWallet(platform, confirmation);
@@ -88,6 +118,22 @@ export function createHandlers(deps: HandlerDeps): Handlers {
         return done(deps.openOnboarding());
       }),
   };
+}
+
+/** Drops undefined keys: core's SettingsPatch uses exact optional properties. */
+function toSettingsPatch(payload: {
+  network?: SettingsPatch["network"] | undefined;
+  acknowledgedRealFunds?: boolean | undefined;
+  autoLockMinutes?: SettingsPatch["autoLockMinutes"] | undefined;
+  horizonOverride?: SettingsPatch["horizonOverride"] | undefined;
+}): SettingsPatch {
+  const patch: SettingsPatch = {};
+  if (payload.network !== undefined) patch.network = payload.network;
+  if (payload.acknowledgedRealFunds !== undefined)
+    patch.acknowledgedRealFunds = payload.acknowledgedRealFunds;
+  if (payload.autoLockMinutes !== undefined) patch.autoLockMinutes = payload.autoLockMinutes;
+  if (payload.horizonOverride !== undefined) patch.horizonOverride = payload.horizonOverride;
+  return patch;
 }
 
 /**
