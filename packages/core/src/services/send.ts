@@ -53,7 +53,8 @@ export type SubmitOutcome =
   | { status: "success"; hash: string; ledger: number }
   | {
       status: "failed";
-      hash?: string;
+      /** Always known: failures are only reported after signing. */
+      hash: string;
       error: { code: ErrorCode; message: string; details?: ErrorDetails };
     }
   | { status: "rebuild"; reason: RebuildReason }
@@ -380,7 +381,7 @@ export async function resumeInflight(
   return unfinished;
 }
 
-export async function listInflight(platform: SendPlatform): Promise<InflightView[]> {
+export async function listInflight(platform: Pick<Platform, "session">): Promise<InflightView[]> {
   return (await readInflight(platform)).map((r) => ({
     hash: r.hash,
     network: r.network,
@@ -478,7 +479,7 @@ async function writeInflight(platform: SendPlatform, record: InflightRecord): Pr
   await platform.session.set(inflightKey(record.hash), record);
 }
 
-async function readInflight(platform: SendPlatform): Promise<InflightRecord[]> {
+async function readInflight(platform: Pick<Platform, "session">): Promise<InflightRecord[]> {
   const keys = (await platform.session.keys()).filter((k) => k.startsWith(INFLIGHT_KEY_PREFIX));
   const records: InflightRecord[] = [];
   for (const k of keys) {

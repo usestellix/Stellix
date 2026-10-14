@@ -16,7 +16,7 @@ export interface PaymentSummary {
   amountStroops: string;
   feeStroops: string;
   totalStroops: string;
-  memo: { type: "none" | "text" | "id"; value?: string };
+  memo: { type: "none" } | { type: "text"; value: string } | { type: "id"; value: string };
   network: NetworkId;
   expiresAt: number;
   firstTimeDestination: boolean;

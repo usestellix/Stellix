@@ -65,7 +65,7 @@ Implementation `createHorizonClient(baseUrl, platform)`:
 - Uses `platform.fetch` (injectable).
 - Every JSON response is parsed with a **zod schema that covers only the fields we use**, using `.passthrough()` so new Horizon fields don't break us. Parse failures → `HORIZON_BAD_RESPONSE`.
 - `Accept: application/json` header. No custom headers that would trigger unneeded CORS preflights.
-- Timeouts via `AbortController`: 10 s for reads, 35 s for submit (Horizon's own submit timeout is ~30 s and returns 504).
+- Timeouts via `AbortController`: 10 s for reads and for the async submit. No request may approach Chrome's 30 s fetch limit for service workers (ADR 0007).
 
 ## 3. Error and retry policy
 
@@ -75,7 +75,7 @@ Implementation `createHorizonClient(baseUrl, platform)`:
 | Read: 429 | Honor `Retry-After` if ≤ 10 s, else surface `RATE_LIMITED`. |
 | Read: 404 on account / transaction | Not an error — return `null`. |
 | Read: 404 elsewhere | `HORIZON_NOT_FOUND`. |
-| Submit: anything | **No automatic retry of a rebuilt tx.** Return raw outcome to the resolver (TRANSACTIONS §5). |
+| Submit: anything | Never retried by the client. The send service may resubmit the **same** signed XDR (TRANSACTIONS §5); a rebuilt tx is never resubmitted. |
 
 The public SDF Horizon instances are rate-limited per IP. The popup must not poll aggressively (see §6).
 

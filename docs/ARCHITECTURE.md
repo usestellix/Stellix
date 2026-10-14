@@ -59,6 +59,8 @@ Access level must be `TRUSTED_CONTEXTS` (the default; set it explicitly at SW st
 | `pendingOnboarding` | `{ mnemonic, verifyPositions, createdAt }` during create flow only | Onboarding completes, is abandoned (>30 min), or lock |
 | `unlockThrottle` | `{ failures, lockedUntil }`: after 5 consecutive wrong passwords (unlock, reveal, change password), every attempt is refused for 30 s with `UNLOCK_THROTTLED`. Enforced in the SW. | Successful password check, browser exit, reset. **Not** on lock. |
 | `preparedTx:<id>` | `{ xdr, networkId, summary, expiresAt, accountIndex }` | Confirmed, cancelled, expired, lock |
+| `inflight:<hash>` | `{ hash, signedXdr, network, summary, status, outcome, … }` (ADR 0007). The signed XDR is dropped once the outcome is known. | Reset, `DISMISS_OUTCOME`, 30 min after finishing. **Not** on lock. |
+| `sw:*` | SW caches: `sw:fee:<network>` (last fee, for the 5-minute fallback), `sw:baseReserve:<network>` | Browser exit, reset |
 | `ui:*` | Written **directly by the popup** (a trusted extension page). Public data only: `ui:baseReserve:<network>`, `ui:lastBalance:<network>:<G>` (last balance + "as of" time), `ui:fundedSeen:<network>:<G>` (for the "testnet was reset" notice). | Browser exit, reset. Not on lock (public data). |
 
 ## 4. Platform interfaces (`packages/core/src/platform.ts`)
@@ -108,7 +110,7 @@ No message is handled until SW startup work (access level, migrations) has finis
 
 | Type | Payload | Returns | Requires unlocked |
 |---|---|---|---|
-| `GET_STATUS` | — | `{ hasVault, unlocked, network, activeAccountIndex }` (`activeAccountIndex` is `null` until an account exists) | No |
+| `GET_STATUS` | — | `{ hasVault, unlocked, network, activeAccountIndex, inflight }`. `activeAccountIndex` is `null` until an account exists. `inflight` lists in-flight and recently finished payments (no XDR). | No |
 | `ONBOARD_GENERATE` | — | `{ words: string[], verifyPositions: number[] }` (onboarding page only; the 3 positions are 0-based and chosen by the SW with `crypto.getRandomValues`) | No |
 | `ONBOARD_CREATE` | `{ password, answers: { position, word }[] }`. The SW checks the answers against `pendingOnboarding`; failure → `VERIFICATION_FAILED`, missing or expired → `ONBOARDING_EXPIRED`. | `{ accounts }` | No |
 | `ONBOARD_IMPORT` | `{ mnemonic, password }` | `{ accounts, discoveryIncomplete }` (discovery on the selected network, KEY_MANAGEMENT §3) | No |
@@ -118,9 +120,10 @@ No message is handled until SW startup work (access level, migrations) has finis
 | `ADD_ACCOUNT` | `{ label? }` | `AccountMeta` | Yes |
 | `RENAME_ACCOUNT` | `{ index, label }` | — | No |
 | `SET_ACTIVE_ACCOUNT` | `{ index }` | — | No |
-| `PREPARE_PAYMENT` | `{ destination, amount, memo? }` | `{ preparedId, summary, expiresAt }` | Yes |
-| `CONFIRM_PAYMENT` | `{ preparedId }` | `SubmitOutcome` | Yes |
+| `PREPARE_PAYMENT` | `{ destination, amount, memo? }` | `{ preparedId, summary, expiresAt }`. `TX_IN_FLIGHT` while the account has an unresolved tx. | Yes |
+| `CONFIRM_PAYMENT` | `{ preparedId }` | `SubmitOutcome`, possibly `{ status: "pending", hash }` after ~20 s (ADR 0007) | Yes |
 | `CANCEL_PAYMENT` | `{ preparedId }` | — | No |
+| `DISMISS_OUTCOME` | `{ hash }` | — (removes a finished outcome after the popup has shown it) | No |
 | `REVEAL_PHRASE` | `{ password }` | `{ words }` (onboarding page only) | Re-auth |
 | `CHANGE_PASSWORD` | `{ current, next }` | — | Re-auth |
 | `GET_SETTINGS` | — | `Settings`. Passive, like `GET_STATUS`: not activity. | No |

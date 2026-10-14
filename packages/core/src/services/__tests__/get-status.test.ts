@@ -13,6 +13,7 @@ describe("getStatus", () => {
       unlocked: false,
       network: "testnet",
       activeAccountIndex: null,
+      inflight: [],
     });
   });
 

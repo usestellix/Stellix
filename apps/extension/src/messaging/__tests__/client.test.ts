@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { createClient } from "../client.js";
 
 const ID = "8f14e45f-ceea-4e7a-9b7b-2b7f5d0f3c11";
-const STATUS = { hasVault: true, unlocked: true, network: "mainnet", activeAccountIndex: 2 };
+const STATUS = {
+  hasVault: true,
+  unlocked: true,
+  network: "mainnet",
+  activeAccountIndex: 2,
+  inflight: [],
+};
 
 function code(p: Promise<unknown>) {
   return p.then(

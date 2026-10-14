@@ -2,6 +2,7 @@ import type { NetworkId } from "../network/config.js";
 import type { Platform } from "../platform.js";
 import { readSettings } from "../settings.js";
 import { PERSISTENT_KEYS, SESSION_KEYS } from "../storage-keys.js";
+import { listInflight, type InflightView } from "./send.js";
 
 export interface WalletStatus {
   hasVault: boolean;
@@ -9,6 +10,8 @@ export interface WalletStatus {
   network: NetworkId;
   /** null until the wallet has at least one account. */
   activeAccountIndex: number | null;
+  /** In-flight and recently finished payments (no signed XDR). */
+  inflight: InflightView[];
 }
 
 /**
@@ -30,6 +33,7 @@ export async function getStatus(
     unlocked: vault !== undefined && sessionKey !== undefined,
     network: settings.network,
     activeAccountIndex: isAccountIndex(activeAccountIndex) ? activeAccountIndex : null,
+    inflight: await listInflight(platform),
   };
 }
 

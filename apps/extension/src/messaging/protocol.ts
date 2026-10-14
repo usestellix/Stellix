@@ -2,6 +2,7 @@ import {
   AUTO_LOCK_MINUTES,
   CREATE_WORD_COUNT,
   ERROR_CODES,
+  sanitizeErrorDetails,
   NETWORK_IDS,
   RESET_CONFIRMATION,
   VERIFY_WORD_COUNT,
@@ -44,6 +45,10 @@ export const REQUEST_TYPES = [
   "GET_SETTINGS",
   "SET_SETTINGS",
   "DISCOVER_ACCOUNTS",
+  "PREPARE_PAYMENT",
+  "CONFIRM_PAYMENT",
+  "CANCEL_PAYMENT",
+  "DISMISS_OUTCOME",
 ] as const;
 
 export type RequestType = (typeof REQUEST_TYPES)[number];
@@ -80,11 +85,72 @@ const accountIndex = z
 const label = z.string().max(64);
 const none = z.undefined();
 
+const stroops = z.string().regex(/^\d+$/);
+const hash = z.string().regex(/^[0-9a-f]{64}$/);
+
+/** TRANSACTIONS §3.8 PaymentSummary; bigints cross messaging as decimal strings. */
+const paymentSummarySchema = z.strictObject({
+  kind: z.enum(["payment", "createAccount"]),
+  source: z.string(),
+  destination: z.string(),
+  destinationBase: z.string(),
+  amountStroops: stroops,
+  feeStroops: stroops,
+  totalStroops: stroops,
+  memo: z.discriminatedUnion("type", [
+    z.strictObject({ type: z.literal("none") }),
+    z.strictObject({ type: z.literal("text"), value: z.string() }),
+    z.strictObject({ type: z.literal("id"), value: z.string() }),
+  ]),
+  network: z.enum(NETWORK_IDS),
+  expiresAt: z.number().int(),
+  firstTimeDestination: z.boolean(),
+  feeEstimated: z.boolean(),
+});
+
+const errorCodeSchema = z.enum(ERROR_CODES);
+
+/** Errors cross messaging with only the detail keys their code declares (ERROR_DETAIL_KEYS). */
+const errorSchema = z
+  .strictObject({
+    code: errorCodeSchema,
+    message: z.string(),
+    details: z.record(z.string(), z.string()).optional(),
+  })
+  .transform(({ code, message, details }) => {
+    const clean = sanitizeErrorDetails(code, details);
+    return clean === undefined ? { code, message } : { code, message, details: clean };
+  });
+
+const finishedOutcomeSchema = z.discriminatedUnion("status", [
+  z.strictObject({ status: z.literal("success"), hash, ledger: z.number().int() }),
+  z.strictObject({ status: z.literal("failed"), hash, error: errorSchema }),
+  z.strictObject({
+    status: z.literal("rebuild"),
+    reason: z.enum(["bad_seq", "destination_changed"]),
+  }),
+]);
+
+const submitOutcomeSchema = z.union([
+  finishedOutcomeSchema,
+  z.strictObject({ status: z.literal("pending"), hash }),
+]);
+
+const inflightSchema = z.strictObject({
+  hash,
+  network: z.enum(NETWORK_IDS),
+  summary: paymentSummarySchema,
+  status: z.enum(["resolving", "done"]),
+  outcome: finishedOutcomeSchema.nullable(),
+});
+
 const walletStatusSchema = z.strictObject({
   hasVault: z.boolean(),
   unlocked: z.boolean(),
   network: z.enum(NETWORK_IDS),
   activeAccountIndex: z.number().int().nonnegative().nullable(),
+  /** In-flight and recently finished payments (TRANSACTIONS §5, UI_FLOWS §1). */
+  inflight: z.array(inflightSchema),
 }) satisfies z.ZodType<WalletStatus>;
 
 const accountsResult = z.strictObject({ accounts: z.array(accountMetaSchema) });
@@ -213,6 +279,41 @@ export const REQUESTS = {
     allowedFrom: BOTH,
     countsAsActivity: true,
   }),
+  /** TRANSACTIONS §3: builds and stores an unsigned tx; returns its summary for review. */
+  PREPARE_PAYMENT: defineRequest({
+    payload: z.strictObject({
+      destination: z.string().max(128),
+      amount: z.string().max(40),
+      memo: z.strictObject({ type: z.enum(["text", "id"]), value: z.string().max(64) }).optional(),
+    }),
+    result: z.strictObject({
+      preparedId: z.string().regex(/^[0-9a-f]{32}$/),
+      summary: paymentSummarySchema,
+      expiresAt: z.number().int(),
+    }),
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  /** TRANSACTIONS §4: signs exactly the stored tx. Returns within ~20 s, possibly "pending". */
+  CONFIRM_PAYMENT: defineRequest({
+    payload: z.strictObject({ preparedId: z.string().regex(/^[0-9a-f]{32}$/) }),
+    result: submitOutcomeSchema,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  CANCEL_PAYMENT: defineRequest({
+    payload: z.strictObject({ preparedId: z.string().regex(/^[0-9a-f]{32}$/) }),
+    result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  /** The popup has shown a finished outcome; drop it. */
+  DISMISS_OUTCOME: defineRequest({
+    payload: z.strictObject({ hash }),
+    result: none,
+    allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
   /** Requires unlocked. Appends newly found indices only. */
   DISCOVER_ACCOUNTS: defineRequest({
     payload: none,
@@ -237,13 +338,13 @@ export type RequestEnvelope = z.output<typeof requestEnvelopeSchema>;
 export const responseSchema = z.discriminatedUnion("ok", [
   // Same as payload: an undefined result (e.g. LOCK) arrives without a `data` key.
   z.strictObject({ id: z.string(), ok: z.literal(true), data: z.unknown().optional() }),
-  z.strictObject({
-    id: z.string(),
-    ok: z.literal(false),
-    error: z.strictObject({ code: z.enum(ERROR_CODES), message: z.string() }),
-  }),
+  z.strictObject({ id: z.string(), ok: z.literal(false), error: errorSchema }),
 ]);
 
 export type Response =
   | { id: string; ok: true; data?: unknown }
-  | { id: string; ok: false; error: { code: ErrorCode; message: string } };
+  | {
+      id: string;
+      ok: false;
+      error: { code: ErrorCode; message: string; details?: Readonly<Record<string, string>> };
+    };
