@@ -57,7 +57,7 @@ export function PopupApp() {
 type Route =
   | { kind: "home" }
   | { kind: "send"; availableStroops: bigint }
-  | { kind: "receive"; unfunded: boolean }
+  | { kind: "receive" }
   | { kind: "history" }
   | { kind: "activity"; item: HistoryItem; back: "home" | "history" }
   | { kind: "accounts" }
@@ -130,8 +130,8 @@ function UnlockedApp({
           onSend={(availableStroops) => {
             setRoute({ kind: "send", availableStroops });
           }}
-          onReceive={(unfunded) => {
-            setRoute({ kind: "receive", unfunded });
+          onReceive={() => {
+            setRoute({ kind: "receive" });
           }}
           history={history.snapshot}
           onViewAll={() => {
@@ -177,7 +177,7 @@ function UnlockedApp({
         <ReceiveScreen
           address={active.publicKey}
           network={settings.network}
-          unfunded={route.unfunded}
+          horizon={horizon}
           onBack={home}
         />
       );

@@ -81,8 +81,8 @@ export function HomeScreen({
   onInflightChange: () => void;
   /** Receives the available balance; Send is only offered for funded, single-signer accounts. */
   onSend: (availableStroops: bigint) => void;
-  /** Receive is always offered; `unfunded` adds the activation hint. */
-  onReceive: (unfunded: boolean) => void;
+  /** Always offered, in every balance state. */
+  onReceive: () => void;
   history: HistorySnapshot | null;
   onViewAll: () => void;
   onOpenActivity: (item: HistoryItem) => void;
@@ -269,9 +269,7 @@ export function HomeScreen({
                 : "secondary"
             }
             className="flex-1"
-            onClick={() => {
-              onReceive(state.kind === "unfunded");
-            }}
+            onClick={onReceive}
           >
             {COPY.receive}
           </Button>

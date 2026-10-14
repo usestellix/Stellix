@@ -1,4 +1,4 @@
-import type { NetworkId } from "@stellix/core";
+import type { HorizonClient, NetworkId } from "@stellix/core";
 import { useState } from "react";
 import { GroupedAddress } from "../components/address.js";
 import { Button } from "../components/button.js";
@@ -10,6 +10,7 @@ import { MemoTypeToggle } from "../components/memo-type-toggle.js";
 import { QrCode } from "../components/qr-code.js";
 import { SubScreen } from "../components/sub-screen.js";
 import { errorCopy } from "../errorCopy.js";
+import { useAccountSummary } from "../hooks/use-account-summary.js";
 import { useCopy } from "../hooks/use-copy.js";
 import { requestLink, type RequestDraft } from "../lib/request-link.js";
 import { displayXlm } from "../lib/xlm.js";
@@ -43,14 +44,17 @@ const EMPTY: RequestDraft = { amount: "", memoType: "text", memo: "" };
 export function ReceiveScreen({
   address,
   network,
-  unfunded,
+  horizon,
   onBack,
 }: {
   address: string;
   network: NetworkId;
-  unfunded: boolean;
+  horizon: HorizonClient;
   onBack: () => void;
 }) {
+  // Its own lookup, not Home's state at tap time (Home may still be loading).
+  const { state: account } = useAccountSummary(address, network, horizon);
+  const unfunded = account.kind === "unfunded";
   const [requesting, setRequesting] = useState(false);
   const [draft, setDraft] = useState<RequestDraft>(EMPTY);
   const copier = useCopy();
