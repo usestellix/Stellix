@@ -58,8 +58,7 @@ export function createHandlers(deps: HandlerDeps): Handlers {
     ONBOARD_GENERATE: () => serial(() => startOnboarding(platform)),
     ONBOARD_CREATE: (p) =>
       serial(async () => unlocked({ accounts: await createWallet(platform, p, opts) })),
-    ONBOARD_IMPORT: (p) =>
-      serial(async () => unlocked({ accounts: await importWallet(platform, p, opts) })),
+    ONBOARD_IMPORT: (p) => serial(async () => unlocked(await importWallet(platform, p, opts))),
     UNLOCK: ({ password }) =>
       serial(async () => {
         await unlock(platform, password);

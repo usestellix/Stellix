@@ -145,8 +145,11 @@ describe("createWallet", () => {
 describe("importWallet", () => {
   it("derives the SEP-0005 address for index 0 and unlocks", async () => {
     const p = createFakePlatform();
-    const accounts = await importWallet(p, { mnemonic: ABANDON, password: PASSWORD }, opts);
-    expect(accounts).toEqual([{ index: 0, publicKey: ABANDON_G0, label: "Account 1" }]);
+    const result = await importWallet(p, { mnemonic: ABANDON, password: PASSWORD }, opts);
+    expect(result).toEqual({
+      accounts: [{ index: 0, publicKey: ABANDON_G0, label: "Account 1" }],
+      discoveryIncomplete: false,
+    });
     expect(await isUnlocked(p)).toBe(true);
   });
 

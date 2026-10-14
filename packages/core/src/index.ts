@@ -48,12 +48,27 @@ export {
   type PasswordStrength,
 } from "./password.js";
 export type { KeyValueStore, Platform } from "./platform.js";
-export { addAccount, listAccounts, renameAccount, setActiveAccount } from "./services/accounts.js";
+export {
+  addAccount,
+  discoverAccounts,
+  listAccounts,
+  renameAccount,
+  setActiveAccount,
+} from "./services/accounts.js";
+export {
+  DISCOVERY_MAX_INDEX,
+  GAP_LIMIT,
+  discoverUsedIndices,
+  type DiscoveryResult,
+} from "./services/discovery.js";
+export { updateSettings, type SettingsDeps, type SettingsPatch } from "./services/settings.js";
 export {
   ONBOARDING_TTL_MS,
   VERIFY_WORD_COUNT,
   createWallet,
+  derivePublicKeys,
   importWallet,
+  type ImportResult,
   startOnboarding,
   type OnboardingOptions,
   type VerifyAnswer,

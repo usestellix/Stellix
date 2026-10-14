@@ -2,6 +2,7 @@ import { z } from "zod";
 import { defaultAccountLabel, writeAccounts, type AccountMeta } from "../accounts.js";
 import { StellixError } from "../errors.js";
 import { derivePublicKey, mnemonicToSeed } from "../keys/derive.js";
+import type { HorizonClient } from "../network/horizon-client.js";
 import {
   CREATE_WORD_COUNT,
   generateMnemonic,
@@ -14,6 +15,7 @@ import { randomDistinct } from "../random.js";
 import { PERSISTENT_KEYS, SESSION_KEYS } from "../storage-keys.js";
 import { DEFAULT_SCRYPT_PARAMS, type ScryptParams } from "../vault/kdf.js";
 import { createVault } from "../vault/vault.js";
+import { discoverUsedIndices } from "./discovery.js";
 import { startSession } from "./session.js";
 
 // Create / import flows (KEY_MANAGEMENT §7.1–7.2).
@@ -26,6 +28,14 @@ export const ONBOARDING_TTL_MS = 30 * 60_000;
 export interface OnboardingOptions {
   /** Tests only pass a lower N (still within SCRYPT_BOUNDS); production uses the default. */
   scryptParams?: ScryptParams;
+  /** Horizon for the selected network. Import runs discovery with it; without it, index 0 only. */
+  horizon?: HorizonClient;
+}
+
+export interface ImportResult {
+  accounts: AccountMeta[];
+  /** A network error cut discovery short (KEY_MANAGEMENT §3: onboarding still completes). */
+  discoveryIncomplete: boolean;
 }
 
 const pendingSchema = z.strictObject({
@@ -78,21 +88,49 @@ export async function createWallet(
   if (!answersMatch(pending, input.answers)) {
     throw new StellixError("VERIFICATION_FAILED", "Verification words do not match");
   }
-  const accounts = await setUpWallet(platform, pending.mnemonic, input.password, options);
+  const accounts = await setUpWallet(platform, pending.mnemonic, input.password, [0], options);
   await platform.session.remove(SESSION_KEYS.pendingOnboarding);
   return accounts;
 }
 
-/** ONBOARD_IMPORT: the SW validates again (never trusts UI validation). Discovery is index 0 until M2. */
+/**
+ * ONBOARD_IMPORT: the SW validates again (never trusts UI validation), then discovers previously
+ * used accounts on the selected network (KEY_MANAGEMENT §3) before anything is written.
+ */
 export async function importWallet(
   platform: OnboardingPlatform,
   input: { mnemonic: string; password: string },
   options: OnboardingOptions = {},
-): Promise<AccountMeta[]> {
+): Promise<ImportResult> {
   await assertNoVault(platform);
   const mnemonic = parseMnemonic(input.mnemonic);
   assertPasswordPolicy(input.password);
-  return setUpWallet(platform, mnemonic, input.password, options);
+
+  let indices = [0];
+  let discoveryIncomplete = false;
+  if (options.horizon !== undefined) {
+    const result = await discoverUsedIndices(
+      (batch) => derivePublicKeys(mnemonic, batch),
+      options.horizon,
+    );
+    indices = result.indices;
+    discoveryIncomplete = result.incomplete;
+  }
+  const accounts = await setUpWallet(platform, mnemonic, input.password, indices, options);
+  return { accounts, discoveryIncomplete };
+}
+
+/** Derives public keys for `indices`; the seed is zeroed before this returns. */
+export async function derivePublicKeys(
+  mnemonic: string,
+  indices: readonly number[],
+): Promise<string[]> {
+  const seed = await mnemonicToSeed(mnemonic);
+  try {
+    return indices.map((index) => derivePublicKey(seed, index));
+  } finally {
+    seed.fill(0);
+  }
 }
 
 /**
@@ -103,16 +141,15 @@ async function setUpWallet(
   platform: OnboardingPlatform,
   mnemonic: string,
   password: string,
+  indices: readonly number[],
   options: OnboardingOptions,
 ): Promise<AccountMeta[]> {
-  const seed = await mnemonicToSeed(mnemonic);
-  let publicKey: string;
-  try {
-    publicKey = derivePublicKey(seed, 0);
-  } finally {
-    seed.fill(0);
-  }
-  const accounts: AccountMeta[] = [{ index: 0, publicKey, label: defaultAccountLabel(0) }];
+  const publicKeys = await derivePublicKeys(mnemonic, indices);
+  const accounts: AccountMeta[] = indices.map((index, i) => ({
+    index,
+    publicKey: publicKeys[i] ?? "",
+    label: defaultAccountLabel(index),
+  }));
 
   const { vault, key } = await createVault(
     { type: "mnemonic", mnemonic, createdAt: platform.now() },

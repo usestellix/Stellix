@@ -59,6 +59,11 @@ always include index 0 even if unfunded
 - Run discovery on the currently selected network (testnet by default). When the user switches networks, offer "Scan for accounts on this network".
 - Discovery is a read-only Horizon operation but needs the seed, so it runs in the SW. Derive public keys, then zero the seed buffer, then make network calls with public keys only.
 - Network failures during discovery must not abort onboarding: finish with what was found plus index 0, and show "Couldn't check for other accounts — you can add them later in Accounts".
+- **Implementation (`core/services/discovery.ts`):**
+  - Keys are derived in batches of 10, and the seed is zeroed before any request for that batch.
+  - Requests are strictly sequential (one in flight).
+  - The scan stops at index 100 as a guard against a misbehaving Horizon.
+  - `DISCOVER_ACCOUNTS` ("Scan for accounts on this network") only appends indices that aren't already listed. It never changes existing labels or `activeAccountIndex`.
 
 ## 4. The vault
 

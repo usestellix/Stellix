@@ -9,7 +9,10 @@ import { StellixError } from "../errors.js";
 import { derivePublicKey, mnemonicToSeed } from "../keys/derive.js";
 import type { Platform } from "../platform.js";
 import { PERSISTENT_KEYS } from "../storage-keys.js";
+import type { HorizonClient } from "../network/horizon-client.js";
 import { openVaultWithKey } from "../vault/vault.js";
+import { discoverUsedIndices } from "./discovery.js";
+import { derivePublicKeys } from "./onboarding.js";
 import { requireUnlocked } from "./session.js";
 
 // Account management (KEY_MANAGEMENT §7.3, ARCHITECTURE §5).
@@ -70,4 +73,43 @@ export async function setActiveAccount(platform: AccountsPlatform, index: number
     throw new StellixError("INVALID_REQUEST", "No account with that index");
   }
   await platform.persistent.set(PERSISTENT_KEYS.activeAccountIndex, index);
+}
+
+/**
+ * DISCOVER_ACCOUNTS ("Scan for accounts on this network", UI_FLOWS §8). Requires unlocked.
+ * Only appends indices that aren't already listed; never changes existing labels or the
+ * active account.
+ */
+export async function discoverAccounts(
+  platform: AccountsPlatform,
+  horizon: HorizonClient,
+): Promise<{ added: AccountMeta[]; incomplete: boolean }> {
+  const key = await requireUnlocked(platform);
+  let mnemonic: string;
+  try {
+    mnemonic = (
+      await openVaultWithKey(await platform.persistent.get<unknown>(PERSISTENT_KEYS.vault), key)
+    ).mnemonic;
+  } finally {
+    key.fill(0);
+  }
+  const result = await discoverUsedIndices((batch) => derivePublicKeys(mnemonic, batch), horizon);
+
+  // Re-read after the (slow) scan; the serial queue in the SW keeps this consistent.
+  const existing = await readAccounts(platform.persistent);
+  const known = new Set(existing.map((a) => a.index));
+  const added: AccountMeta[] = result.indices
+    .filter((index) => !known.has(index))
+    .map((index) => ({
+      index,
+      publicKey: result.publicKeys.get(index) ?? "",
+      label: defaultAccountLabel(index),
+    }));
+  if (added.length > 0) {
+    await writeAccounts(
+      platform.persistent,
+      [...existing, ...added].sort((a, b) => a.index - b.index),
+    );
+  }
+  return { added, incomplete: result.incomplete };
 }

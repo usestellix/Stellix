@@ -84,6 +84,10 @@ const walletStatusSchema = z.strictObject({
 }) satisfies z.ZodType<WalletStatus>;
 
 const accountsResult = z.strictObject({ accounts: z.array(accountMetaSchema) });
+const importResult = z.strictObject({
+  accounts: z.array(accountMetaSchema),
+  discoveryIncomplete: z.boolean(),
+});
 
 export const REQUESTS = {
   GET_STATUS: defineRequest({
@@ -124,7 +128,7 @@ export const REQUESTS = {
   }),
   ONBOARD_IMPORT: defineRequest({
     payload: z.strictObject({ mnemonic: z.string().max(1024), password }),
-    result: accountsResult,
+    result: importResult,
     allowedFrom: ONBOARDING_ONLY,
     countsAsActivity: true,
   }),
