@@ -53,6 +53,7 @@ export const ERROR_COPY: Readonly<Record<ErrorCode, string>> = {
   HORIZON_BAD_RESPONSE: "The network server sent an unexpected response. Try again later.",
   HORIZON_NOT_FOUND: "That couldn't be found on the network.",
   NOT_AVAILABLE_ON_NETWORK: "This isn't available on the current network.",
+  FRIENDBOT_FAILED: "Friendbot couldn't fund this account. Try again in a minute.",
   INVALID_HORIZON_URL: "This server URL isn't valid for the selected network.",
   // messaging
   UNAUTHORIZED_SENDER: "This request was blocked for your security.",

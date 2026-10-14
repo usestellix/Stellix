@@ -89,3 +89,19 @@ export {
   type VaultWithKey,
 } from "./vault/vault.js";
 export { PERSISTENT_KEYS, PREPARED_TX_KEY_PREFIX, SESSION_KEYS } from "./storage-keys.js";
+export { isMultisig, summarizeAccount, type AccountSummary } from "./stellar/account-summary.js";
+export { isAccountId, isMuxedAddress, looksLikeSecretSeed } from "./stellar/address.js";
+export {
+  INT64_MAX,
+  STROOPS_PER_XLM,
+  formatXlm,
+  parseHorizonAmount,
+  parseXlm,
+  type FormatXlmOptions,
+} from "./stellar/amount.js";
+export {
+  availableStroops,
+  minimumBalanceStroops,
+  minimumStartingBalanceStroops,
+  type ReserveInputs,
+} from "./stellar/reserve.js";
