@@ -12,6 +12,11 @@ import transaction_success from "../../__fixtures__/horizon/transaction-success.
 import transaction_failed from "../../__fixtures__/horizon/transaction-failed.json" with { type: "json" };
 import transaction_not_found from "../../__fixtures__/horizon/transaction-not-found.json" with { type: "json" };
 import payments_page from "../../__fixtures__/horizon/payments-page.json" with { type: "json" };
+import history_page from "../../__fixtures__/horizon/history-page.json" with { type: "json" };
+import history_me from "../../__fixtures__/horizon/history-me.json" with { type: "json" };
+import history_multiop_page1 from "../../__fixtures__/horizon/history-multiop-page1.json" with { type: "json" };
+import history_multiop_page2 from "../../__fixtures__/horizon/history-multiop-page2.json" with { type: "json" };
+import effects_account_merge from "../../__fixtures__/horizon/effects-account-merge.json" with { type: "json" };
 
 // Captured testnet responses (scripts/capture-horizon-fixtures.mjs), imported as JSON so core
 // tests stay free of Node APIs.
@@ -30,6 +35,11 @@ const FIXTURES = {
   "transaction-failed": transaction_failed,
   "transaction-not-found": transaction_not_found,
   "payments-page": payments_page,
+  "history-page": history_page,
+  "history-me": history_me,
+  "history-multiop-page1": history_multiop_page1,
+  "history-multiop-page2": history_multiop_page2,
+  "effects-account-merge": effects_account_merge,
 } as const satisfies Record<string, { status: number; body: unknown }>;
 
 export type FixtureName = keyof typeof FIXTURES;

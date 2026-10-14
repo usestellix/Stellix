@@ -66,6 +66,8 @@ export type ErrorCode =
   // network
   | "NETWORK_ERROR" | "RATE_LIMITED" | "HORIZON_BAD_RESPONSE" | "HORIZON_NOT_FOUND"
   | "NOT_AVAILABLE_ON_NETWORK" | "FRIENDBOT_FAILED" | "INVALID_HORIZON_URL"
+  // platform
+  | "CLIPBOARD_UNAVAILABLE"
   // messaging
   | "UNAUTHORIZED_SENDER" | "INVALID_REQUEST"
   // catch-all

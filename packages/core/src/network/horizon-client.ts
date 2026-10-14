@@ -7,11 +7,16 @@ import {
   asyncSubmitSchema,
   feeStatsSchema,
   ledgerPageSchema,
+  effectsPageSchema,
+  historyPageSchema,
+  historyRecordSchema,
   paymentsPageSchema,
   rootSchema,
   transactionSchema,
   type AccountRecord,
   type AsyncSubmitResponse,
+  type EffectRecord,
+  type HistoryRecord,
   type FeeStats,
   type HorizonRoot,
   type LedgerRecord,
@@ -19,8 +24,16 @@ import {
   type TransactionRecord,
 } from "./horizon-schemas.js";
 
-// HorizonClient (NETWORK.md §2–3). M2 implements the read methods; submit, transactions,
-// payments and streaming arrive with M3/M4 behind the same interface.
+// HorizonClient (NETWORK.md §2–3). Streaming lives in the shell (EventSource is a platform API);
+// it builds its URL with historyStreamUrl and parses events with parseHistoryRecord.
+
+export const HISTORY_PAGE_SIZE = 20;
+
+export interface HistoryPage {
+  records: HistoryRecord[];
+  /** paging_token of the last record; null once a short page shows the end. */
+  nextCursor: string | null;
+}
 
 export interface HorizonClient {
   /** GET / */
@@ -41,6 +54,34 @@ export interface HorizonClient {
   getTransaction(hash: string): Promise<TransactionRecord | null>;
   /** GET /accounts/{id}/payments, newest first. Unfunded account (404) → []. */
   getPayments(id: string, limit: number): Promise<PaymentRecord[]>;
+  /**
+   * GET /accounts/{id}/payments?order=desc&include_failed=false&join=transactions (NETWORK §5),
+   * from `cursor` (exclusive) when given. Unfunded account (404) → empty, end of list.
+   */
+  getHistoryPage(id: string, cursor?: string): Promise<HistoryPage>;
+  /** GET /operations/{id}/effects (merge amounts). */
+  getOperationEffects(operationId: string): Promise<EffectRecord[]>;
+}
+
+const HISTORY_QUERY = "include_failed=false&join=transactions";
+
+/**
+ * SSE URL for payments after `cursor` (NETWORK §6); the shell opens it with EventSource. The
+ * popup passes the newest record it fetched, so nothing between that fetch and the stream
+ * opening is missed; "now" when it has none.
+ */
+export function historyStreamUrl(baseUrl: string, id: string, cursor = "now"): string {
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  return new URL(
+    `accounts/${encodeURIComponent(id)}/payments?cursor=${encodeURIComponent(cursor)}&${HISTORY_QUERY}`,
+    base,
+  ).toString();
+}
+
+/** Validates one streamed record (an SSE `message` event's JSON). Anything else → null. */
+export function parseHistoryRecord(json: unknown): HistoryRecord | null {
+  const parsed = historyRecordSchema.safeParse(json);
+  return parsed.success ? parsed.data : null;
 }
 
 export interface HorizonClientOptions {
@@ -158,6 +199,28 @@ export function createHorizonClient(
       );
       return page?._embedded.records ?? [];
     },
+    getHistoryPage: async (id, cursor) => {
+      const from = cursor === undefined ? "" : `&cursor=${encodeURIComponent(cursor)}`;
+      const page = await read(
+        `accounts/${encodeURIComponent(id)}/payments?order=desc&limit=${String(HISTORY_PAGE_SIZE)}&${HISTORY_QUERY}${from}`,
+        historyPageSchema,
+        "null",
+      );
+      const records = page?._embedded.records ?? [];
+      const last = records.at(-1);
+      return {
+        records,
+        nextCursor:
+          records.length === HISTORY_PAGE_SIZE && last !== undefined ? last.paging_token : null,
+      };
+    },
+    getOperationEffects: async (operationId) =>
+      (
+        await required(
+          `operations/${encodeURIComponent(operationId)}/effects?limit=50`,
+          effectsPageSchema,
+        )
+      )._embedded.records,
     submitTransactionAsync: async (envelopeXdr) => {
       const controller = new AbortController();
       const timer = setTimeout(() => {

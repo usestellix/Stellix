@@ -1,7 +1,14 @@
 import type { Browser } from "wxt/browser";
 import { SEP0005_VECTORS } from "../../../packages/core/src/keys/__tests__/sep0005.vectors.js";
 import { expect, test } from "./fixtures.js";
-import { PASSWORD, createWalletViaUi, importWalletViaUi, openPopup, sendFrom } from "./helpers.js";
+import {
+  PASSWORD,
+  createWalletViaUi,
+  importWalletViaUi,
+  openPopup,
+  sendFrom,
+  activeAddress,
+} from "./helpers.js";
 
 // `evaluate` callbacks run inside the extension, where the `chrome` global exists.
 declare const chrome: typeof Browser;
@@ -18,7 +25,7 @@ test("flow 1: create wallet → verify words → password → popup unlocked", a
   const popup = await openPopup(context, extensionId);
   await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
   await expect(popup.getByTestId("account-label")).toHaveText("Account 1");
-  await expect(popup.getByTestId("full-address")).toHaveText(/^G[A-Z2-7]{3}( [A-Z2-7]{4}){13}$/);
+  expect(await activeAddress(popup)).toMatch(/^G[A-Z2-7]{3}( [A-Z2-7]{4}){13}$/);
   await expect(popup.getByTestId("network-badge")).toHaveText(/^testnet$/i);
 });
 
@@ -29,7 +36,7 @@ test("flow 2: import a known phrase → same G address as SEP-0005", async ({
   await importWalletViaUi(context, extensionId, TEST5.mnemonic);
   const popup = await openPopup(context, extensionId);
   await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
-  const shown = (await popup.getByTestId("full-address").innerText()).replaceAll(" ", "");
+  const shown = (await activeAddress(popup)).replaceAll(" ", "");
   expect(shown).toBe(TEST5.accounts[0]!.publicKey);
 });
 

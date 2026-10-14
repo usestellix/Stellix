@@ -6,10 +6,10 @@ import {
   fundWithFriendbot,
 } from "../../../packages/core/src/index.js";
 import { expect, test } from "./fixtures.js";
-import { createWalletViaUi, openPopup, sendFrom } from "./helpers.js";
+import { activeAddress, createWalletViaUi, openPopup, sendFrom } from "./helpers.js";
 
 // M3 flows against live testnet (TESTING §3 flow 3; M3 exit: killing the SW mid-submit still
-// resolves to a definitive outcome). History assertions move to M4.
+// resolves to a definitive outcome). Flow 3's history assertion landed with M4.
 
 const nodeFetch = { fetch: globalThis.fetch.bind(globalThis) };
 const horizon = createHorizonClient(NETWORKS.testnet.horizonUrl, nodeFetch);
@@ -39,7 +39,7 @@ async function fundedWallet(context: BrowserContext, extensionId: string): Promi
   await createWalletViaUi(context, extensionId);
   const popup = await openPopup(context, extensionId);
   await popup.setViewportSize({ width: 360, height: 600 });
-  const address = (await popup.getByTestId("full-address").innerText()).replaceAll(" ", "");
+  const address = (await activeAddress(popup)).replaceAll(" ", "");
   await fund(address);
   await popup.reload();
   await expect(popup.getByTestId("balance-card")).toHaveAttribute("data-state", "funded", {
@@ -84,6 +84,17 @@ test("flow 3: send to a fresh address activates it", async ({ context, extension
 
   await popup.getByRole("button", { name: "Done" }).click();
   await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
+
+  // History (deferred from M3): the activation is the newest item, with our fee in the detail.
+  const row = popup.getByTestId("activity-row").first();
+  await expect(row).toContainText(`Activated ${fresh.slice(0, 4)}…${fresh.slice(-4)}`, {
+    timeout: 30_000,
+  });
+  await expect(row.getByTestId("activity-amount")).toHaveText("\u22122 XLM");
+  await row.click();
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "activity-detail");
+  await expect(popup.getByText("Network fee", { exact: true })).toBeVisible();
+  await expect(popup.getByTestId("detail-fee")).toHaveText(/^0\.\d+ XLM$/);
 });
 
 test("payment with a text memo to an existing account", async ({ context, extensionId }) => {
@@ -103,6 +114,11 @@ test("payment with a text memo to an existing account", async ({ context, extens
     timeout: 60_000,
   });
   expect(await nativeBalance(dest)).toBe("10001.5000000");
+
+  await popup.getByRole("button", { name: "Done" }).click();
+  const row = popup.getByTestId("activity-row").first();
+  await expect(row.getByTestId("activity-memo")).toHaveText("order 1001", { timeout: 30_000 });
+  await expect(row.getByTestId("activity-amount")).toHaveText("\u22121.5 XLM");
 });
 
 test("SEP-29: the memo opens automatically and sending without one is blocked", async ({

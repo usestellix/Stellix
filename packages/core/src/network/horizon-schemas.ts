@@ -133,3 +133,51 @@ export type PaymentRecord = z.output<typeof paymentRecordSchema>;
 export const paymentsPageSchema = z.looseObject({
   _embedded: z.looseObject({ records: z.array(paymentRecordSchema) }),
 });
+
+/** The transaction embedded by `join=transactions` (NETWORK §5): memo and fee attribution. */
+const joinedTransactionSchema = z.looseObject({
+  memo_type: z.string(),
+  memo: z.string().optional(),
+  fee_account: z.string(),
+  fee_charged: int64String,
+  operation_count: z.number().int().positive(),
+});
+
+/**
+ * GET /accounts/{id}/payments?join=transactions (history). Payment-like records only: payment,
+ * path payments, create_account, account_merge. Fields vary by type, so all are optional and
+ * normalization decides what a record means.
+ */
+export const historyRecordSchema = paymentRecordSchema.extend({
+  // Numeric: ids order the merged list (normalize.ts).
+  id: z.string().regex(/^\d+$/),
+  paging_token: z.string().regex(/^\d+$/),
+  transaction_successful: z.boolean(),
+  from_muxed: z.string().optional(),
+  from_muxed_id: z.string().optional(),
+  to_muxed: z.string().optional(),
+  to_muxed_id: z.string().optional(),
+  asset_type: z.string().optional(),
+  amount: amountString.optional(),
+  source_asset_type: z.string().optional(),
+  source_amount: amountString.optional(),
+  starting_balance: amountString.optional(),
+  transaction: joinedTransactionSchema,
+});
+export type HistoryRecord = z.output<typeof historyRecordSchema>;
+
+export const historyPageSchema = z.looseObject({
+  _embedded: z.looseObject({ records: z.array(historyRecordSchema) }),
+});
+
+/** GET /operations/{id}/effects: only what merge amounts need. */
+const effectSchema = z.looseObject({
+  type: z.string(),
+  account: z.string().optional(),
+  amount: amountString.optional(),
+});
+export type EffectRecord = z.output<typeof effectSchema>;
+
+export const effectsPageSchema = z.looseObject({
+  _embedded: z.looseObject({ records: z.array(effectSchema) }),
+});

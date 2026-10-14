@@ -159,3 +159,43 @@ export function RefreshIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Incoming: arrow down-left, into the account. */
+export function ArrowInIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M14.5 5.5 5.5 14.5" />
+      <path d="M5.5 7.5v7h7" />
+    </Icon>
+  );
+}
+
+/** Outgoing: arrow up-right, out of the account. */
+export function ArrowOutIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m5.5 14.5 9-9" />
+      <path d="M7.5 5.5h7v7" />
+    </Icon>
+  );
+}
+
+/** Account activation / merge: a plus in a circle. */
+export function AccountIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="10" r="7.25" />
+      <path d="M10 7v6M7 10h6" />
+    </Icon>
+  );
+}
+
+/** Copy: two offset sheets. */
+export function CopyIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="7.25" y="7.25" width="9" height="9" rx="1.75" />
+      <path d="M12.75 4.75v-.5a1.5 1.5 0 0 0-1.5-1.5h-6a1.5 1.5 0 0 0-1.5 1.5v6a1.5 1.5 0 0 0 1.5 1.5h.5" />
+    </Icon>
+  );
+}

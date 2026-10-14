@@ -60,9 +60,9 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 
 ## 4. Home (popup)
 
-- **Balance card**: total XLM (large), below it "Available: X XLM · Reserved: Y XLM ⓘ". Tooltip: "Stellar keeps a small amount of XLM locked in every account. You can't send it, but you get it back if you close the account."
-- Buttons: **Send**, **Receive**.
-- **Recent activity**: last 10 normalized history items; "View all".
+- **Balance card**: total XLM (large), below it "Available: X XLM   Reserved: Y XLM ⓘ" (two groups that never break internally; on a long balance the Reserved group, icon included, wraps to the next line). Tooltip: "Stellar keeps a small amount of XLM locked in every account. You can't send it, but you get it back if you close the account."
+- Buttons: **Send**, **Receive** (Send only for funded single-signer accounts; Receive always).
+- **Recent activity**: last 10 normalized history items; "View all" opens History (§7). The full address lives on Receive (§6); the header shows it truncated.
 - States:
   - loading (skeletons)
   - funded
@@ -96,17 +96,25 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 - Rebuild needed: auto re-prepare and return to Review with a note "Network conditions changed. Please review again."
 
 ## 6. Receive (popup)
-- QR of the plain `G...` address.
-- Full address (monospace, 4-char groups) + Copy (toast "Address copied").
-- "Request a specific amount" → amount + optional memo → QR switches to the SEP-7 URI `web+stellar:pay?destination=G…&amount=…&memo=…&memo_type=MEMO_TEXT`; "Copy payment link".
+- Opened from Home's Receive button, always offered (funded or not). One primary per screen: Receive is secondary next to Send or Friendbot.
+- QR of the plain `G...` address. Dark on white in both themes, ECC level M, 4-module quiet zone, drawn as one SVG path (`ui/lib/qr.ts`).
+- Full address (monospace, 4-char groups). The pinned footer action copies it; its label changes to "Copied" for 1.5 s. No toast. A clipboard failure shows `CLIPBOARD_UNAVAILABLE` copy.
+- "Request a specific amount" (right under the QR, so the code stays in view) → amount + optional memo (text or ID) → QR switches to the SEP-7 URI and the footer action becomes "Copy payment link".
+  - Testnet: `web+stellar:pay?destination=G…&amount=…&memo=…&memo_type=MEMO_TEXT&network_passphrase=Test%20SDF%20Network%20%3B%20September%202015`. SEP-7 requires `network_passphrase` off the public network; mainnet links omit it.
+  - Until the request is valid, no QR is shown (a placeholder says to enter or fix the amount) and the copy action is disabled, so nobody scans a code that doesn't match the screen.
 - Note: "Only send XLM on Stellar to this address." On testnet add "This is a testnet address — test XLM has no value."
-- States: default, request-amount, unfunded hint ("Send at least 1 XLM to activate this account").
+- States: default, request-amount (empty / invalid / valid), unfunded hint ("Send at least 1 XLM to activate this account").
 
 ## 7. History (popup)
-- Infinite scroll, 20 per page.
-- Row: direction icon, "Received from GABC…WXYZ" / "Sent to …" / "Account activated by …", amount (+/−), relative time; memo as a secondary line if present.
-- Tap → detail sheet: full addresses, memo, fee (if outgoing), hash, explorer link.
-- States: loading, empty ("No activity yet"), error with retry, end of list.
+- Infinite scroll, 20 per page (older pages load when the end of the list comes into view; a page holding only hidden non-XLM records loads the next one).
+- Row: direction icon, "Received from GABC…WXYZ" / "Sent to …" / "Account activated by …" / "Activated …" / "Merged in from …" / "Merged into …", amount (+/−), relative time; memo as a secondary line if present. Rows never show a fee.
+- Tap → detail screen: amount, From / To (full addresses; "You" for this account, plus the recipient ID when paid to our `M` address), memo, fee, date, hash, "View on explorer" (opens a tab; NETWORK §8).
+  - Fee only when this account paid it (`fee_account`), not merely because the item is outgoing. "Network fee" for a single-operation transaction; **"Transaction fee"** for a multi-op one, with "Paid once for all N operations in this transaction."
+  - A merge's amount is loaded from its effects when the detail opens.
+- Live while the popup is open (NETWORK §6): new payments appear at the top and the balance refetches.
+- States: loading, empty ("No activity yet"), error with retry (also for a failed older page), end of list. The end is worded by what we know, since Horizon keeps about a year:
+  - the oldest item is the `create_account` that funded this account → "This is where your account started.";
+  - otherwise → "No older activity available from this server."
 
 ## 8. Accounts (popup)
 - List: label, truncated address, XLM balance (lazy).

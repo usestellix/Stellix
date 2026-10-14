@@ -1,10 +1,12 @@
 import { StellixError } from "../errors.js";
-import type { HorizonClient } from "../network/horizon-client.js";
+import { HISTORY_PAGE_SIZE, type HorizonClient } from "../network/horizon-client.js";
 import type {
   AccountRecord,
   AsyncSubmitResponse,
   FeeStats,
   HorizonRoot,
+  EffectRecord,
+  HistoryRecord,
   LedgerRecord,
   PaymentRecord,
   TransactionRecord,
@@ -18,6 +20,11 @@ export class FakeHorizonClient implements HorizonClient {
   readonly accounts = new Map<string, AccountRecord>();
   readonly transactions = new Map<string, TransactionRecord>();
   readonly payments = new Map<string, PaymentRecord[]>();
+  /** Newest first, as Horizon orders them; paged by paging_token. */
+  readonly history = new Map<string, HistoryRecord[]>();
+  readonly effects = new Map<string, EffectRecord[]>();
+  /** Accounts whose history page throws NETWORK_ERROR. */
+  readonly failingHistory = new Set<string>();
   readonly calls: { method: string; arg?: string }[] = [];
   /** Accounts whose lookup throws NETWORK_ERROR. */
   readonly failingAccounts = new Set<string>();
@@ -81,6 +88,26 @@ export class FakeHorizonClient implements HorizonClient {
       return this.transactions.get(hash) ?? null;
     });
   getPayments = (id: string) => this.track("getPayments", id, () => this.payments.get(id) ?? []);
+  getHistoryPage = (id: string, cursor?: string) =>
+    this.track("getHistoryPage", cursor === undefined ? id : `${id}@${cursor}`, () => {
+      if (this.failingHistory.has(id)) throw new StellixError("NETWORK_ERROR", "down", true);
+      const all = this.history.get(id) ?? [];
+      const at = cursor === undefined ? -1 : all.findIndex((r) => r.paging_token === cursor);
+      const records =
+        cursor !== undefined && at < 0 ? [] : all.slice(at + 1, at + 1 + HISTORY_PAGE_SIZE);
+      const last = records.at(-1);
+      return {
+        records,
+        nextCursor:
+          records.length === HISTORY_PAGE_SIZE && last !== undefined ? last.paging_token : null,
+      };
+    });
+  getOperationEffects = (operationId: string) =>
+    this.track(
+      "getOperationEffects",
+      operationId,
+      () => this.effects.get(operationId) ?? FakeHorizonClient.missing(`effects ${operationId}`),
+    );
   submitTransactionAsync = (envelopeXdr: string) =>
     this.track("submitTransactionAsync", undefined, () => {
       this.onSubmit?.(envelopeXdr);

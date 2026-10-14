@@ -1,4 +1,4 @@
-import type { WalletStatus } from "@stellix/core";
+import type { HistoryItem, WalletStatus } from "@stellix/core";
 import { useEffect, useMemo, useState } from "react";
 import { request } from "../../messaging/client.js";
 import { Button } from "../components/button.js";
@@ -10,6 +10,10 @@ import { useAccounts } from "../hooks/use-accounts.js";
 import { useHorizon, useSettings } from "../hooks/use-settings.js";
 import { useStatus } from "../hooks/use-status.js";
 import { AccountsScreen } from "./accounts-screen.js";
+import { useHistory } from "../hooks/use-history.js";
+import { ActivityDetailScreen } from "./activity-detail-screen.js";
+import { HistoryScreen } from "./history-screen.js";
+import { ReceiveScreen } from "./receive-screen.js";
 import { SendFlow } from "./send/send-flow.js";
 import { HomeScreen } from "./home-screen.js";
 import { AboutScreen } from "./settings/about-screen.js";
@@ -53,6 +57,9 @@ export function PopupApp() {
 type Route =
   | { kind: "home" }
   | { kind: "send"; availableStroops: bigint }
+  | { kind: "receive" }
+  | { kind: "history" }
+  | { kind: "activity"; item: HistoryItem; back: "home" | "history" }
   | { kind: "accounts" }
   | { kind: "settings" }
   | { kind: "settings-page"; page: SettingsPage };
@@ -73,6 +80,7 @@ function UnlockedApp({
     () => accounts?.find((a) => a.index === status.activeAccountIndex) ?? accounts?.[0] ?? null,
     [accounts, status.activeAccountIndex],
   );
+  const history = useHistory(active?.publicKey ?? null, settings, horizon);
 
   // While a payment is confirming, poll so banners update (each poll also nudges the SW to keep
   // resolving; ADR 0007).
@@ -122,6 +130,55 @@ function UnlockedApp({
           onSend={(availableStroops) => {
             setRoute({ kind: "send", availableStroops });
           }}
+          onReceive={() => {
+            setRoute({ kind: "receive" });
+          }}
+          history={history.snapshot}
+          onViewAll={() => {
+            setRoute({ kind: "history" });
+          }}
+          onOpenActivity={(item) => {
+            setRoute({ kind: "activity", item, back: "home" });
+          }}
+          onRetryActivity={() => void history.controller?.refresh()}
+        />
+      );
+    case "history":
+      if (history.snapshot === null || history.controller === null) return null;
+      return (
+        <HistoryScreen
+          network={settings.network}
+          snapshot={history.snapshot}
+          controller={history.controller}
+          onOpen={(item) => {
+            setRoute({ kind: "activity", item, back: "history" });
+          }}
+          onBack={home}
+        />
+      );
+    case "activity": {
+      if (history.controller === null) return null;
+      // The live item (a merge amount may have loaded since the row was tapped).
+      const item = history.snapshot?.items.find((i) => i.id === route.item.id) ?? route.item;
+      return (
+        <ActivityDetailScreen
+          item={item}
+          me={active.publicKey}
+          network={settings.network}
+          controller={history.controller}
+          onBack={() => {
+            setRoute({ kind: route.back });
+          }}
+        />
+      );
+    }
+    case "receive":
+      return (
+        <ReceiveScreen
+          address={active.publicKey}
+          network={settings.network}
+          horizon={horizon}
+          onBack={home}
         />
       );
     case "send":
@@ -133,6 +190,7 @@ function UnlockedApp({
           horizon={horizon}
           onClose={() => {
             onStatusChange();
+            void history.controller?.refresh();
             home();
           }}
         />

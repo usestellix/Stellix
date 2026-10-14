@@ -78,6 +78,16 @@ export async function importWalletViaUi(
   await page.close();
 }
 
+/** The active account's full address, read from the Receive screen (Home shows it truncated). */
+export async function activeAddress(popup: Page): Promise<string> {
+  await popup.getByRole("button", { name: "Receive" }).click();
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "receive");
+  const text = await popup.getByTestId("full-address").innerText();
+  await popup.getByRole("button", { name: "Back" }).click();
+  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "home");
+  return text;
+}
+
 /** Sends a raw request from a page's context, as that page would. */
 export async function sendFrom(page: Page, type: string, payload?: unknown): Promise<unknown> {
   return page.evaluate(
