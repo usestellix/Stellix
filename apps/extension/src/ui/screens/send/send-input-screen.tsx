@@ -171,12 +171,21 @@ export function SendInputScreen({
       <form noValidate onSubmit={submit} className="space-y-5">
         <div className="space-y-1.5">
           <FieldLabel htmlFor="send-to">{COPY.to}</FieldLabel>
-          <input
+          {/* Two wrapping lines: the WHOLE address stays visible. Lookalike (poisoned) addresses
+              differ in the middle and end, which a scrolling single-line input would hide. */}
+          <textarea
             id="send-to"
             data-testid="send-destination"
+            rows={2}
             value={draft.destination}
             onChange={(e) => {
-              onDraft({ ...draft, destination: e.currentTarget.value });
+              onDraft({ ...draft, destination: e.currentTarget.value.replace(/\s+/g, "") });
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.currentTarget.form?.requestSubmit();
+              }
             }}
             onBlur={() => void checkDestination()}
             placeholder={COPY.toPlaceholder}
@@ -185,7 +194,10 @@ export function SendInputScreen({
             autoCapitalize="characters"
             autoFocus
             aria-invalid={shownDestError !== null}
-            className={inputClass(shownDestError !== null, "h-10 font-mono text-[12px]")}
+            className={inputClass(
+              shownDestError !== null,
+              "resize-none py-2 font-mono text-[12px] leading-5 break-all",
+            )}
           />
           {shownDestError !== null && <ErrorText>{errorCopy(shownDestError)}</ErrorText>}
           {shownDestError === null && muxed && (

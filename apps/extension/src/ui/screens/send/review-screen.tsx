@@ -1,4 +1,4 @@
-import { NETWORKS, type NetworkId, type PaymentSummary } from "@stellix/core";
+import type { NetworkId, PaymentSummary } from "@stellix/core";
 import { useEffect, useState } from "react";
 import { GroupedAddress } from "../../components/address.js";
 import { Button } from "../../components/button.js";
@@ -90,7 +90,34 @@ export function ReviewScreen({
   ];
 
   return (
-    <SubScreen title={COPY.title} network={network} onBack={onCancel} testId="send-review">
+    <SubScreen
+      title={COPY.title}
+      network={network}
+      onBack={onCancel}
+      testId="send-review"
+      footer={
+        <div className="space-y-2">
+          {error !== null && <ErrorText>{errorCopy(error)}</ErrorText>}
+          <p className="tabular text-center text-[12px] text-muted" data-testid="review-expiry">
+            {expired ? COPY.expired : COPY.expiresIn(secondsLeft)}
+          </p>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={onCancel} disabled={busy}>
+              {COPY.cancel}
+            </Button>
+            {expired ? (
+              <Button className="flex-1" onClick={onReviewAgain}>
+                {COPY.reviewAgain}
+              </Button>
+            ) : (
+              <Button className="flex-1" busy={busy} onClick={onConfirm}>
+                {busy ? COPY.confirming : COPY.confirm}
+              </Button>
+            )}
+          </div>
+        </div>
+      }
+    >
       <div className="space-y-4">
         <div className="flex justify-center" aria-hidden="true">
           <div className="origin-center scale-125">
@@ -146,25 +173,6 @@ export function ReviewScreen({
           {summary.firstTimeDestination && <Callout tone="warning">{COPY.firstTime}</Callout>}
           {summary.feeEstimated && <Callout>{COPY.feeEstimated}</Callout>}
         </div>
-        {error !== null && <ErrorText>{errorCopy(error)}</ErrorText>}
-        <p className="tabular text-center text-[12px] text-muted" data-testid="review-expiry">
-          {expired ? COPY.expired : COPY.expiresIn(secondsLeft)}
-        </p>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={onCancel} disabled={busy}>
-            {COPY.cancel}
-          </Button>
-          {expired ? (
-            <Button className="flex-1" onClick={onReviewAgain}>
-              {COPY.reviewAgain}
-            </Button>
-          ) : (
-            <Button className="flex-1" busy={busy} onClick={onConfirm}>
-              {busy ? COPY.confirming : COPY.confirm}
-            </Button>
-          )}
-        </div>
-        <p className="text-center text-[11px] text-faint">{NETWORKS[network].label}</p>
       </div>
     </SubScreen>
   );

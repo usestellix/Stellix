@@ -11,12 +11,15 @@ export function SubScreen({
   onBack,
   children,
   testId,
+  footer,
 }: {
   title: string;
   network: NetworkId;
   onBack: () => void;
   children: ReactNode;
   testId: string;
+  /** Pinned below the scrolling content (primary actions must never be below the fold). */
+  footer?: ReactNode;
 }) {
   return (
     <div data-testid="popup" data-screen={testId} className="flex h-full flex-col bg-surface">
@@ -32,6 +35,11 @@ export function SubScreen({
         }
       />
       <main className="flex-1 overflow-y-auto px-4 pb-6 pt-4">{children}</main>
+      {footer !== undefined && (
+        <footer className="shrink-0 px-4 pb-4 pt-3 shadow-[0_-1px_0_var(--color-line)]">
+          {footer}
+        </footer>
+      )}
     </div>
   );
 }

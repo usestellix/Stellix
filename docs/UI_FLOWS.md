@@ -74,7 +74,7 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 ## 5. Send (popup)
 
 ### 5.1 Input
-- Destination field: paste button; validates on blur. Shows inline errors from TRANSACTIONS §2. If `M...`, show a hint "This address includes a recipient ID — no memo needed."
+- Destination field: a two-line wrapping field, so the whole address is visible (lookalike addresses differ in the middle and end); validates on blur. *No paste button in the MVP:* reading the clipboard needs the `clipboardRead` permission (CLAUDE.md §6.11). ⌘V / Ctrl+V works. Shows inline errors from TRANSACTIONS §2. If `M...`, show a hint "This address includes a recipient ID — no memo needed."
 - Amount field: XLM, "Max" button, shows "Available: X XLM" beneath.
 - Memo section (collapsed "Add memo"): type selector (Text / ID) + value with byte counter for text. If the destination is known to require a memo (SEP-29, discovered on blur via a lightweight account fetch in the popup), expand automatically with "This recipient requires a memo. Exchanges use it to credit your deposit."
 - Continue → PREPARE_PAYMENT.
