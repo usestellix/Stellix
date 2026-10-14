@@ -91,6 +91,24 @@ export type ErrorCode =
 - Extension APIs come from `import { browser } from "wxt/browser"`, which is the raw `chrome` object on Chromium (no polyfill) and keeps the Firefox build working. Docs still say `chrome.*`; they mean the same API.
 - All user-visible strings in one place per screen (preparing for i18n later; no i18n library in MVP).
 
+### 6.1 Visual and motion rules
+
+Applied from Emil Kowalski's published design-engineering guidance (`emilkowalski/skills`, Oct 2026), adapted to "no component library in MVP". Every new screen follows these:
+
+- **Palette:** neutral ink. Color appears only where it carries meaning (network, danger, warning, success, focus). Primary buttons are ink, not brand blue.
+- **Edges:** semi-transparent shadow rings (`shadow-ring`, `shadow-ring-strong`, `shadow-raised`), not solid borders. Divider lines are `0 1px 0 var(--color-line)` shadows.
+- **Icons:** the inline SVG set in `ui/components/icons.tsx` (20px grid, 1.5px stroke, `currentColor`). **No emoji as UI.**
+- **Type:** system font stack only (no remote fonts). Headings are tightened (`-0.02em`); small uppercase labels are loosened (`0.06–0.08em`). Addresses and numbers use `font-mono` / `tabular`. Body text is capped around 52–65ch.
+- **Press feedback:** every pressable element uses `.pressable` (`scale(0.97)` on `:active`, 160ms, `--ease-out`).
+- **Hover:** use the `hover-fine:` variant, never bare `hover:` (touch devices fire false hovers).
+- **Motion budget, by how often a surface is seen:**
+  - The popup (opened many times a day) has **no** entrance or screen-change animation.
+  - Onboarding steps (rare, first-time) may use `.enter`: opacity plus 6px rise, 220ms.
+  - UI motion stays under 300ms, animates only `transform`/`opacity` (`filter` for the phrase reveal), never `transition: all`, never `ease-in`, never `scale(0)`.
+  - Under `prefers-reduced-motion`, only opacity changes remain.
+- **Feedback:** never insert content (error text, banners) on blur near a button; the layout shift makes the click miss. Show outlines on blur and messages on submit.
+- **Libraries:** the curated picks (base-ui, Sonner, motion, NumberFlow, clsx/cva) still need an ADR before they're added (CLAUDE.md §4). `ui/cx.ts` stands in for clsx.
+
 ## 7. Linting & formatting
 
 - ESLint with `@typescript-eslint` strict-type-checked config, plus:

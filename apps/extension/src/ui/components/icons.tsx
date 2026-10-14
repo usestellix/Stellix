@@ -1,0 +1,90 @@
+import type { SVGProps } from "react";
+
+// One small icon set: 20px grid, 1.5px stroke, round caps, currentColor. Drawn for Stellix; no
+// emoji (they render differently on every OS) and no icon font.
+
+type IconProps = Omit<SVGProps<SVGSVGElement>, "children"> & { size?: number };
+
+function Icon({ size = 16, children, ...props }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+
+export function LockIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="4.25" y="8.75" width="11.5" height="8" rx="2" />
+      <path d="M6.75 8.75V6.5a3.25 3.25 0 0 1 6.5 0v2.25" />
+    </Icon>
+  );
+}
+
+export function AlertIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="10" r="7.25" />
+      <path d="M10 6.5v4" />
+      <path d="M10 13.5h.01" strokeWidth={2} />
+    </Icon>
+  );
+}
+
+export function EyeIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M2.5 10s2.75-5 7.5-5 7.5 5 7.5 5-2.75 5-7.5 5-7.5-5-7.5-5Z" />
+      <circle cx="10" cy="10" r="2.25" />
+    </Icon>
+  );
+}
+
+export function EyeOffIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M8.2 5.2A7.6 7.6 0 0 1 10 5c4.75 0 7.5 5 7.5 5a13 13 0 0 1-1.9 2.5" />
+      <path d="M5.1 6.6C3.4 7.9 2.5 10 2.5 10s2.75 5 7.5 5c1.2 0 2.3-.3 3.2-.8" />
+      <path d="M8.4 8.4a2.25 2.25 0 0 0 3.2 3.2" />
+      <path d="M3 3l14 14" />
+    </Icon>
+  );
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M15.5 10h-11" />
+      <path d="M9 5.5 4.5 10 9 14.5" />
+    </Icon>
+  );
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m4.5 10.5 3.5 3.5 7.5-8" />
+    </Icon>
+  );
+}
+
+export function ShieldIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M10 2.75 4.25 5v4.6c0 3.6 2.4 6.3 5.75 7.65 3.35-1.35 5.75-4.05 5.75-7.65V5L10 2.75Z" />
+    </Icon>
+  );
+}

@@ -6,18 +6,20 @@ import {
 } from "@stellix/core";
 import { useRef, useState, type SubmitEvent } from "react";
 import { Button } from "../../components/button.js";
+import { Callout } from "../../components/callout.js";
 import { ErrorText } from "../../components/error-text.js";
-import { PasswordInput } from "../../components/password-input.js";
+import { PasswordField } from "../../components/field.js";
 import { StrengthMeter } from "../../components/strength-meter.js";
 import { errorCopy } from "../../errorCopy.js";
 import { useAction } from "../../hooks/use-request.js";
+import { StepHeading } from "./onboarding-shell.js";
 
 // Password (UI_FLOWS §2.4, KEY_MANAGEMENT §5). Inputs are uncontrolled; only the strength level
 // is kept in state.
 
 const COPY = {
-  title: "Set a password",
-  body: "You'll use this password to unlock Stellix on this device.",
+  title: "Choose a password",
+  body: "You'll use it to unlock Stellix on this device.",
   password: "Password",
   confirm: "Confirm password",
   notice:
@@ -52,55 +54,59 @@ export function SetPasswordScreen({
     const confirm = confirmRef.current?.value ?? "";
     if (!meetsPasswordPolicy(password)) {
       setFieldError("too-short");
+      passwordRef.current?.focus();
       return;
     }
     if (password !== confirm) {
       setFieldError("mismatch");
+      confirmRef.current?.focus();
       return;
     }
     setFieldError(null);
     const result = await action.run(() => submit(password));
-    if (result.ok) {
-      onDone();
-    } else if (result.code === "ONBOARDING_EXPIRED") {
-      onExpired();
-    }
+    if (result.ok) onDone();
+    else if (result.code === "ONBOARDING_EXPIRED") onExpired();
   };
 
   const working = action.state.kind === "working";
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => void onSubmit(e)}
-      data-testid="onboarding-password"
-    >
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">{COPY.title}</h1>
-        <p className="text-muted">{COPY.body}</p>
+    <form onSubmit={(e) => void onSubmit(e)} data-testid="onboarding-password" noValidate>
+      <StepHeading title={COPY.title} body={COPY.body} />
+      <div className="space-y-5">
+        <PasswordField
+          id="new-password"
+          label={COPY.password}
+          inputRef={passwordRef}
+          name="new-password"
+          autoFocus
+          invalid={fieldError === "too-short"}
+          onInput={(e) => {
+            const value = e.currentTarget.value;
+            setStrength(value === "" ? null : passwordStrength(value));
+            if (fieldError === "too-short") setFieldError(null);
+          }}
+          hint={
+            <div className="pt-1">
+              <StrengthMeter strength={strength} />
+              {fieldError === "too-short" && <ErrorText>{COPY.tooShort}</ErrorText>}
+            </div>
+          }
+        />
+        <PasswordField
+          id="confirm-password"
+          label={COPY.confirm}
+          inputRef={confirmRef}
+          name="confirm-password"
+          invalid={fieldError === "mismatch"}
+          onInput={() => {
+            if (fieldError === "mismatch") setFieldError(null);
+          }}
+          hint={fieldError === "mismatch" ? <ErrorText>{COPY.mismatch}</ErrorText> : undefined}
+        />
+        <Callout>{COPY.notice}</Callout>
+        {action.state.kind === "error" && <ErrorText>{errorCopy(action.state.code)}</ErrorText>}
       </div>
-      <PasswordInput
-        label={COPY.password}
-        inputRef={passwordRef}
-        name="new-password"
-        autoFocus
-        invalid={fieldError === "too-short"}
-        onInput={(e) => {
-          const value = e.currentTarget.value;
-          setStrength(value === "" ? null : passwordStrength(value));
-        }}
-      />
-      <StrengthMeter strength={strength} />
-      <PasswordInput
-        label={COPY.confirm}
-        inputRef={confirmRef}
-        name="confirm-password"
-        invalid={fieldError === "mismatch"}
-      />
-      {fieldError === "too-short" && <ErrorText>{COPY.tooShort}</ErrorText>}
-      {fieldError === "mismatch" && <ErrorText>{COPY.mismatch}</ErrorText>}
-      <p className="rounded-md bg-warning-bg p-3 text-sm text-warning-fg">{COPY.notice}</p>
-      {action.state.kind === "error" && <ErrorText>{errorCopy(action.state.code)}</ErrorText>}
-      <Button type="submit" disabled={working} className="w-full">
+      <Button type="submit" busy={working} className="mt-8 w-full">
         {working ? workingText : COPY.submit}
       </Button>
     </form>
