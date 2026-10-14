@@ -19,7 +19,7 @@ import { useAccountSummary } from "../hooks/use-account-summary.js";
 import { useAction } from "../hooks/use-request.js";
 import { asOfTime, displayXlm } from "../lib/xlm.js";
 
-// Home (UI_FLOWS §4). Send/Receive and recent activity arrive in M3/M4; no dead buttons meanwhile.
+// Home (UI_FLOWS §4).
 
 const COPY = {
   lock: "Lock",
@@ -44,6 +44,7 @@ const COPY = {
   asOf: (t: string) => `Last known balance, as of ${t}`,
   address: "Address",
   send: "Send",
+  receive: "Receive",
 } as const;
 
 export function HomeScreen({
@@ -56,6 +57,7 @@ export function HomeScreen({
   inflight,
   onInflightChange,
   onSend,
+  onReceive,
 }: {
   account: AccountMeta;
   network: NetworkId;
@@ -67,6 +69,8 @@ export function HomeScreen({
   onInflightChange: () => void;
   /** Receives the available balance; Send is only offered for funded, single-signer accounts. */
   onSend: (availableStroops: bigint) => void;
+  /** Receive is always offered; `unfunded` adds the activation hint. */
+  onReceive: (unfunded: boolean) => void;
 }) {
   const { state, refresh } = useAccountSummary(account.publicKey, network, horizon);
   const friendbot = useAction();
@@ -224,16 +228,33 @@ export function HomeScreen({
         {state.kind === "funded" && state.summary.multisig && (
           <Callout tone="warning">{COPY.multisig}</Callout>
         )}
-        {state.kind === "funded" && !state.summary.multisig && (
+        <div className="flex gap-2">
+          {state.kind === "funded" && !state.summary.multisig && (
+            <Button
+              className="flex-1"
+              onClick={() => {
+                onSend(state.summary.availableStroops);
+              }}
+            >
+              {COPY.send}
+            </Button>
+          )}
           <Button
-            className="w-full"
+            // One primary per screen: Send, or Friendbot on an unfunded testnet account.
+            variant={
+              (state.kind === "funded" && state.summary.multisig) ||
+              (state.kind === "unfunded" && NETWORKS[network].friendbotUrl === undefined)
+                ? "primary"
+                : "secondary"
+            }
+            className="flex-1"
             onClick={() => {
-              onSend(state.summary.availableStroops);
+              onReceive(state.kind === "unfunded");
             }}
           >
-            {COPY.send}
+            {COPY.receive}
           </Button>
-        )}
+        </div>
 
         <section className="space-y-1.5 px-1">
           <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">

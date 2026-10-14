@@ -96,11 +96,14 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 - Rebuild needed: auto re-prepare and return to Review with a note "Network conditions changed. Please review again."
 
 ## 6. Receive (popup)
-- QR of the plain `G...` address.
-- Full address (monospace, 4-char groups) + Copy (toast "Address copied").
-- "Request a specific amount" → amount + optional memo → QR switches to the SEP-7 URI `web+stellar:pay?destination=G…&amount=…&memo=…&memo_type=MEMO_TEXT`; "Copy payment link".
+- Opened from Home's Receive button, always offered (funded or not). One primary per screen: Receive is secondary next to Send or Friendbot.
+- QR of the plain `G...` address. Dark on white in both themes, ECC level M, 4-module quiet zone, drawn as one SVG path (`ui/lib/qr.ts`).
+- Full address (monospace, 4-char groups). The pinned footer action copies it; its label changes to "Copied" for 1.5 s. No toast. A clipboard failure shows `CLIPBOARD_UNAVAILABLE` copy.
+- "Request a specific amount" (right under the QR, so the code stays in view) → amount + optional memo (text or ID) → QR switches to the SEP-7 URI and the footer action becomes "Copy payment link".
+  - Testnet: `web+stellar:pay?destination=G…&amount=…&memo=…&memo_type=MEMO_TEXT&network_passphrase=Test%20SDF%20Network%20%3B%20September%202015`. SEP-7 requires `network_passphrase` off the public network; mainnet links omit it.
+  - Until the request is valid, no QR is shown (a placeholder says to enter or fix the amount) and the copy action is disabled, so nobody scans a code that doesn't match the screen.
 - Note: "Only send XLM on Stellar to this address." On testnet add "This is a testnet address — test XLM has no value."
-- States: default, request-amount, unfunded hint ("Send at least 1 XLM to activate this account").
+- States: default, request-amount (empty / invalid / valid), unfunded hint ("Send at least 1 XLM to activate this account").
 
 ## 7. History (popup)
 - Infinite scroll, 20 per page.

@@ -16,6 +16,7 @@ import { Callout } from "../../components/callout.js";
 import { ErrorText } from "../../components/error-text.js";
 import { FieldLabel, inputClass } from "../../components/field.js";
 import { ChevronDownIcon } from "../../components/icons.js";
+import { MemoTypeToggle } from "../../components/memo-type-toggle.js";
 import { SubScreen } from "../../components/sub-screen.js";
 import { cx } from "../../cx.js";
 import { errorCopy } from "../../errorCopy.js";
@@ -70,8 +71,6 @@ const COPY = {
   available: (x: string) => `Available: ${x} XLM`,
   addMemo: "Add memo",
   memo: "Memo",
-  memoText: "Text",
-  memoId: "ID",
   bytes: (n: number) => `${String(n)}/${String(MEMO_TEXT_MAX_BYTES)} bytes`,
   tooLittleToActivate: "New accounts need at least 1 XLM, and you don't have enough available.",
   sendMax: (x: string) => `Send max (${x} XLM)`,
@@ -281,31 +280,12 @@ export function SendInputScreen({
             <div className="space-y-1.5">
               <div className="flex items-end justify-between">
                 <FieldLabel htmlFor="send-memo">{COPY.memo}</FieldLabel>
-                <div
-                  role="radiogroup"
-                  aria-label="Memo type"
-                  className="inline-flex rounded-md bg-fill p-0.5"
-                >
-                  {(["text", "id"] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      role="radio"
-                      aria-checked={draft.memoType === t}
-                      onClick={() => {
-                        onDraft({ ...draft, memoType: t });
-                      }}
-                      className={cx(
-                        "h-6 rounded px-2 text-[12px] font-medium",
-                        draft.memoType === t
-                          ? "bg-surface text-ink shadow-ring-strong"
-                          : "text-muted",
-                      )}
-                    >
-                      {t === "text" ? COPY.memoText : COPY.memoId}
-                    </button>
-                  ))}
-                </div>
+                <MemoTypeToggle
+                  value={draft.memoType}
+                  onChange={(memoType) => {
+                    onDraft({ ...draft, memoType });
+                  }}
+                />
               </div>
               {memoRequired && <Callout tone="warning">{COPY.memoRequired}</Callout>}
               <input

@@ -57,6 +57,7 @@ export const ERROR_COPY: Readonly<Record<ErrorCode, string>> = {
   FRIENDBOT_FAILED: "Friendbot couldn't fund this account. Try again in a minute.",
   INVALID_HORIZON_URL: "This server URL isn't valid for the selected network.",
   // messaging
+  CLIPBOARD_UNAVAILABLE: "Couldn't copy. Select the text and copy it manually.",
   UNAUTHORIZED_SENDER: "This request was blocked for your security.",
   INVALID_REQUEST: "Something went wrong. Close and reopen Stellix.",
   // catch-all

@@ -10,6 +10,7 @@ import { useAccounts } from "../hooks/use-accounts.js";
 import { useHorizon, useSettings } from "../hooks/use-settings.js";
 import { useStatus } from "../hooks/use-status.js";
 import { AccountsScreen } from "./accounts-screen.js";
+import { ReceiveScreen } from "./receive-screen.js";
 import { SendFlow } from "./send/send-flow.js";
 import { HomeScreen } from "./home-screen.js";
 import { AboutScreen } from "./settings/about-screen.js";
@@ -53,6 +54,7 @@ export function PopupApp() {
 type Route =
   | { kind: "home" }
   | { kind: "send"; availableStroops: bigint }
+  | { kind: "receive"; unfunded: boolean }
   | { kind: "accounts" }
   | { kind: "settings" }
   | { kind: "settings-page"; page: SettingsPage };
@@ -122,6 +124,18 @@ function UnlockedApp({
           onSend={(availableStroops) => {
             setRoute({ kind: "send", availableStroops });
           }}
+          onReceive={(unfunded) => {
+            setRoute({ kind: "receive", unfunded });
+          }}
+        />
+      );
+    case "receive":
+      return (
+        <ReceiveScreen
+          address={active.publicKey}
+          network={settings.network}
+          unfunded={route.unfunded}
+          onBack={home}
         />
       );
     case "send":
