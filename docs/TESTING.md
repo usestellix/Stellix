@@ -93,6 +93,13 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
   - Settings: auto-lock, custom Horizon (https + passphrase probe), About.
   - Security: change password, reveal phrase in its own tab, reset.
   - Blocking Horizon with `context.route` shows the error state with the greyed last-known balance.
+- **M3 (`e2e/m3-flows.spec.ts`, live testnet):**
+  - Flow 3: activate a fresh address. The recipient's balance is checked from Node; the history assertion moves to M4.
+  - A text-memo payment to an existing account.
+  - SEP-29: an account with the data entry set in test setup auto-opens the memo, and sending without one is blocked.
+  - Insufficient balance offers "Send max".
+  - A network switch between Review and Confirm gives `NETWORK_MISMATCH`, then Review again.
+  - **M3 exit:** the SW is killed ~150 ms after Confirm. Resolution must leave nothing "resolving", and the recipient is funded **iff** the wallet reports success (no double send, no false report).
 - **Also covered:**
   - the SW-enforced unlock throttle, checked from a fresh popup
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`

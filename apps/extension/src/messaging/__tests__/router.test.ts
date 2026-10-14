@@ -11,6 +11,7 @@ const STATUS: WalletStatus = {
   unlocked: false,
   network: "testnet",
   activeAccountIndex: null,
+  inflight: [],
 };
 
 function deps(overrides: Partial<RouterDeps> = {}): RouterDeps {

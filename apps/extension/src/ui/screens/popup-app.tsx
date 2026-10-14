@@ -1,5 +1,5 @@
 import type { WalletStatus } from "@stellix/core";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { request } from "../../messaging/client.js";
 import { Button } from "../components/button.js";
 import { ErrorText } from "../components/error-text.js";
@@ -10,6 +10,7 @@ import { useAccounts } from "../hooks/use-accounts.js";
 import { useHorizon, useSettings } from "../hooks/use-settings.js";
 import { useStatus } from "../hooks/use-status.js";
 import { AccountsScreen } from "./accounts-screen.js";
+import { SendFlow } from "./send/send-flow.js";
 import { HomeScreen } from "./home-screen.js";
 import { AboutScreen } from "./settings/about-screen.js";
 import { AutoLockSettings } from "./settings/autolock-settings.js";
@@ -51,6 +52,7 @@ export function PopupApp() {
 
 type Route =
   | { kind: "home" }
+  | { kind: "send"; availableStroops: bigint }
   | { kind: "accounts" }
   | { kind: "settings" }
   | { kind: "settings-page"; page: SettingsPage };
@@ -71,6 +73,17 @@ function UnlockedApp({
     () => accounts?.find((a) => a.index === status.activeAccountIndex) ?? accounts?.[0] ?? null,
     [accounts, status.activeAccountIndex],
   );
+
+  // While a payment is confirming, poll so banners update (each poll also nudges the SW to keep
+  // resolving; ADR 0007).
+  const resolving = status.inflight.some((i) => i.status === "resolving");
+  useEffect(() => {
+    if (!resolving) return;
+    const t = window.setInterval(onStatusChange, 3_000);
+    return () => {
+      window.clearInterval(t);
+    };
+  }, [resolving, onStatusChange]);
 
   const lock = async () => {
     await request("LOCK", undefined).catch(() => undefined);
@@ -104,6 +117,24 @@ function UnlockedApp({
             setRoute({ kind: "accounts" });
           }}
           onOpenSettings={toSettings}
+          inflight={status.inflight}
+          onInflightChange={onStatusChange}
+          onSend={(availableStroops) => {
+            setRoute({ kind: "send", availableStroops });
+          }}
+        />
+      );
+    case "send":
+      return (
+        <SendFlow
+          network={settings.network}
+          source={active.publicKey}
+          availableStroops={route.availableStroops}
+          horizon={horizon}
+          onClose={() => {
+            onStatusChange();
+            home();
+          }}
         />
       );
     case "accounts":

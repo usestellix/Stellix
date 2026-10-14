@@ -5,7 +5,7 @@ import {
   type AccountRecord,
   type HorizonClient,
 } from "@stellix/core";
-import { createFakePlatform, type FakePlatform } from "@stellix/core/testing";
+import { FakeHorizonClient, createFakePlatform, type FakePlatform } from "@stellix/core/testing";
 import { describe, expect, it, vi } from "vitest";
 import type { RequestType } from "../../messaging/protocol.js";
 import { handleMessage } from "../../messaging/router.js";
@@ -23,17 +23,16 @@ const PASSWORD = "correct horse battery";
 const ABANDON =
   "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
 
-/** Accounts in `funded` exist on the fake Horizon; records are minimal but schema-shaped. */
-function fakeHorizon(funded: Set<string>): HorizonClient & { urls: string[] } {
-  const urls: string[] = [];
-  return {
-    urls,
-    getRoot: () => Promise.reject(new Error("unused")),
-    getLatestLedger: () => Promise.reject(new Error("unused")),
-    getFeeStats: () => Promise.reject(new Error("unused")),
-    getAccount: (id) =>
-      Promise.resolve(funded.has(id) ? ({ id } as unknown as AccountRecord) : null),
-  };
+/** Accounts in `funded` exist on the fake Horizon (minimal but schema-shaped records). */
+function fakeHorizon(funded: Set<string>): HorizonClient {
+  const client = new FakeHorizonClient();
+  const accounts = client.accounts;
+  // Keep `funded` live: tests add to it after setup.
+  client.getAccount = (id: string) =>
+    Promise.resolve(
+      funded.has(id) ? ({ id } as unknown as AccountRecord) : (accounts.get(id) ?? null),
+    );
+  return client;
 }
 
 function setup(funded: Set<string> = new Set()) {

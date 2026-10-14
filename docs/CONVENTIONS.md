@@ -62,7 +62,7 @@ export type ErrorCode =
   // tx lifecycle
   | "PREPARED_TX_NOT_FOUND" | "PREPARED_TX_EXPIRED" | "NETWORK_MISMATCH" | "SIGNING_FAILED"
   | "FEE_TOO_LOW" | "CLOCK_SKEW" | "TX_EXPIRED_NOT_INCLUDED"
-  | "DESTINATION_UNFUNDED_RACE" | "DESTINATION_CREATED_RACE" | "UNKNOWN_TX_ERROR"
+  | "DESTINATION_UNFUNDED_RACE" | "DESTINATION_CREATED_RACE" | "TX_IN_FLIGHT" | "UNKNOWN_TX_ERROR"
   // network
   | "NETWORK_ERROR" | "RATE_LIMITED" | "HORIZON_BAD_RESPONSE" | "HORIZON_NOT_FOUND"
   | "NOT_AVAILABLE_ON_NETWORK" | "FRIENDBOT_FAILED" | "INVALID_HORIZON_URL"
@@ -74,6 +74,7 @@ export type ErrorCode =
 
 - Throw `StellixError` from core. Catch at boundaries (message handler, React error boundary) and convert.
 - Unknown thrown values become `INTERNAL_ERROR` with a sanitized message; the original is logged at `debug` (never containing secrets — see SECURITY §7).
+- Errors may carry **details**, but only the keys a code declares in `ERROR_DETAIL_KEYS` (`core/errors.ts`), with units in the name, e.g. `INSUFFICIENT_BALANCE → { maxSendableStroops }`. Unknown keys are stripped on both sides of messaging. Details are public values only.
 - Add a code only when the UI or caller would behave differently for it. Update `ui/errorCopy.ts` in the same change; a test asserts every `ErrorCode` has copy.
 
 ## 5. Async and side effects

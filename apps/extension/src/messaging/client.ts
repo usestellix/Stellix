@@ -35,7 +35,8 @@ export function createClient(
       throw new StellixError("INTERNAL_ERROR", "Malformed response from the service worker");
     }
     if (!response.data.ok) {
-      throw new StellixError(response.data.error.code, response.data.error.message);
+      const { code, message, details } = response.data.error;
+      throw new StellixError(code, message, false, details);
     }
 
     const result = REQUESTS[type].result.safeParse(response.data.data);

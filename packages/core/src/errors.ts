@@ -35,6 +35,7 @@ export const ERROR_CODES = [
   "TX_EXPIRED_NOT_INCLUDED",
   "DESTINATION_UNFUNDED_RACE",
   "DESTINATION_CREATED_RACE",
+  "TX_IN_FLIGHT",
   "UNKNOWN_TX_ERROR",
   // network
   "NETWORK_ERROR",
@@ -54,18 +55,46 @@ export const ERROR_CODES = [
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 /**
+ * Detail keys each code may carry across messaging. Public values only, units in the key name.
+ * Anything else is stripped (sanitizeErrorDetails), on both the SW and UI sides.
+ */
+export const ERROR_DETAIL_KEYS = {
+  INSUFFICIENT_BALANCE: ["maxSendableStroops"],
+  UNKNOWN_TX_ERROR: ["resultCode"],
+} as const satisfies Partial<Record<ErrorCode, readonly string[]>>;
+
+export type ErrorDetails = Readonly<Record<string, string>>;
+
+export function sanitizeErrorDetails(code: ErrorCode, details: unknown): ErrorDetails | undefined {
+  const allowed: readonly string[] =
+    (ERROR_DETAIL_KEYS as Partial<Record<ErrorCode, readonly string[]>>)[code] ?? [];
+  if (allowed.length === 0 || typeof details !== "object" || details === null) return undefined;
+  const out: Record<string, string> = {};
+  for (const key of allowed) {
+    const value = (details as Record<string, unknown>)[key];
+    if (typeof value === "string") out[key] = value;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/**
  * The only error type core throws. `message` is developer-facing and must never contain
  * secret material; user-facing copy comes from the shell's errorCopy table, keyed by `code`.
  */
 export class StellixError extends Error {
   override readonly name = "StellixError";
 
+  /** Public, allowlisted details only (ERROR_DETAIL_KEYS). */
+  public readonly details: ErrorDetails | undefined;
+
   constructor(
     public readonly code: ErrorCode,
     message: string,
     public readonly retryable = false,
+    details?: ErrorDetails,
   ) {
     super(message);
+    this.details = sanitizeErrorDetails(code, details);
   }
 }
 

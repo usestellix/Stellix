@@ -1,27 +1,18 @@
-import { StellixError } from "../../errors.js";
-import type { HorizonClient } from "../../network/horizon-client.js";
-import { accountSchema, type AccountRecord } from "../../network/horizon-schemas.js";
+import { accountSchema } from "../../network/horizon-schemas.js";
 import { fixture } from "../../network/__tests__/fixtures.js";
+import { FakeHorizonClient } from "../../testing/fake-horizon.js";
 
-/** FakeHorizonClient (TESTING §1): accounts in `funded` exist; `failAt` throws NETWORK_ERROR. */
+/** Discovery-style fake: accounts in `funded` exist; `failOn` throws NETWORK_ERROR. */
 export function fakeHorizon(funded: ReadonlySet<string>, opts: { failOn?: string } = {}) {
-  let inFlight = 0;
-  let maxInFlight = 0;
-  const requested: string[] = [];
+  const client = new FakeHorizonClient();
   const template = accountSchema.parse(fixture("account-funded").body);
-  const client: HorizonClient = {
-    getRoot: () => Promise.reject(new Error("unused")),
-    getLatestLedger: () => Promise.reject(new Error("unused")),
-    getFeeStats: () => Promise.reject(new Error("unused")),
-    getAccount: async (id): Promise<AccountRecord | null> => {
-      requested.push(id);
-      inFlight++;
-      maxInFlight = Math.max(maxInFlight, inFlight);
-      await new Promise((r) => setTimeout(r, 1));
-      inFlight--;
-      if (id === opts.failOn) throw new StellixError("NETWORK_ERROR", "down", true);
-      return funded.has(id) ? { ...template, id } : null;
+  for (const id of funded) client.accounts.set(id, { ...template, id });
+  if (opts.failOn !== undefined) client.failingAccounts.add(opts.failOn);
+  return {
+    client,
+    get requested() {
+      return client.calls.filter((c) => c.method === "getAccount").map((c) => c.arg ?? "");
     },
+    maxInFlight: () => client.maxInFlight,
   };
-  return { client, requested, maxInFlight: () => maxInFlight };
 }

@@ -1,9 +1,18 @@
-import { createLogger, type Logger } from "@stellix/core";
+import {
+  createHorizonClient,
+  createLogger,
+  horizonUrlFor,
+  readSettings,
+  type Logger,
+  type NetworkId,
+  type SendDeps,
+} from "@stellix/core";
 import { browser } from "wxt/browser";
 import { createMessageListener } from "../messaging/router.js";
 import { migrate } from "../storage/migrations.js";
 import { createAutoLock, type AutoLock } from "./autolock.js";
 import { createHandlers, createTouchActivity } from "./handlers.js";
+import { createInflightResolver, type InflightResolver } from "./inflight.js";
 import { createExtensionPlatform } from "./platform.js";
 
 /**
@@ -15,12 +24,21 @@ export function startBackground(): void {
   const log = createLogger({ minLevel: import.meta.env.PROD ? "info" : "debug" });
   const platform = createExtensionPlatform();
   const autoLock = createAutoLock(platform, browser.alarms);
+  const sendDeps = async (): Promise<SendDeps> => {
+    const { horizonOverrides } = await readSettings(platform.persistent);
+    return {
+      horizonFor: (network: NetworkId) =>
+        createHorizonClient(horizonUrlFor(network, horizonOverrides), platform),
+    };
+  };
+  const inflight = createInflightResolver(platform, browser.alarms, sendDeps);
 
   browser.alarms.onAlarm.addListener((alarm) => {
     autoLock.onAlarm(alarm);
+    inflight.onAlarm(alarm);
   });
 
-  const ready = initialize(platform.persistent, autoLock, log);
+  const ready = initialize(platform.persistent, autoLock, inflight, log);
   // Each message awaits `ready` and reports the failure; this only silences the unhandled rejection.
   ready.catch(() => undefined);
 
@@ -30,6 +48,7 @@ export function startBackground(): void {
         platform,
         autoLock,
         devBuild: import.meta.env.DEV,
+        inflight,
         openOnboarding: async () => {
           await browser.tabs.create({ url: browser.runtime.getURL("/onboarding.html") });
         },
@@ -45,6 +64,7 @@ export function startBackground(): void {
 async function initialize(
   persistent: ReturnType<typeof createExtensionPlatform>["persistent"],
   autoLock: AutoLock,
+  inflight: InflightResolver,
   log: Logger,
 ): Promise<void> {
   try {
@@ -52,6 +72,8 @@ async function initialize(
     await browser.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
     await migrate(persistent);
     await autoLock.onStartup();
+    // TRANSACTIONS §5: resume resolving anything a killed worker left in flight.
+    void inflight.resume().catch(() => undefined);
   } catch (err: unknown) {
     log.error("startup failed");
     throw err;

@@ -97,8 +97,8 @@ Executed in order. Any failure returns a mapped error and nothing is stored.
 
 ## 4. Confirmation (`CONFIRM_PAYMENT`)
 
-1. Require unlocked.
-2. Load `preparedTx:<id>`. Missing → `PREPARED_TX_NOT_FOUND`. `now ≥ expiresAt − 10s` (safety margin) → delete it, `PREPARED_TX_EXPIRED`.
+1. Require unlocked. Steps 2–7 run inside the SW serial queue.
+2. Load `preparedTx:<id>`. Missing → `PREPARED_TX_NOT_FOUND`. **Delete it immediately**, before signing: a second confirm for the same id can never sign again. Then, if `now ≥ expiresAt − 10s` (safety margin) → `PREPARED_TX_EXPIRED`.
 3. Rehydrate: `TransactionBuilder.fromXDR(xdr, passphrase)`. Assert `networkId` equals the current network; else `NETWORK_MISMATCH`.
 4. Re-run the summary assertions on the rehydrated tx (defense in depth).
 5. Derive keypair for `accountIndex` (KEY_MANAGEMENT §6), assert `keypair.publicKey() === tx.source`, sign, zero secrets.
@@ -108,20 +108,25 @@ Executed in order. Any failure returns a mapped error and nothing is stored.
 
 ## 5. Submission and ambiguity resolution
 
-Use Horizon's synchronous submit: `POST /transactions` with form body `tx=<base64 XDR>`.
+Use Horizon's **async** submit: `POST /transactions_async` with form body `tx=<base64 XDR>`, 10 s client timeout (ADR 0007). A synchronous submit can exceed Chrome's 30 s fetch limit and kill the worker.
 
-| Response | Meaning | Action |
+| `tx_status` | Meaning | Action |
 |---|---|---|
-| 200 | Included in a ledger; `successful: true` | `SUCCESS { hash, ledger }` |
-| 400 with `extras.result_codes` | Rejected or failed | Map codes (§8). `tx_bad_seq` → `REBUILD_NEEDED`. Others → `FAILED`. |
-| 504 / timeout / network error / 5xx | **Ambiguous** — may or may not land | → `RESOLVING` |
+| `PENDING` / `DUPLICATE` | Accepted by core | → `RESOLVING` |
+| `TRY_AGAIN_LATER` | Not accepted | Resubmit the **same** XDR (≥ 2 s apart) while `now < maxTime`; resolve meanwhile |
+| `ERROR` (`error_result_xdr`) | Rejected | Decode and map (§8). `tx_bad_seq` → rebuild. Others → `FAILED`. |
+| network error / timeout / no valid status | **Ambiguous**: may or may not have arrived | → `RESOLVING`; resubmit the same XDR if never accepted |
+
+`CONFIRM_PAYMENT` waits up to ~20 s for a definitive outcome, then returns `{ status: "pending", hash }`. Resolution continues in the SW: on startup, on a 30 s `resolve` alarm, and while the popup polls `GET_STATUS`.
+
+`PREPARE_PAYMENT` refuses with `TX_IN_FLIGHT` while the active account has an unresolved transaction.
 
 ### Resolving (`core/tx/resolve.ts`)
 
 ```
 loop:
   GET /transactions/{hash}
-    200 → SUCCESS (or FAILED if successful=false — then map result codes from result_xdr)
+    200 → SUCCESS (or FAILED if successful=false — then decode and map result_xdr)
     404 → if now > maxTime + 15s: FAILED(TX_EXPIRED_NOT_INCLUDED) — safe to rebuild
           else wait (backoff 2s, 3s, 5s, 5s, …) and loop
     network error → wait and loop (same deadline)
@@ -133,7 +138,9 @@ Why this is safe: after `maxTime` the network will never include the transaction
 
 ### SW restart during submit
 
-On SW startup, for each `inflight:<hash>` in session storage, resume resolution in the background. The popup, when reopened, asks `GET_STATUS` which includes any in-flight hashes and their resolution state.
+On SW startup, for each `inflight:<hash>` in session storage, resume resolution in the background. The popup, when reopened, asks `GET_STATUS`, whose `inflight` lists each in-flight or recently finished payment (summary, status, outcome; never the XDR). A finished outcome stays until the popup shows it (`DISMISS_OUTCOME`) or for 30 minutes.
+
+`inflight:<hash>` holds the signed envelope until the outcome is known, so the same XDR can be resubmitted after a restart. It survives lock (no secrets needed to resolve) and is removed by reset.
 
 ## 6. "Max" button
 
@@ -171,11 +178,12 @@ A 5xx or timeout is never shown as success. Not exposed when network = mainnet; 
 ```ts
 type SubmitOutcome =
   | { status: "success"; hash: string; ledger: number }
-  | { status: "failed"; hash?: string; error: { code: ErrorCode; message: string; details?: Record<string, string> } }
-  | { status: "rebuild"; reason: "bad_seq" | "expired" | "destination_changed" };
+  | { status: "failed"; hash: string; error: { code: ErrorCode; message: string; details?: Record<string, string> } }
+  | { status: "rebuild"; reason: "bad_seq" | "destination_changed" }
+  | { status: "pending"; hash: string }; // CONFIRM returned before resolution finished
 ```
 
-The `resolving` state is internal to the SW; the popup observes it via polling `GET_STATUS` while a hash is in flight and shows "Confirming on the network…".
+`details` carries only the keys the code declares in `ERROR_DETAIL_KEYS` (e.g. `INSUFFICIENT_BALANCE → { maxSendableStroops }`). Expiry is reported as `failed` (`PREPARED_TX_EXPIRED` or `TX_EXPIRED_NOT_INCLUDED`), not a rebuild. While `pending`, the popup polls `GET_STATUS` and shows "Confirming on the network…".
 
 ## 10. Tests required
 

@@ -53,7 +53,15 @@ export async function handleMessage(
     const error = toStellixError(err);
     // Only the code and our own message are logged: never payloads or foreign error text.
     deps.log.debug("request failed", { code: error.code });
-    return { id, ok: false, error: { code: error.code, message: error.message } };
+    return {
+      id,
+      ok: false,
+      error: {
+        code: error.code,
+        message: error.message,
+        ...(error.details !== undefined ? { details: error.details } : {}),
+      },
+    };
   }
 }
 

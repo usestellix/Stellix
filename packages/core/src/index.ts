@@ -9,7 +9,10 @@ export { assertNever } from "./assert-never.js";
 export { RESET_CONFIRMATION } from "./constants.js";
 export {
   ERROR_CODES,
+  ERROR_DETAIL_KEYS,
   StellixError,
+  sanitizeErrorDetails,
+  type ErrorDetails,
   isErrorCode,
   isStellixError,
   toStellixError,
@@ -60,8 +63,13 @@ export {
   type HorizonClientOptions,
 } from "./network/horizon-client.js";
 export {
+  ASYNC_TX_STATUSES,
   nativeBalanceOf,
   type AccountRecord,
+  type AsyncSubmitResponse,
+  type AsyncTxStatus,
+  type PaymentRecord,
+  type TransactionRecord,
   type FeeStats,
   type HorizonRoot,
   type LedgerRecord,
@@ -135,7 +143,13 @@ export {
   type KeyBytes,
   type VaultWithKey,
 } from "./vault/vault.js";
-export { PERSISTENT_KEYS, PREPARED_TX_KEY_PREFIX, SESSION_KEYS } from "./storage-keys.js";
+export {
+  INFLIGHT_KEY_PREFIX,
+  PERSISTENT_KEYS,
+  PREPARED_TX_KEY_PREFIX,
+  SESSION_KEYS,
+  SW_CACHE_PREFIX,
+} from "./storage-keys.js";
 export { isMultisig, summarizeAccount, type AccountSummary } from "./stellar/account-summary.js";
 export { isAccountId, isMuxedAddress, looksLikeSecretSeed } from "./stellar/address.js";
 export {
@@ -152,3 +166,59 @@ export {
   minimumStartingBalanceStroops,
   type ReserveInputs,
 } from "./stellar/reserve.js";
+export {
+  FALLBACK_FEE_STROOPS,
+  MAX_FEE_STROOPS,
+  MIN_FEE_STROOPS,
+  fallbackFee,
+  feeFromStats,
+  type FeeChoice,
+} from "./tx/fee.js";
+export { selectOperation, type PaymentKind } from "./tx/select-op.js";
+export { MEMO_REQUIRED_KEY, requiresMemo } from "./tx/sep29.js";
+export {
+  MEMO_TEXT_MAX_BYTES,
+  memoTextBytes,
+  validateDestination,
+  validateMemo,
+  validatePayment,
+  type MemoSpec,
+  type PaymentInput,
+  type ValidatedPayment,
+} from "./tx/validate.js";
+export {
+  TX_TIMEOUT_SECONDS,
+  buildPaymentTransaction,
+  rehydrateTransaction,
+  transactionHashHex,
+  type BuildPaymentParams,
+} from "./tx/build.js";
+export { mapResultCodes, type MappedFailure, type RebuildReason } from "./tx/errors.js";
+export { decodeResultXdr, type ResultCodes } from "./tx/result-codes.js";
+export {
+  assertSameSummary,
+  summarizeTransaction,
+  type PaymentSummary,
+  type SummaryContext,
+} from "./tx/summary.js";
+export {
+  RESOLVE_BACKOFF_MS,
+  RESOLVE_GRACE_MS,
+  pollOnce,
+  resolveTransaction,
+  type ResolveOptions,
+  type ResolveState,
+} from "./tx/resolve.js";
+export {
+  awaitOutcome,
+  cancelPayment,
+  confirmPayment,
+  dismissOutcome,
+  listInflight,
+  preparePayment,
+  resumeInflight,
+  submitPrepared,
+  type InflightView,
+  type SendDeps,
+  type SubmitOutcome,
+} from "./services/send.js";

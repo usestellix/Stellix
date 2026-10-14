@@ -33,7 +33,13 @@ describe("GET_STATUS schemas", () => {
   });
 
   it("accepts valid results", () => {
-    const ok = { hasVault: true, unlocked: false, network: "testnet", activeAccountIndex: 0 };
+    const ok = {
+      hasVault: true,
+      unlocked: false,
+      network: "testnet",
+      activeAccountIndex: 0,
+      inflight: [],
+    };
     expect(def.result.safeParse(ok).success).toBe(true);
     expect(def.result.safeParse({ ...ok, activeAccountIndex: null }).success).toBe(true);
   });
@@ -44,7 +50,13 @@ describe("GET_STATUS schemas", () => {
     ["fractional index", { activeAccountIndex: 1.5 }],
     ["extra field", { mnemonic: "abandon" }],
   ])("rejects result with %s", (_name, patch) => {
-    const base = { hasVault: true, unlocked: false, network: "testnet", activeAccountIndex: 0 };
+    const base = {
+      hasVault: true,
+      unlocked: false,
+      network: "testnet",
+      activeAccountIndex: 0,
+      inflight: [],
+    };
     expect(def.result.safeParse({ ...base, ...patch }).success).toBe(false);
   });
 });
@@ -140,6 +152,24 @@ describe("payload schemas for every request type", () => {
       ],
     },
     DISCOVER_ACCOUNTS: { valid: [undefined], invalid: [{}] },
+    PREPARE_PAYMENT: {
+      valid: [
+        { destination: "GABC", amount: "1" },
+        { destination: "GABC", amount: "1", memo: { type: "id", value: "7" } },
+      ],
+      invalid: [
+        { destination: "GABC" },
+        { destination: "GABC", amount: "1", memo: { type: "hash", value: "x" } },
+        { destination: "x".repeat(129), amount: "1" },
+        { destination: "GABC", amount: "1", xdr: "AAAA" },
+      ],
+    },
+    CONFIRM_PAYMENT: {
+      valid: [{ preparedId: "a".repeat(32) }],
+      invalid: [{ preparedId: "xyz" }, { preparedId: "a".repeat(32), xdr: "AAAA" }, {}],
+    },
+    CANCEL_PAYMENT: { valid: [{ preparedId: "0".repeat(32) }], invalid: [{}] },
+    DISMISS_OUTCOME: { valid: [{ hash: "f".repeat(64) }], invalid: [{ hash: "nothex" }] },
   };
 
   for (const [type, { valid, invalid }] of Object.entries(cases)) {
@@ -164,5 +194,38 @@ describe("result schemas", () => {
 
   it("void results accept a missing data key in the response envelope", () => {
     expect(responseSchema.safeParse({ id: ID, ok: true }).success).toBe(true);
+  });
+});
+
+describe("error details cross messaging only as declared (ERROR_DETAIL_KEYS)", () => {
+  it("keeps INSUFFICIENT_BALANCE.maxSendableStroops and strips everything else", () => {
+    const parsed = responseSchema.parse({
+      id: ID,
+      ok: false,
+      error: {
+        code: "INSUFFICIENT_BALANCE",
+        message: "m",
+        details: { maxSendableStroops: "5", mnemonic: "abandon" },
+      },
+    });
+    expect(parsed).toEqual({
+      id: ID,
+      ok: false,
+      error: { code: "INSUFFICIENT_BALANCE", message: "m", details: { maxSendableStroops: "5" } },
+    });
+  });
+
+  it("drops details entirely for codes that declare none", () => {
+    expect(
+      responseSchema.parse({
+        id: ID,
+        ok: false,
+        error: { code: "LOCKED", message: "m", details: { a: "b" } },
+      }),
+    ).toEqual({
+      id: ID,
+      ok: false,
+      error: { code: "LOCKED", message: "m" },
+    });
   });
 });

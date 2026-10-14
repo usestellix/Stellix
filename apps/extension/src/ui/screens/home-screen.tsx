@@ -3,6 +3,7 @@ import {
   fundWithFriendbot,
   type AccountMeta,
   type HorizonClient,
+  type InflightView,
   type NetworkId,
 } from "@stellix/core";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import { GroupedAddress, truncateAddress } from "../components/address.js";
 import { Button, IconButton } from "../components/button.js";
 import { Callout } from "../components/callout.js";
 import { ErrorText } from "../components/error-text.js";
+import { InflightBanners } from "../components/inflight-banner.js";
 import { ChevronDownIcon, GearIcon, InfoIcon, LockIcon, RefreshIcon } from "../components/icons.js";
 import { PopupHeader } from "../components/popup-header.js";
 import { errorCopy } from "../errorCopy.js";
@@ -41,6 +43,7 @@ const COPY = {
   retry: "Try again",
   asOf: (t: string) => `Last known balance, as of ${t}`,
   address: "Address",
+  send: "Send",
 } as const;
 
 export function HomeScreen({
@@ -50,6 +53,9 @@ export function HomeScreen({
   onLock,
   onOpenAccounts,
   onOpenSettings,
+  inflight,
+  onInflightChange,
+  onSend,
 }: {
   account: AccountMeta;
   network: NetworkId;
@@ -57,6 +63,10 @@ export function HomeScreen({
   onLock: () => void;
   onOpenAccounts: () => void;
   onOpenSettings: () => void;
+  inflight: readonly InflightView[];
+  onInflightChange: () => void;
+  /** Receives the available balance; Send is only offered for funded, single-signer accounts. */
+  onSend: (availableStroops: bigint) => void;
 }) {
   const { state, refresh } = useAccountSummary(account.publicKey, network, horizon);
   const friendbot = useAction();
@@ -109,6 +119,10 @@ export function HomeScreen({
         }
       />
       <main className="flex-1 space-y-4 overflow-y-auto p-4">
+        <InflightBanners
+          items={inflight.filter((i) => i.summary.source === account.publicKey)}
+          onChange={onInflightChange}
+        />
         <section
           className="rounded-xl bg-surface p-4 shadow-raised"
           data-testid="balance-card"
@@ -209,6 +223,16 @@ export function HomeScreen({
 
         {state.kind === "funded" && state.summary.multisig && (
           <Callout tone="warning">{COPY.multisig}</Callout>
+        )}
+        {state.kind === "funded" && !state.summary.multisig && (
+          <Button
+            className="w-full"
+            onClick={() => {
+              onSend(state.summary.availableStroops);
+            }}
+          >
+            {COPY.send}
+          </Button>
         )}
 
         <section className="space-y-1.5 px-1">
