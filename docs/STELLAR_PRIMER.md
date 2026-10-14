@@ -100,7 +100,7 @@ A transaction contains: source account, sequence number, fee, preconditions (tim
 - Fee is specified per operation, in stroops. Minimum base fee is 100 stroops *(network parameter)*.
 - Under congestion, **surge pricing** applies: transactions bidding higher get included first. You pay the *charged* fee, not necessarily the full bid.
 - Read `GET /fee_stats`. Fields include `last_ledger_base_fee`, `ledger_capacity_usage`, and percentile objects `fee_charged` and `max_fee` (`p10`…`p99`, `mode`).
-- Stellix fee policy (MVP): `fee = clamp(max(last_ledger_base_fee, fee_charged.p70), floor = 100, cap = settings.maxFeeStroops (default 100,000 = 0.01 XLM))`. Show the fee on review. If the cap is binding, tell the user the network is congested.
+- Stellix fee policy (MVP): `fee = clamp(max(last_ledger_base_fee, fee_charged.p70), floor = 100, cap = 100,000 stroops = 0.01 XLM)`. The cap is a core constant (`MAX_FEE_STROOPS` in `core/tx/fee.ts`), with no user setting in the MVP. Show the fee on review. If the cap is binding, tell the user the network is congested.
 - Insufficient fee → `tx_insufficient_fee`.
 
 ### 5.3 Timebounds

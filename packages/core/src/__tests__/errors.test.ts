@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { ERROR_CODES, StellixError, isErrorCode, toStellixError } from "../errors.js";
+import {
+  ERROR_CODES,
+  StellixError,
+  isErrorCode,
+  sanitizeErrorDetails,
+  toStellixError,
+} from "../errors.js";
 
 describe("StellixError", () => {
   it("carries code, message and retryable flag", () => {
@@ -47,5 +53,25 @@ describe("toStellixError", () => {
   it("maps non-Error values to INTERNAL_ERROR", () => {
     expect(toStellixError("boom").code).toBe("INTERNAL_ERROR");
     expect(toStellixError(undefined).code).toBe("INTERNAL_ERROR");
+  });
+});
+
+describe("error details (allowlisted per code)", () => {
+  it("keeps declared keys and strips everything else", () => {
+    const err = new StellixError("INSUFFICIENT_BALANCE", "m", false, {
+      maxSendableStroops: "100",
+      secret: "S…",
+    });
+    expect(err.details).toEqual({ maxSendableStroops: "100" });
+  });
+
+  it("codes without declared keys carry no details", () => {
+    expect(
+      new StellixError("LOCKED", "m", false, { maxSendableStroops: "1" }).details,
+    ).toBeUndefined();
+  });
+
+  it("non-string values are dropped", () => {
+    expect(sanitizeErrorDetails("INSUFFICIENT_BALANCE", { maxSendableStroops: 5 })).toBeUndefined();
   });
 });

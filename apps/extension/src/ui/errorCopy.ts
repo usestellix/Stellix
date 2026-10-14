@@ -46,6 +46,7 @@ export const ERROR_COPY: Readonly<Record<ErrorCode, string>> = {
   TX_EXPIRED_NOT_INCLUDED: "This payment wasn't processed and no funds moved. You can try again.",
   DESTINATION_UNFUNDED_RACE: "The recipient account no longer exists. Review the payment again.",
   DESTINATION_CREATED_RACE: "The recipient account was just activated. Review the payment again.",
+  TX_IN_FLIGHT: "Your previous payment is still confirming. Try again in a moment.",
   UNKNOWN_TX_ERROR: "The network rejected this transaction. See details below.",
   // network
   NETWORK_ERROR: "Couldn't reach the Stellar network. Check your connection and try again.",

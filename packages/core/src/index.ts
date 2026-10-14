@@ -9,7 +9,10 @@ export { assertNever } from "./assert-never.js";
 export { RESET_CONFIRMATION } from "./constants.js";
 export {
   ERROR_CODES,
+  ERROR_DETAIL_KEYS,
   StellixError,
+  sanitizeErrorDetails,
+  type ErrorDetails,
   isErrorCode,
   isStellixError,
   toStellixError,
@@ -152,3 +155,23 @@ export {
   minimumStartingBalanceStroops,
   type ReserveInputs,
 } from "./stellar/reserve.js";
+export {
+  FALLBACK_FEE_STROOPS,
+  MAX_FEE_STROOPS,
+  MIN_FEE_STROOPS,
+  fallbackFee,
+  feeFromStats,
+  type FeeChoice,
+} from "./tx/fee.js";
+export { selectOperation, type PaymentKind } from "./tx/select-op.js";
+export { MEMO_REQUIRED_KEY, requiresMemo } from "./tx/sep29.js";
+export {
+  MEMO_TEXT_MAX_BYTES,
+  memoTextBytes,
+  validateDestination,
+  validateMemo,
+  validatePayment,
+  type MemoSpec,
+  type PaymentInput,
+  type ValidatedPayment,
+} from "./tx/validate.js";
