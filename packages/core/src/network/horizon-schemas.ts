@@ -94,3 +94,42 @@ export function nativeBalanceOf(account: AccountRecord): NativeBalance | null {
   }
   return null;
 }
+
+/** POST /transactions_async (ADR 0007). */
+export const ASYNC_TX_STATUSES = ["PENDING", "DUPLICATE", "TRY_AGAIN_LATER", "ERROR"] as const;
+export type AsyncTxStatus = (typeof ASYNC_TX_STATUSES)[number];
+
+export const asyncSubmitSchema = z.looseObject({
+  tx_status: z.enum(ASYNC_TX_STATUSES),
+  hash: z.string().regex(/^[0-9a-f]{64}$/),
+  error_result_xdr: z.string().optional(),
+});
+export type AsyncSubmitResponse = z.output<typeof asyncSubmitSchema>;
+
+/** GET /transactions/{hash} */
+export const transactionSchema = z.looseObject({
+  hash: z.string(),
+  successful: z.boolean(),
+  ledger: z.number().int(),
+  result_xdr: z.string(),
+  created_at: z.string(),
+});
+export type TransactionRecord = z.output<typeof transactionSchema>;
+
+/** GET /accounts/{id}/payments: only the counterparty fields firstTimeDestination needs. */
+const paymentRecordSchema = z.looseObject({
+  id: z.string(),
+  type: z.string(),
+  transaction_hash: z.string(),
+  created_at: z.string(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  account: z.string().optional(),
+  funder: z.string().optional(),
+  into: z.string().optional(),
+});
+export type PaymentRecord = z.output<typeof paymentRecordSchema>;
+
+export const paymentsPageSchema = z.looseObject({
+  _embedded: z.looseObject({ records: z.array(paymentRecordSchema) }),
+});

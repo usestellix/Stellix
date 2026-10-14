@@ -63,8 +63,13 @@ export {
   type HorizonClientOptions,
 } from "./network/horizon-client.js";
 export {
+  ASYNC_TX_STATUSES,
   nativeBalanceOf,
   type AccountRecord,
+  type AsyncSubmitResponse,
+  type AsyncTxStatus,
+  type PaymentRecord,
+  type TransactionRecord,
   type FeeStats,
   type HorizonRoot,
   type LedgerRecord,
@@ -190,3 +195,11 @@ export {
   type PaymentSummary,
   type SummaryContext,
 } from "./tx/summary.js";
+export {
+  RESOLVE_BACKOFF_MS,
+  RESOLVE_GRACE_MS,
+  pollOnce,
+  resolveTransaction,
+  type ResolveOptions,
+  type ResolveState,
+} from "./tx/resolve.js";

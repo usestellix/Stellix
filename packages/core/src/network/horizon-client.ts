@@ -4,13 +4,19 @@ import type { Platform } from "../platform.js";
 import { randomInt } from "../random.js";
 import {
   accountSchema,
+  asyncSubmitSchema,
   feeStatsSchema,
   ledgerPageSchema,
+  paymentsPageSchema,
   rootSchema,
+  transactionSchema,
   type AccountRecord,
+  type AsyncSubmitResponse,
   type FeeStats,
   type HorizonRoot,
   type LedgerRecord,
+  type PaymentRecord,
+  type TransactionRecord,
 } from "./horizon-schemas.js";
 
 // HorizonClient (NETWORK.md §2–3). M2 implements the read methods; submit, transactions,
@@ -25,6 +31,16 @@ export interface HorizonClient {
   getAccount(id: string): Promise<AccountRecord | null>;
   /** GET /fee_stats */
   getFeeStats(): Promise<FeeStats>;
+  /**
+   * POST /transactions_async (ADR 0007). Returns Horizon's tx_status. Never retried here.
+   * Throws NETWORK_ERROR (retryable) when the outcome is unknown: transport error, timeout,
+   * or a response without a valid status. The caller then resolves by hash.
+   */
+  submitTransactionAsync(envelopeXdr: string): Promise<AsyncSubmitResponse>;
+  /** GET /transactions/{hash}. 404 → null (not ingested, or never will be). */
+  getTransaction(hash: string): Promise<TransactionRecord | null>;
+  /** GET /accounts/{id}/payments, newest first. Unfunded account (404) → []. */
+  getPayments(id: string, limit: number): Promise<PaymentRecord[]>;
 }
 
 export interface HorizonClientOptions {
@@ -132,6 +148,57 @@ export function createHorizonClient(
     },
     getAccount: (id) => read(`accounts/${encodeURIComponent(id)}`, accountSchema, "null"),
     getFeeStats: () => required("fee_stats", feeStatsSchema),
+    getTransaction: (hash) =>
+      read(`transactions/${encodeURIComponent(hash)}`, transactionSchema, "null"),
+    getPayments: async (id, limit) => {
+      const page = await read(
+        `accounts/${encodeURIComponent(id)}/payments?order=desc&limit=${String(Math.min(Math.max(limit, 1), 200))}`,
+        paymentsPageSchema,
+        "null",
+      );
+      return page?._embedded.records ?? [];
+    },
+    submitTransactionAsync: async (envelopeXdr) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => {
+        controller.abort();
+      }, timeoutMs);
+      let res: Response;
+      try {
+        res = await platform.fetch(new URL("transactions_async", base).toString(), {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ tx: envelopeXdr }).toString(),
+          signal: controller.signal,
+        });
+      } catch {
+        throw new StellixError("NETWORK_ERROR", "Submit outcome unknown", true);
+      } finally {
+        clearTimeout(timer);
+      }
+      let body: unknown;
+      try {
+        body = await res.json();
+      } catch {
+        throw new StellixError(
+          "NETWORK_ERROR",
+          `Submit returned ${String(res.status)} without a status`,
+          true,
+        );
+      }
+      const parsed = asyncSubmitSchema.safeParse(body);
+      if (!parsed.success) {
+        throw new StellixError(
+          "NETWORK_ERROR",
+          `Submit returned ${String(res.status)} without a status`,
+          true,
+        );
+      }
+      return parsed.data;
+    },
   };
 }
 
