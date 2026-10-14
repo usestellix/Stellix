@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fixture } from "../../network/__tests__/fixtures.js";
 import type { EffectRecord, HistoryRecord } from "../../network/horizon-schemas.js";
 import {
+  applyFirstPage,
   isAccountOrigin,
   mergeAmountFromEffects,
   mergeHistoryItems,
@@ -212,5 +213,59 @@ describe("isAccountOrigin", () => {
     const page2 = normalizeHistory(records("history-multiop-page2"), me);
     expect(isAccountOrigin(page2.at(-1)!)).toBe(true);
     expect(page2.slice(0, -1).some(isAccountOrigin)).toBe(false);
+  });
+});
+
+describe("applyFirstPage (popup open: cache, then always refetch page 1)", () => {
+  const item = (id: number): HistoryItem => ({
+    id: String(id),
+    pagingToken: String(id),
+    hash: "h",
+    at: "2026-10-14T00:00:00Z",
+    direction: "in",
+    kind: "payment",
+    counterparty: "G",
+    amountStroops: "1",
+    successful: true,
+  });
+  const range = (from: number, to: number) =>
+    Array.from({ length: from - to + 1 }, (_, k) => item(from - k));
+  const ids = (l: { items: HistoryItem[] }) => l.items.map((i) => Number(i.id));
+
+  it("no cache → the fresh page as is", () => {
+    expect(applyFirstPage(null, range(30, 11), "11")).toEqual({
+      items: range(30, 11),
+      nextCursor: "11",
+    });
+  });
+
+  it("payments arrived while closed, overlapping the cache → merged, cache cursor kept", () => {
+    const cached = { items: range(25, 1), nextCursor: "1" };
+    const next = applyFirstPage(cached, range(30, 11), "11");
+    expect(ids(next)).toEqual(range(30, 1).map((i) => Number(i.id)));
+    expect(next.nextCursor).toBe("1");
+  });
+
+  it("nothing new → unchanged order, no duplicates", () => {
+    const cached = { items: range(20, 1), nextCursor: null };
+    expect(ids(applyFirstPage(cached, range(20, 1), null))).toEqual(ids(cached));
+  });
+
+  it("more than a page arrived while closed → the cache is dropped (no silent gap)", () => {
+    const cached = { items: range(10, 1), nextCursor: null };
+    const next = applyFirstPage(cached, range(60, 41), "41");
+    expect(ids(next)).toEqual(range(60, 41).map((i) => Number(i.id)));
+    expect(next.nextCursor).toBe("41");
+  });
+
+  it("a fresh page that is the whole history merges with the cache and ends the list", () => {
+    const cached = { items: range(5, 1), nextCursor: "1" };
+    expect(applyFirstPage(cached, range(7, 1), null)).toMatchObject({ nextCursor: null });
+  });
+
+  it("an empty cache behaves like none", () => {
+    expect(applyFirstPage({ items: [], nextCursor: null }, range(3, 1), null).items).toHaveLength(
+      3,
+    );
   });
 });

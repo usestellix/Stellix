@@ -135,6 +135,9 @@ describe("history streaming helpers", () => {
     expect(historyStreamUrl(BASE, "GABC")).toBe(
       `${BASE}/accounts/GABC/payments?cursor=now&include_failed=false&join=transactions`,
     );
+    expect(historyStreamUrl(`${BASE}/`, "GABC", "123")).toBe(
+      `${BASE}/accounts/GABC/payments?cursor=123&include_failed=false&join=transactions`,
+    );
   });
 
   it("parses a captured record and rejects junk", () => {

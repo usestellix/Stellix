@@ -151,7 +151,7 @@ const joinedTransactionSchema = z.looseObject({
 export const historyRecordSchema = paymentRecordSchema.extend({
   // Numeric: ids order the merged list (normalize.ts).
   id: z.string().regex(/^\d+$/),
-  paging_token: z.string(),
+  paging_token: z.string().regex(/^\d+$/),
   transaction_successful: z.boolean(),
   from_muxed: z.string().optional(),
   from_muxed_id: z.string().optional(),

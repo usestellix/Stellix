@@ -222,6 +222,39 @@ export function mergeHistoryItems(
   });
 }
 
+export interface HistoryList {
+  items: HistoryItem[];
+  /** Where the next older page starts; null once the end was reached. */
+  nextCursor: string | null;
+}
+
+/**
+ * Folds a freshly fetched first page into what the UI already shows (cache or earlier pages).
+ * Payments that arrived while the popup was closed must appear, and nothing may silently go
+ * missing in between:
+ * - the fresh page reaches into the known range (its oldest record is at or below the newest
+ *   known one) or is the whole history → merge, keep the known continuation cursor;
+ * - otherwise more than a page arrived meanwhile → there may be a gap, so drop the old list and
+ *   continue from the fresh page.
+ */
+export function applyFirstPage(
+  current: HistoryList | null,
+  fresh: readonly HistoryItem[],
+  freshNextCursor: string | null,
+): HistoryList {
+  const newestKnown = current?.items[0];
+  if (current === null || newestKnown === undefined) {
+    return { items: mergeHistoryItems([], fresh), nextCursor: freshNextCursor };
+  }
+  if (freshNextCursor === null) {
+    return { items: mergeHistoryItems(current.items, fresh), nextCursor: null };
+  }
+  if (BigInt(freshNextCursor) <= BigInt(newestKnown.pagingToken)) {
+    return { items: mergeHistoryItems(current.items, fresh), nextCursor: current.nextCursor };
+  }
+  return { items: mergeHistoryItems([], fresh), nextCursor: freshNextCursor };
+}
+
 /** True when this item is the account's very first operation (UI end-of-list copy). */
 export function isAccountOrigin(item: HistoryItem): boolean {
   return item.kind === "account_created" && item.direction === "in";

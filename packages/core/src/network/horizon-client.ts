@@ -65,11 +65,15 @@ export interface HorizonClient {
 
 const HISTORY_QUERY = "include_failed=false&join=transactions";
 
-/** SSE URL for payments from now on (NETWORK §6). The shell opens it with EventSource. */
-export function historyStreamUrl(baseUrl: string, id: string): string {
+/**
+ * SSE URL for payments after `cursor` (NETWORK §6); the shell opens it with EventSource. The
+ * popup passes the newest record it fetched, so nothing between that fetch and the stream
+ * opening is missed; "now" when it has none.
+ */
+export function historyStreamUrl(baseUrl: string, id: string, cursor = "now"): string {
   const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   return new URL(
-    `accounts/${encodeURIComponent(id)}/payments?cursor=now&${HISTORY_QUERY}`,
+    `accounts/${encodeURIComponent(id)}/payments?cursor=${encodeURIComponent(cursor)}&${HISTORY_QUERY}`,
     base,
   ).toString();
 }

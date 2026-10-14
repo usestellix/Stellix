@@ -216,12 +216,14 @@ export {
   type ResolveState,
 } from "./tx/resolve.js";
 export {
+  applyFirstPage,
   isAccountOrigin,
   mergeAmountFromEffects,
   mergeHistoryItems,
   normalizeHistory,
   normalizeHistoryRecord,
   type HistoryItem,
+  type HistoryList,
 } from "./history/normalize.js";
 export { SEP7_SCHEME, encodePayRequest, type PayRequest } from "./uri/sep7.js";
 export {
