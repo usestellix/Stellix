@@ -143,7 +143,13 @@ export {
   type KeyBytes,
   type VaultWithKey,
 } from "./vault/vault.js";
-export { PERSISTENT_KEYS, PREPARED_TX_KEY_PREFIX, SESSION_KEYS } from "./storage-keys.js";
+export {
+  INFLIGHT_KEY_PREFIX,
+  PERSISTENT_KEYS,
+  PREPARED_TX_KEY_PREFIX,
+  SESSION_KEYS,
+  SW_CACHE_PREFIX,
+} from "./storage-keys.js";
 export { isMultisig, summarizeAccount, type AccountSummary } from "./stellar/account-summary.js";
 export { isAccountId, isMuxedAddress, looksLikeSecretSeed } from "./stellar/address.js";
 export {
@@ -203,3 +209,16 @@ export {
   type ResolveOptions,
   type ResolveState,
 } from "./tx/resolve.js";
+export {
+  awaitOutcome,
+  cancelPayment,
+  confirmPayment,
+  dismissOutcome,
+  listInflight,
+  preparePayment,
+  resumeInflight,
+  submitPrepared,
+  type InflightView,
+  type SendDeps,
+  type SubmitOutcome,
+} from "./services/send.js";

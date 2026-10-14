@@ -16,3 +16,7 @@ export const SESSION_KEYS = {
 } as const;
 
 export const PREPARED_TX_KEY_PREFIX = "preparedTx:";
+/** In-flight (signed, submitted) transactions. Survive lock; cleared by reset (ADR 0007). */
+export const INFLIGHT_KEY_PREFIX = "inflight:";
+/** SW-side caches in session storage (fee, base reserve). */
+export const SW_CACHE_PREFIX = "sw:";
