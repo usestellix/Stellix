@@ -209,6 +209,7 @@ export {
   type ResolveOptions,
   type ResolveState,
 } from "./tx/resolve.js";
+export { SEP7_SCHEME, encodePayRequest, type PayRequest } from "./uri/sep7.js";
 export {
   awaitOutcome,
   cancelPayment,
