@@ -14,10 +14,19 @@ import { Button, IconButton } from "../components/button.js";
 import { Callout } from "../components/callout.js";
 import { ErrorText } from "../components/error-text.js";
 import { InflightBanners } from "../components/inflight-banner.js";
-import { ChevronDownIcon, GearIcon, InfoIcon, LockIcon, RefreshIcon } from "../components/icons.js";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  CopyIcon,
+  GearIcon,
+  InfoIcon,
+  LockIcon,
+  RefreshIcon,
+} from "../components/icons.js";
 import { PopupHeader } from "../components/popup-header.js";
 import { errorCopy } from "../errorCopy.js";
 import { useAccountSummary } from "../hooks/use-account-summary.js";
+import { useCopy } from "../hooks/use-copy.js";
 import { useAction } from "../hooks/use-request.js";
 import type { HistorySnapshot } from "../lib/history-controller.js";
 import { asOfTime, displayXlm } from "../lib/xlm.js";
@@ -53,6 +62,8 @@ const COPY = {
   viewAll: "View all",
   send: "Send",
   receive: "Receive",
+  copyAddress: "Copy address",
+  copied: "Copied",
 } as const;
 
 export function HomeScreen({
@@ -95,6 +106,7 @@ export function HomeScreen({
     if (activity > 0) refresh();
   }, [activity, refresh]);
   const friendbot = useAction();
+  const copier = useCopy();
   const [showReserve, setShowReserve] = useState(false);
 
   const fund = async () => {
@@ -111,26 +123,37 @@ export function HomeScreen({
       <PopupHeader
         network={network}
         leading={
-          <button
-            type="button"
-            onClick={onOpenAccounts}
-            aria-label={COPY.accounts}
-            className="pressable -ml-2 flex max-w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left hover-fine:bg-fill"
-          >
-            <span className="min-w-0">
-              <span
-                className="block truncate text-[14px] font-semibold tracking-[-0.01em]"
-                data-testid="account-label"
-                title={account.label}
-              >
-                {account.label}
+          <div className="flex min-w-0 items-center gap-0.5">
+            <button
+              type="button"
+              onClick={onOpenAccounts}
+              aria-label={COPY.accounts}
+              className="pressable -ml-2 flex min-w-0 items-center gap-1.5 rounded-lg px-2 py-1 text-left hover-fine:bg-fill"
+            >
+              <span className="min-w-0">
+                <span
+                  className="block truncate text-[14px] font-semibold tracking-[-0.01em]"
+                  data-testid="account-label"
+                  title={account.label}
+                >
+                  {account.label}
+                </span>
+                <span className="block font-mono text-[12px] text-muted" title={account.publicKey}>
+                  {truncateAddress(account.publicKey)}
+                </span>
               </span>
-              <span className="block font-mono text-[12px] text-muted" title={account.publicKey}>
-                {truncateAddress(account.publicKey)}
-              </span>
-            </span>
-            <ChevronDownIcon size={14} className="shrink-0 text-faint" />
-          </button>
+              <ChevronDownIcon size={14} className="shrink-0 text-faint" />
+            </button>
+            {/* PRODUCT §4.4: copy next to the truncated address. The label doubles as feedback. */}
+            <IconButton
+              label={copier.copied ? COPY.copied : COPY.copyAddress}
+              data-testid="header-copy"
+              onClick={() => void copier.copy(account.publicKey)}
+              className="size-7"
+            >
+              {copier.copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
+            </IconButton>
+          </div>
         }
         trailing={
           <>
@@ -144,6 +167,7 @@ export function HomeScreen({
         }
       />
       <main className="flex-1 space-y-4 overflow-y-auto p-4">
+        {copier.error !== null && <ErrorText>{errorCopy(copier.error)}</ErrorText>}
         <InflightBanners
           items={inflight.filter((i) => i.summary.source === account.publicKey)}
           onChange={onInflightChange}

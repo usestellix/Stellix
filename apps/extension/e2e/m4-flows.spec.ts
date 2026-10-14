@@ -80,6 +80,12 @@ const rows = (popup: Page) => popup.getByTestId("activity-row");
 test("Receive: address QR, copy, and a SEP-7 request link", async ({ context, extensionId }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   const { popup, me } = await wallet(context, extensionId);
+  // PRODUCT §4.4: Home's header copies the full address next to the truncated one.
+  await popup.getByTestId("header-copy").click();
+  await expect(popup.getByTestId("header-copy")).toHaveAccessibleName("Copied");
+  expect(await popup.evaluate(() => navigator.clipboard.readText())).toBe(me);
+  await popup.evaluate(() => navigator.clipboard.writeText(""));
+
   await popup.getByRole("button", { name: "Receive" }).click();
   await expect(popup.getByTestId("qr")).toHaveAttribute("data-value", me);
   await expect(popup.getByText("Send at least 1 XLM to activate this account.")).toBeVisible();

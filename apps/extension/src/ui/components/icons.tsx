@@ -189,3 +189,13 @@ export function AccountIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Copy: two offset sheets. */
+export function CopyIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="7.25" y="7.25" width="9" height="9" rx="1.75" />
+      <path d="M12.75 4.75v-.5a1.5 1.5 0 0 0-1.5-1.5h-6a1.5 1.5 0 0 0-1.5 1.5v6a1.5 1.5 0 0 0 1.5 1.5h.5" />
+    </Icon>
+  );
+}
