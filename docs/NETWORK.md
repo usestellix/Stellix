@@ -127,29 +127,37 @@ For memos: payment records don't include the memo. Fetch via `?join=transactions
 
 ## 5. History normalization (`core/history/normalize.ts`)
 
+Source: `GET /accounts/{id}/payments?order=desc&limit=20&include_failed=false&join=transactions`, paged by the last record's `paging_token` (`HorizonClient.getHistoryPage`). Failed transactions are excluded in the MVP. An unfunded account (404) is an empty list. Shapes are pinned by captured fixtures (`history-page`, `history-multiop-page1/2`, `effects-account-merge`).
+
 Convert Horizon records into a UI-ready shape:
 
 ```ts
 type HistoryItem = {
-  id: string;                  // operation id
+  id: string;                  // operation id (numeric; orders merged lists)
   pagingToken: string;
   hash: string;
   at: string;                  // ISO time
   direction: "in" | "out" | "self";
-  kind: "payment" | "account_created" | "account_merged" | "other";
-  counterparty: string;        // G or M
-  amountStroops: string | null;// null if unknown (merge without effects fetched yet)
-  memo?: { type: string; value: string };
+  kind: "payment" | "account_created" | "account_merged";
+  counterparty: string;        // G or M, as used on chain
+  amountStroops: string | null;// null for a merge until its effects are read
+  memo?: { type: "text" | "id" | "hash" | "return"; value: string };
+  muxedId?: string;            // recipient ID when paid to our M address
   successful: boolean;
+  fee?: { stroops: string; operationCount: number }; // only when fee_account === me
 };
 ```
 
 Rules:
-- `payment` native: `direction = from === me ? "out" : "in"` (compare base accounts; handle `from_muxed`/`to_muxed`).
-- `payment` non-native and path payments not delivering native: `kind: "other"`, hidden in MVP UI.
-- `create_account`: `in` if `account === me` (counterparty = `funder`), `out` if `funder === me` (counterparty = `account`). Amount = `starting_balance`.
-- `account_merge`: `in` if `into === me`, `out` if `account === me`. Amount: fetch effects lazily when the row is expanded.
-- Amount strings → bigint stroops via `parseXlm`.
+- Directions compare **base** accounts. Horizon reports `from`/`to` as `G` and adds `from_muxed`/`to_muxed`/`to_muxed_id`; the counterparty keeps the muxed form.
+- `payment` native: `out` if `from === me`, `in` if `to === me`, `self` if both.
+- Path payments: shown only when XLM moves on our side. Outgoing paid in XLM → amount = `source_amount`. Incoming delivering XLM → amount = `amount`.
+- Everything else (non-native payments, path payments without XLM on our side, other operation types) normalizes to `null` and is hidden in the MVP.
+- `create_account`: `in` if `account === me` (counterparty = `funder`), `out` if `funder === me` (counterparty = `account`). Amount = `starting_balance`. An incoming `create_account` is the account's origin (end-of-list copy, UI_FLOWS §7).
+- `account_merge`: `in` if `into === me`, `out` if `account === me`. Amount: `GET /operations/{id}/effects` when the row is opened; `account_credited` (in) or `account_debited` (out) for our account.
+- **Fee:** `transaction.fee_charged` is the whole transaction's fee. It's attached only when `transaction.fee_account` is this account, never merely because the item is outgoing. A multi-op transaction carries the same fee on each of its items, so the UI shows it only in the detail sheet (UI_FLOWS §7).
+- Amount strings → bigint stroops via `parseHorizonAmount`.
+- Merging pages, cached items and streamed items: dedupe by operation id, newest first; fresh records win, except a merge amount already loaded is kept (`mergeHistoryItems`).
 
 ## 6. Refresh strategy (popup)
 
