@@ -1,4 +1,4 @@
-import type { NetworkId } from "../network/network-id.js";
+import type { NetworkId } from "../network/config.js";
 import type { Platform } from "../platform.js";
 import { readSettings } from "../settings.js";
 import { PERSISTENT_KEYS, SESSION_KEYS } from "../storage-keys.js";

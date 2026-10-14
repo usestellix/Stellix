@@ -39,7 +39,7 @@ export {
   parseMnemonic,
   unknownWordPositions,
 } from "./keys/mnemonic.js";
-export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./network/network-id.js";
+export { DEFAULT_NETWORK, NETWORK_IDS, isNetworkId, type NetworkId } from "./network/config.js";
 export {
   PASSWORD_MIN_LENGTH,
   assertPasswordPolicy,

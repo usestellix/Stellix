@@ -1,0 +1,9 @@
+{
+  "status": 400,
+  "body": {
+    "type": "https://stellar.org/friendbot-errors/bad_request",
+    "title": "Bad Request",
+    "status": 400,
+    "detail": "account already funded to starting balance"
+  }
+}
