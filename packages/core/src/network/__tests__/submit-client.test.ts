@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createHorizonClient } from "../horizon-client.js";
+import { createHorizonClient, historyStreamUrl, parseHistoryRecord } from "../horizon-client.js";
 import { fixture, fromFixture, json, scriptedFetch } from "./fixtures.js";
 
 const BASE = "https://horizon-testnet.stellar.org";
@@ -76,5 +76,72 @@ describe("getTransaction / getPayments", () => {
     );
     expect(f.calls[0]!.url).toBe(`${BASE}/accounts/GABC/payments?order=desc&limit=200`);
     expect(await client.getPayments("GNEW", 10)).toEqual([]);
+  });
+});
+
+describe("getHistoryPage / getOperationEffects (NETWORK §5)", () => {
+  const me = (fixture("history-me").body as { id: string }).id;
+
+  it("requests newest first, 20 per page, failed excluded, transactions joined", async () => {
+    const f = scriptedFetch([fromFixture("history-multiop-page1")]);
+    const page = await createHorizonClient(BASE, f, { sleep: noSleep }).getHistoryPage(me);
+    expect(f.calls[0]!.url).toBe(
+      `${BASE}/accounts/${me}/payments?order=desc&limit=20&include_failed=false&join=transactions`,
+    );
+    expect(page.records).toHaveLength(20);
+    expect(page.records[0]!.transaction).toMatchObject({ fee_account: me, operation_count: 25 });
+    expect(page.nextCursor).toBe(page.records[19]!.paging_token);
+  });
+
+  it("continues from the cursor; a short page ends the list", async () => {
+    const f = scriptedFetch([fromFixture("history-multiop-page2")]);
+    const page = await createHorizonClient(BASE, f, { sleep: noSleep }).getHistoryPage(me, "123");
+    expect(f.calls[0]!.url).toContain("&cursor=123");
+    expect(page.records.length).toBeLessThan(20);
+    expect(page.nextCursor).toBeNull();
+  });
+
+  it("unfunded account (404) → empty, end of list", async () => {
+    const f = scriptedFetch([fromFixture("account-not-found")]);
+    expect(await createHorizonClient(BASE, f, { sleep: noSleep }).getHistoryPage("GNEW")).toEqual({
+      records: [],
+      nextCursor: null,
+    });
+  });
+
+  it("rejects a record without its joined transaction", async () => {
+    const page = fixture("history-page").body as {
+      _embedded: { records: Record<string, unknown>[] };
+    };
+    delete page._embedded.records[0]!.transaction;
+    const f = scriptedFetch([json(200, page)]);
+    await expect(
+      createHorizonClient(BASE, f, { sleep: noSleep }).getHistoryPage(me),
+    ).rejects.toMatchObject({ code: "HORIZON_BAD_RESPONSE" });
+  });
+
+  it("reads merge effects", async () => {
+    const f = scriptedFetch([fromFixture("effects-account-merge")]);
+    const effects = await createHorizonClient(BASE, f, { sleep: noSleep }).getOperationEffects(
+      "42",
+    );
+    expect(f.calls[0]!.url).toBe(`${BASE}/operations/42/effects?limit=50`);
+    expect(effects.find((e) => e.type === "account_credited")).toMatchObject({ account: me });
+  });
+});
+
+describe("history streaming helpers", () => {
+  it("builds the from-now SSE URL with the same query", () => {
+    expect(historyStreamUrl(BASE, "GABC")).toBe(
+      `${BASE}/accounts/GABC/payments?cursor=now&include_failed=false&join=transactions`,
+    );
+  });
+
+  it("parses a captured record and rejects junk", () => {
+    const [record] = (fixture("history-page").body as { _embedded: { records: unknown[] } })
+      ._embedded.records;
+    expect(parseHistoryRecord(record)).toMatchObject({ type: "account_merge" });
+    expect(parseHistoryRecord("hello")).toBeNull();
+    expect(parseHistoryRecord({ id: "1" })).toBeNull();
   });
 });

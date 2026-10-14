@@ -58,7 +58,11 @@ export {
 } from "./network/config.js";
 export { fundWithFriendbot } from "./network/friendbot.js";
 export {
+  HISTORY_PAGE_SIZE,
   createHorizonClient,
+  historyStreamUrl,
+  parseHistoryRecord,
+  type HistoryPage,
   type HorizonClient,
   type HorizonClientOptions,
 } from "./network/horizon-client.js";
@@ -68,6 +72,8 @@ export {
   type AccountRecord,
   type AsyncSubmitResponse,
   type AsyncTxStatus,
+  type EffectRecord,
+  type HistoryRecord,
   type PaymentRecord,
   type TransactionRecord,
   type FeeStats,
