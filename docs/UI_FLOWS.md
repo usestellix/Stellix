@@ -61,8 +61,8 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 ## 4. Home (popup)
 
 - **Balance card**: total XLM (large), below it "Available: X XLM · Reserved: Y XLM ⓘ". Tooltip: "Stellar keeps a small amount of XLM locked in every account. You can't send it, but you get it back if you close the account."
-- Buttons: **Send**, **Receive**.
-- **Recent activity**: last 10 normalized history items; "View all".
+- Buttons: **Send**, **Receive** (Send only for funded single-signer accounts; Receive always).
+- **Recent activity**: last 10 normalized history items; "View all" opens History (§7). The full address lives on Receive (§6); the header shows it truncated.
 - States:
   - loading (skeletons)
   - funded
@@ -106,10 +106,15 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 - States: default, request-amount (empty / invalid / valid), unfunded hint ("Send at least 1 XLM to activate this account").
 
 ## 7. History (popup)
-- Infinite scroll, 20 per page.
-- Row: direction icon, "Received from GABC…WXYZ" / "Sent to …" / "Account activated by …", amount (+/−), relative time; memo as a secondary line if present.
-- Tap → detail sheet: full addresses, memo, fee (if outgoing), hash, explorer link.
-- States: loading, empty ("No activity yet"), error with retry, end of list.
+- Infinite scroll, 20 per page (older pages load when the end of the list comes into view; a page holding only hidden non-XLM records loads the next one).
+- Row: direction icon, "Received from GABC…WXYZ" / "Sent to …" / "Account activated by …" / "Activated …" / "Merged in from …" / "Merged into …", amount (+/−), relative time; memo as a secondary line if present. Rows never show a fee.
+- Tap → detail screen: amount, From / To (full addresses; "You" for this account, plus the recipient ID when paid to our `M` address), memo, fee, date, hash, "View on explorer" (opens a tab; NETWORK §8).
+  - Fee only when this account paid it (`fee_account`), not merely because the item is outgoing. "Network fee" for a single-operation transaction; **"Transaction fee"** for a multi-op one, with "Paid once for all N operations in this transaction."
+  - A merge's amount is loaded from its effects when the detail opens.
+- Live while the popup is open (NETWORK §6): new payments appear at the top and the balance refetches.
+- States: loading, empty ("No activity yet"), error with retry (also for a failed older page), end of list. The end is worded by what we know, since Horizon keeps about a year:
+  - the oldest item is the `create_account` that funded this account → "This is where your account started.";
+  - otherwise → "No older activity available from this server."
 
 ## 8. Accounts (popup)
 - List: label, truncated address, XLM balance (lazy).

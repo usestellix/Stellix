@@ -161,12 +161,13 @@ Rules:
 
 ## 6. Refresh strategy (popup)
 
-The SW can't hold a long-lived SSE connection (it gets terminated). So:
+The SW can't hold a long-lived SSE connection (it gets terminated). So the popup owns it (`ui/lib/history-controller.ts`):
 
-- On popup open: fetch account + first history page.
-- While the popup is open: open an SSE stream on `/accounts/{id}/payments?cursor=now` (via `EventSource`); on each event, refetch the account and prepend the normalized item. Close the stream on popup unload.
-- If SSE fails, fall back to polling the account every 15 s while the popup is visible.
-- After a successful send: refetch account immediately.
+- On popup open: fetch the account, and render cached history pages (`ui:history:<network>:<account>` in `chrome.storage.session`, first 60 items) if any.
+- **Always** refetch history page 1 and merge it by operation id, so payments that arrived while the popup was closed appear. If the fresh page doesn't reach the cached range (more than a page arrived meanwhile), the cache is dropped rather than leaving a silent gap (`applyFirstPage`).
+- Then open an SSE stream on `/accounts/{id}/payments?cursor=<newest fetched paging token>&include_failed=false&join=transactions` (via `EventSource`; `cursor=now` only when there's no history yet). Starting from the newest fetched record rather than `now` means nothing between the fetch and the stream opening is lost; duplicates are dropped by id. On each new item, refetch the account. Close the stream on popup unload.
+- The browser reconnects a dropped stream by itself (Horizon's `id:` is the paging token, so `Last-Event-ID` resumes it). If the stream is closed for good (for example 404 for an unfunded account), fall back to polling page 1 every 15 s while the popup is visible; a new item refetches the account, which is how an unfunded account's activation shows up.
+- After a successful send: refetch account and history page 1 immediately.
 - Never poll while the popup is closed in the MVP. (Background notifications for incoming payments are post-MVP and would need an alarm-driven poll — ADR first.)
 
 ## 7. Base reserve

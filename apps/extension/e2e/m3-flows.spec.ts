@@ -6,7 +6,7 @@ import {
   fundWithFriendbot,
 } from "../../../packages/core/src/index.js";
 import { expect, test } from "./fixtures.js";
-import { createWalletViaUi, openPopup, sendFrom } from "./helpers.js";
+import { activeAddress, createWalletViaUi, openPopup, sendFrom } from "./helpers.js";
 
 // M3 flows against live testnet (TESTING §3 flow 3; M3 exit: killing the SW mid-submit still
 // resolves to a definitive outcome). History assertions move to M4.
@@ -39,7 +39,7 @@ async function fundedWallet(context: BrowserContext, extensionId: string): Promi
   await createWalletViaUi(context, extensionId);
   const popup = await openPopup(context, extensionId);
   await popup.setViewportSize({ width: 360, height: 600 });
-  const address = (await popup.getByTestId("full-address").innerText()).replaceAll(" ", "");
+  const address = (await activeAddress(popup)).replaceAll(" ", "");
   await fund(address);
   await popup.reload();
   await expect(popup.getByTestId("balance-card")).toHaveAttribute("data-state", "funded", {

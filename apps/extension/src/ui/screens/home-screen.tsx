@@ -2,12 +2,14 @@ import {
   NETWORKS,
   fundWithFriendbot,
   type AccountMeta,
+  type HistoryItem,
   type HorizonClient,
   type InflightView,
   type NetworkId,
 } from "@stellix/core";
-import { useState } from "react";
-import { GroupedAddress, truncateAddress } from "../components/address.js";
+import { useEffect, useState } from "react";
+import { ActivitySkeleton } from "../components/activity-row.js";
+import { truncateAddress } from "../components/address.js";
 import { Button, IconButton } from "../components/button.js";
 import { Callout } from "../components/callout.js";
 import { ErrorText } from "../components/error-text.js";
@@ -17,7 +19,12 @@ import { PopupHeader } from "../components/popup-header.js";
 import { errorCopy } from "../errorCopy.js";
 import { useAccountSummary } from "../hooks/use-account-summary.js";
 import { useAction } from "../hooks/use-request.js";
+import type { HistorySnapshot } from "../lib/history-controller.js";
 import { asOfTime, displayXlm } from "../lib/xlm.js";
+import { ActivityList } from "./history-screen.js";
+
+/** UI_FLOWS §4: the last 10 items on Home; "View all" opens Activity. */
+const RECENT_ACTIVITY = 10;
 
 // Home (UI_FLOWS §4).
 
@@ -42,7 +49,8 @@ const COPY = {
     "This account uses multiple signers. Stellix can show its balance but can't send from it.",
   retry: "Try again",
   asOf: (t: string) => `Last known balance, as of ${t}`,
-  address: "Address",
+  activity: "Recent activity",
+  viewAll: "View all",
   send: "Send",
   receive: "Receive",
 } as const;
@@ -58,6 +66,10 @@ export function HomeScreen({
   onInflightChange,
   onSend,
   onReceive,
+  history,
+  onViewAll,
+  onOpenActivity,
+  onRetryActivity,
 }: {
   account: AccountMeta;
   network: NetworkId;
@@ -71,8 +83,17 @@ export function HomeScreen({
   onSend: (availableStroops: bigint) => void;
   /** Receive is always offered; `unfunded` adds the activation hint. */
   onReceive: (unfunded: boolean) => void;
+  history: HistorySnapshot | null;
+  onViewAll: () => void;
+  onOpenActivity: (item: HistoryItem) => void;
+  onRetryActivity: () => void;
 }) {
   const { state, refresh } = useAccountSummary(account.publicKey, network, horizon);
+  // A new payment arrived (stream or poll): the balance changed too (NETWORK §6).
+  const activity = history?.activity ?? 0;
+  useEffect(() => {
+    if (activity > 0) refresh();
+  }, [activity, refresh]);
   const friendbot = useAction();
   const [showReserve, setShowReserve] = useState(false);
 
@@ -256,11 +277,31 @@ export function HomeScreen({
           </Button>
         </div>
 
-        <section className="space-y-1.5 px-1">
-          <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
-            {COPY.address}
-          </h2>
-          <GroupedAddress address={account.publicKey} />
+        <section className="space-y-1" data-testid="recent-activity">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+              {COPY.activity}
+            </h2>
+            {history !== null && history.items.length > 0 && (
+              <button
+                type="button"
+                onClick={onViewAll}
+                className="pressable rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-secondary hover-fine:bg-fill"
+              >
+                {COPY.viewAll}
+              </button>
+            )}
+          </div>
+          {history === null ? (
+            <ActivitySkeleton />
+          ) : (
+            <ActivityList
+              snapshot={history}
+              onOpen={onOpenActivity}
+              onRetry={onRetryActivity}
+              limit={RECENT_ACTIVITY}
+            />
+          )}
         </section>
       </main>
     </div>
