@@ -16,7 +16,7 @@ The mobile app is **not** built during the MVP. This document exists so MVP code
 | `keys` (`@scure/bip39`, SLIP-0010) | Pure JS — works. Needs `crypto.getRandomValues` → `react-native-get-random-values` (or `expo-crypto`) imported first in the app entry. |
 | `vault` (scrypt + AES-GCM) | scrypt (`@noble/hashes`) is pure JS — works, but slower on low-end phones; benchmark and tune N per platform (params are in the vault header, so per-platform N is fine). AES-GCM needs WebCrypto `subtle`: use a vetted RN WebCrypto polyfill or switch the AES implementation to `@noble/ciphers` (`gcm`) behind the same function signatures. **Decide by ADR before mobile starts; prefer `@noble/ciphers` in core from the beginning if it simplifies both platforms.** |
 | `stellar`, `tx`, `history`, `uri` | `@stellar/stellar-sdk` works in RN with a `Buffer` global polyfill (`buffer` package) set in the app entry. |
-| `network` | Uses injected `fetch` — works. SSE: RN has no `EventSource`; use a small polyfill or polling on mobile. Keep `streamPayments` behind the interface so the shell chooses. |
+| `network` | Uses injected `fetch` — works. SSE: core supplies `historyStreamUrl` and `parseHistoryRecord`; the extension's history controller (`apps/extension/src/ui/lib/history-controller.ts`) takes the `EventSource` constructor and the store as parameters and falls back to polling without one. RN has no `EventSource`: pass a small polyfill, or nothing to poll. The controller has no browser dependency beyond those parameters, so it can move into core when the mobile shell needs it. |
 | `errors`, `platform` | Unchanged. |
 
 ## 3. What gets reimplemented in the mobile shell

@@ -28,8 +28,9 @@ Three layers. Each has a clear job; don't use a slower layer for something a fas
 | `tx/summary.test.ts` | Summary built from tx matches inputs; rejects multi-op, wrong op type, wrong source. |
 | `tx/resolve.test.ts` | With fake clock + fake Horizon: found immediately, found after N polls, never found → FAILED after maxTime+buffer, network errors during polling. |
 | `tx/errors.test.ts` | Every row in TRANSACTIONS §8. |
-| `history/normalize.test.ts` | Fixtures for each operation type and direction, muxed fields, non-native filtered. |
-| `uri/sep7.test.ts` | Encode/decode with amount, memo, memo_type; URL-encoding of memo text. |
+| `history/normalize.test.ts` | Fixtures for each operation type and direction, muxed fields, non-native filtered. Fee only when `fee_account` is this account, on every item of the captured 25-op transaction (`history-multiop-page1/2`) and absent for the recipient. `applyFirstPage` merge vs gap. |
+| `uri/sep7.test.ts` | Encode (decode is deferred until something consumes links) with amount, memo, memo_type, `network_passphrase` off the public network; URL-encoding of memo text; the spec's own `pay` example. |
+| `apps/extension/src/ui/lib/__tests__/` | QR: ECC M, 4-module quiet zone, one-path rendering, and a decoder round-trip back to the exact URI. History controller (fake Horizon, scripted EventSource, manual timers): cache first, then always page 1; stream from the newest record; closed stream → 15 s polling while visible; paging and hidden-only pages; merge amounts; restart after stop. History cache validation and size cap. |
 | `messaging/schemas.test.ts` (extension) | Each request type accepts valid payloads and rejects malformed ones. |
 | `messaging/sender.test.ts` (extension) | Rejects foreign `sender.id`, non-extension URLs, onboarding-only types from the popup. |
 
@@ -56,6 +57,7 @@ Horizon response fixtures live in `packages/core/src/__fixtures__/horizon/*.json
   5. Stale sequence: build two txs from the same loaded account, submit both → second gets `tx_bad_seq` → mapped to rebuild.
   6. Max send: send `maxSendable` → succeeds, remaining balance = minimum balance.
   7. fee_stats parses.
+  8. History (`history/__tests__/history.testnet.test.ts`): a 22-operation payment A → B pages by cursor (20 + 2 + A's Friendbot origin), every item carries the memo, A's items carry the fee (`fee_account`), B's don't.
 
 ## 3. E2E (Playwright)
 
@@ -75,7 +77,7 @@ To terminate the SW, use CDP `ServiceWorker.stopAllWorkers` from a page session.
 Required flows (testnet, live network):
 1. Create wallet → verify words → password → popup unlocked → Friendbot → balance shows.
 2. Import a known testnet phrase (generated in test setup) → same `G...` as derived in Node.
-3. Send to a fresh address (activation) → success → history shows it.
+3. Send to a fresh address (activation) → success → history shows it (with the network fee in its detail).
 4. Lock → unlock wrong password → error → correct password → home.
 5. **SW termination**: unlock, terminate the SW (via CDP `ServiceWorker.stopWorker` or by waiting out idle), reopen popup → still unlocked (session storage survived) → send works.
 6. Auto-lock: set auto-lock to minimum, advance time (or wait), confirm locked.
@@ -94,12 +96,17 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
   - Security: change password, reveal phrase in its own tab, reset.
   - Blocking Horizon with `context.route` shows the error state with the greyed last-known balance.
 - **M3 (`e2e/m3-flows.spec.ts`, live testnet):**
-  - Flow 3: activate a fresh address. The recipient's balance is checked from Node; the history assertion moves to M4.
+  - Flow 3: activate a fresh address. The recipient's balance is checked from Node; since M4 the wallet's history shows "Activated …" with its network fee.
   - A text-memo payment to an existing account.
   - SEP-29: an account with the data entry set in test setup auto-opens the memo, and sending without one is blocked.
   - Insufficient balance offers "Send max".
   - A network switch between Review and Confirm gives `NETWORK_MISMATCH`, then Review again.
   - **M3 exit:** the SW is killed ~150 ms after Confirm. Resolution must leave nothing "resolving", and the recipient is funded **iff** the wallet reports success (no double send, no false report).
+- **M4 (`e2e/m4-flows.spec.ts`, live testnet):**
+  - Receive: the QR encodes the address; Copy shows "Copied" and the clipboard holds the address; a request shows no QR until valid, then the exact SEP-7 URI (with the testnet passphrase); Copy payment link.
+  - **M4 exit:** with the popup open and never reloaded, a payment sent from Node appears with its memo, and the balance updates. Its detail shows no fee (the sender paid it) and an explorer link.
+  - A payment made while the popup was closed appears on reopen (cached page, then page 1).
+  - Pagination: a 25-operation incoming payment → Home shows 10, Activity 20, scrolling reaches 26 and "This is where your account started."
 - **Also covered:**
   - the SW-enforced unlock throttle, checked from a fresh popup
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`
