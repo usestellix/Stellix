@@ -113,7 +113,7 @@ At SW startup: `chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CO
 
 1. Releases are built **only in CI** from a tagged commit. No local builds get uploaded.
 2. CI produces the store zip and publishes its SHA-256 plus the commit hash in the GitHub release notes.
-3. Builds must be reproducible: same commit + lockfile → same zip hash. Pin Node and pnpm versions in CI (`.nvmrc`, `packageManager` field).
+3. Builds must be reproducible: same commit + lockfile → same zip hash. Pin Node and pnpm versions in CI (`.nvmrc`, `packageManager` field). CI proves it on every push: two independent runners build the zip, and the `reproducible` job fails if their `SHA256SUMS` differ (`scripts/release-hashes.mjs`: the zip's hash plus one per file). Verified locally on 2026-10-17: identical hashes across separate runs and checkout paths.
 4. Chrome Web Store developer account and the GitHub org use hardware security keys for 2FA. At least two maintainers can publish; publishing credentials are scoped to CI.
 5. About screen shows version + commit hash so users can compare with the release.
 6. Release checklist (in `.github/RELEASE.md` when created): changelog, permission diff check (manifest permissions unchanged unless ADR'd), dependency diff review, E2E pass, manual smoke test on testnet.

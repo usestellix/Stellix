@@ -87,3 +87,45 @@ jobs:
           name: playwright-report-mainnet
           path: apps/extension/playwright-report
           retention-days: 7
+
+  # SECURITY §9.3: same commit + lockfile → same zip. Two independent runners build the store
+  # zip; `reproducible` fails if the hashes differ and lists the files that changed.
+  zip:
+    strategy:
+      matrix:
+        build: [a, b]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm zip
+      - run: node scripts/release-hashes.mjs apps/extension/.output/stellixextension-*-chrome.zip > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: zip-${{ matrix.build }}
+          path: SHA256SUMS
+          retention-days: 7
+
+  reproducible:
+    needs: zip
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: hashes
+      - run: |
+          if diff -u hashes/zip-a/SHA256SUMS hashes/zip-b/SHA256SUMS; then
+            echo "Reproducible: both builds match."
+          else
+            echo "::error::The two builds differ (see the diff above)."
+            exit 1
+          fi
