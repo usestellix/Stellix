@@ -60,7 +60,7 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 
 ## 4. Home (popup)
 
-- **Balance card**: total XLM (large), below it "Available: X XLM   Reserved: Y XLM ⓘ" (two groups that never break internally; on a long balance the Reserved group, icon included, wraps to the next line). Tooltip: "Stellar keeps a small amount of XLM locked in every account. You can't send it, but you get it back if you close the account."
+- **Balance card**: total XLM (large; steps down from 28 to 22 to 18 px for long values so even the int64 maximum fits, never truncated), below it "Available: X XLM   Reserved: Y XLM ⓘ" (two groups that never break internally; on a long balance the Reserved group, icon included, wraps to the next line). Tooltip: "Stellar keeps a small amount of XLM locked in every account. You can't send it, but you get it back if you close the account."
 - Buttons: **Send**, **Receive** (Send only for funded single-signer accounts; Receive always).
 - **Recent activity**: last 10 normalized history items; "View all" opens History (§7). The full address lives on Receive (§6); the header shows it truncated.
 - States:

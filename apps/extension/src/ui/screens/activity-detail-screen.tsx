@@ -1,6 +1,7 @@
 import { NETWORKS, type HistoryItem, type NetworkId } from "@stellix/core";
 import { useEffect, useRef, type ReactNode } from "react";
 import { GroupedAddress } from "../components/address.js";
+import { BigAmount } from "../components/big-amount.js";
 import { ErrorText } from "../components/error-text.js";
 import { ExternalIcon } from "../components/icons.js";
 import { SubScreen } from "../components/sub-screen.js";
@@ -60,22 +61,20 @@ export function ActivityDetailScreen({
       testId="activity-detail"
     >
       <div className="space-y-5">
-        <p
-          className="tabular text-[28px] font-semibold leading-tight tracking-[-0.02em]"
-          data-testid="detail-amount"
-        >
-          {amount === null ? (
-            merge.state.kind === "error" ? (
+        {amount === null ? (
+          <p
+            className="text-[28px] font-semibold leading-tight tracking-[-0.02em]"
+            data-testid="detail-amount"
+          >
+            {merge.state.kind === "error" ? (
               "—"
             ) : (
               <span className="text-[15px] font-normal text-muted">{COPY.amountLoading}</span>
-            )
-          ) : (
-            <>
-              {amount} <span className="text-[15px] font-medium text-muted">XLM</span>
-            </>
-          )}
-        </p>
+            )}
+          </p>
+        ) : (
+          <BigAmount value={amount} testId="detail-amount" className="mt-0" />
+        )}
         {merge.state.kind === "error" && <ErrorText>{errorCopy(merge.state.code)}</ErrorText>}
 
         <dl className="space-y-4">

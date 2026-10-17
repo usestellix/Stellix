@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { ActivitySkeleton } from "../components/activity-row.js";
 import { truncateAddress } from "../components/address.js";
+import { BigAmount } from "../components/big-amount.js";
 import { Button, IconButton } from "../components/button.js";
 import { Callout } from "../components/callout.js";
 import { ErrorText } from "../components/error-text.js";
@@ -182,13 +183,7 @@ export function HomeScreen({
           {state.kind === "funded" && (
             <>
               <p className="text-[12px] text-muted">{COPY.total}</p>
-              <p
-                className="tabular mt-0.5 text-[28px] font-semibold leading-tight tracking-[-0.02em]"
-                data-testid="balance-total"
-              >
-                {displayXlm(state.summary.totalStroops)}{" "}
-                <span className="text-[15px] font-medium text-muted">XLM</span>
-              </p>
+              <BigAmount value={displayXlm(state.summary.totalStroops)} testId="balance-total" />
               {/* Two unbreakable groups: on a long balance "Reserved … ⓘ" wraps as a unit, so the
                   icon never sits alone on a line. No separator dot: it would dangle on wrap. */}
               <div
@@ -262,10 +257,7 @@ export function HomeScreen({
                   <p className="text-[12px] text-muted">
                     {COPY.asOf(asOfTime(state.lastKnown.at))}
                   </p>
-                  <p className="tabular mt-0.5 text-[28px] font-semibold leading-tight tracking-[-0.02em]">
-                    {displayXlm(state.lastKnown.totalStroops)}{" "}
-                    <span className="text-[15px] font-medium text-muted">XLM</span>
-                  </p>
+                  <BigAmount value={displayXlm(state.lastKnown.totalStroops)} />
                 </div>
               )}
               <ErrorText>{errorCopy(state.code)}</ErrorText>
