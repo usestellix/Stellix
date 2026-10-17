@@ -16,7 +16,8 @@
     "typecheck": "pnpm -r run typecheck",
     "lint": "eslint . --max-warnings 0 && node scripts/check-lint-restrictions.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:e2e:mainnet": "pnpm --filter @stellix/extension test:e2e:mainnet"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

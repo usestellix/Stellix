@@ -1,9 +1,11 @@
 import {
   DEFAULT_SCRYPT_PARAMS,
+  NETWORK_IDS,
   createLogger,
   type AccountMeta,
   type AccountRecord,
   type HorizonClient,
+  type NetworkId,
 } from "@stellix/core";
 import { FakeHorizonClient, createFakePlatform, type FakePlatform } from "@stellix/core/testing";
 import { describe, expect, it, vi } from "vitest";
@@ -35,7 +37,10 @@ function fakeHorizon(funded: Set<string>): HorizonClient {
   return client;
 }
 
-function setup(funded: Set<string> = new Set()) {
+function setup(
+  funded: Set<string> = new Set(),
+  enabledNetworks: readonly NetworkId[] = NETWORK_IDS,
+) {
   // Mutable: tests can fund accounts after setup.
   const platform: FakePlatform = createFakePlatform();
   const horizon = fakeHorizon(funded);
@@ -50,6 +55,7 @@ function setup(funded: Set<string> = new Set()) {
       openOnboarding,
       onboarding: { scryptParams: { ...DEFAULT_SCRYPT_PARAMS, N: 2 ** 15 } },
       devBuild: false,
+      enabledNetworks,
       horizonFor: (url) => {
         horizonUrls.push(url);
         return horizon;
@@ -70,8 +76,8 @@ function setup(funded: Set<string> = new Set()) {
   return { platform, fakeAlarms, openOnboarding, send, horizonUrls, funded };
 }
 
-async function importedWallet() {
-  const s = setup();
+async function importedWallet(enabledNetworks: readonly NetworkId[] = NETWORK_IDS) {
+  const s = setup(new Set(), enabledNetworks);
   expect(
     await s.send("ONBOARD_IMPORT", { mnemonic: ABANDON, password: PASSWORD }, ONBOARDING),
   ).toMatchObject({
@@ -276,6 +282,19 @@ describe("settings", () => {
       data: { network: "mainnet" },
     });
     expect(await s.send("GET_STATUS")).toMatchObject({ data: { network: "mainnet" } });
+  });
+
+  it("a testnet-only build (ADR 0008) refuses mainnet even when acknowledged", async () => {
+    const s = await importedWallet(["testnet"]);
+    expect(
+      await s.send("SET_SETTINGS", { network: "mainnet", acknowledgedRealFunds: true }),
+    ).toEqual({ ok: false, code: "INVALID_REQUEST" });
+    expect(
+      await s.send("SET_SETTINGS", {
+        horizonOverride: { network: "mainnet", url: "https://horizon.example" },
+      }),
+    ).toEqual({ ok: false, code: "INVALID_REQUEST" });
+    expect(await s.send("GET_STATUS")).toMatchObject({ data: { network: "testnet" } });
   });
 
   it("auto-lock timer changes take effect", async () => {

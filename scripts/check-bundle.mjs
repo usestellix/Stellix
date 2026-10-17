@@ -18,6 +18,9 @@ const MARKERS = [
   "EventSource polyfill",
   "eventsource",
 ];
+// ADR 0008: a testnet-only build must not ship the mainnet switch. Its confirmation copy is the
+// marker (constant folding drops the screen when STELLIX_MAINNET_ENABLED isn't "true").
+if (process.env.STELLIX_MAINNET_ENABLED !== "true") MARKERS.push("I understand this uses real XLM");
 
 const errors = [];
 

@@ -1,3 +1,4 @@
+import { MAINNET_ENABLED } from "../../../build-flags.js";
 import type { NetworkId, Settings } from "@stellix/core";
 import { browser } from "wxt/browser";
 import { ExternalIcon } from "../../components/icons.js";
@@ -28,13 +29,16 @@ export function SettingsScreen({
   return (
     <SubScreen title="Settings" network={settings.network} onBack={onBack} testId="settings">
       <SectionLabel>Network</SectionLabel>
-      <ListRow
-        label="Network"
-        detail={LABELS[settings.network]}
-        onClick={() => {
-          onOpen("network");
-        }}
-      />
+      {/* ADR 0008: a testnet-only build has nothing to switch to. */}
+      {MAINNET_ENABLED && (
+        <ListRow
+          label="Network"
+          detail={LABELS[settings.network]}
+          onClick={() => {
+            onOpen("network");
+          }}
+        />
+      )}
       <ListRow
         label="Custom Horizon URL"
         detail={settings.horizonOverrides[settings.network] !== undefined ? "Custom" : "Default"}

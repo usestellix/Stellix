@@ -49,6 +49,8 @@ export interface HandlerDeps {
   onboarding?: OnboardingOptions;
   /** Dev builds may point a network at http://localhost Horizon (NETWORK.md §1). */
   devBuild: boolean;
+  /** Networks this build offers (ADR 0008); SET_SETTINGS refuses the rest. */
+  enabledNetworks: readonly NetworkId[];
   /** Tests inject a fake; production builds a client for the network's effective URL. */
   horizonFor?: (url: string) => HorizonClient;
   /** Resumes in-flight resolution; created from the same sendDeps (start.ts). */
@@ -151,6 +153,7 @@ export function createHandlers(deps: HandlerDeps): Handlers {
         updateSettings(platform, toSettingsPatch(payload), {
           validateHorizonOverride: (url, network) =>
             validateHorizonOverride(url, network, { allowLocalhost: deps.devBuild }, platform),
+          enabledNetworks: deps.enabledNetworks,
         }),
       ),
     DISCOVER_ACCOUNTS: () => serial(async () => discoverAccounts(platform, await currentHorizon())),

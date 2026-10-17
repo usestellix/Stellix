@@ -5,6 +5,7 @@ import {
   createLogger,
   type AccountRecord,
   type TransactionRecord,
+  NETWORK_IDS,
 } from "@stellix/core";
 import { FakeHorizonClient, createFakePlatform } from "@stellix/core/testing";
 import { describe, expect, it, vi } from "vitest";
@@ -67,6 +68,7 @@ async function setup() {
       openOnboarding: vi.fn(() => Promise.resolve()),
       onboarding: { scryptParams: { ...DEFAULT_SCRYPT_PARAMS, N: 2 ** 15 } },
       devBuild: false,
+      enabledNetworks: NETWORK_IDS,
       horizonFor: () => h,
     }),
     sender: { runtimeId: "abcdefghijklmnop", extensionBaseUrl: BASE },

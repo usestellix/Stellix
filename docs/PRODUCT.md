@@ -65,7 +65,7 @@ The MVP user is someone who wants to **send and receive XLM** under their own cu
 - Each row: direction, counterparty (truncated), amount, memo (if any), time, link to explorer.
 
 ### 4.8 Settings
-- Network (testnet / mainnet with confirmation).
+- Network (testnet / mainnet with confirmation). The first public release is testnet-only (ADR 0008).
 - Custom Horizon URL per network (advanced).
 - Auto-lock timer.
 - Reveal recovery phrase, change password, reset wallet.

@@ -136,7 +136,8 @@ pnpm dev                      # WXT dev mode, loads extension with hot reload
 pnpm build                    # production build of the extension
 pnpm test                     # unit tests across workspaces (Vitest)
 pnpm test:testnet             # integration tests against Stellar testnet (needs network)
-pnpm test:e2e                 # Playwright E2E against the built extension
+pnpm test:e2e                 # Playwright E2E against the built (testnet-only) extension
+pnpm test:e2e:mainnet         # the @mainnet E2E specs against a STELLIX_MAINNET_ENABLED=true build
 pnpm typecheck                # tsc --noEmit across workspaces
 pnpm lint                     # ESLint + core restriction self-test
 pnpm format:check             # Prettier (CI runs this too)
@@ -175,7 +176,7 @@ These are security and correctness rules. Breaking one is a bug even if all test
 
 **Mainnet**
 
-14. Mainnet is off by default. Switching to it requires an explicit confirmation step. The current network is always visible in the UI header.
+14. Mainnet is off by default. Switching to it requires an explicit confirmation step. The current network is always visible in the UI header. Builds without `STELLIX_MAINNET_ENABLED=true` don't offer mainnet at all; the SW refuses it (ADR 0008).
 
 ---
 
