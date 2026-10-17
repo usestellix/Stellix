@@ -122,6 +122,6 @@ At SW startup: `chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CO
 5. About screen shows version + commit hash so users can compare with the release.
 6. Release checklist: `.github/RELEASE.md` (changelog, permission diff, dependency diff review, E2E pass, manual testnet smoke test, hash verification, signing and upload).
 
-## 10. Incident response (placeholder)
+## 10. Incident response
 
-Before mainnet launch, document: how users report issues, how to publish an emergency update, and how to communicate if a malicious build ever ships (store takedown, advisory telling users to move funds to a new phrase).
+See `docs/INCIDENT_RESPONSE.md`. It covers what we can and can't do (no server, no kill switch); store rollback, emergency update, unpublish and takedown; playbooks for a malicious build, secret-exposing bugs and fund-affecting bugs; communication channels; and custody and recovery of publishing credentials and the upload-signing key.
