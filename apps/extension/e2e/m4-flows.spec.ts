@@ -167,11 +167,16 @@ test("history paginates through a 25-operation payment to the account's origin",
   extensionId,
 }) => {
   test.setTimeout(150_000);
-  const { popup, me } = await fundedWallet(context, extensionId);
+  const { popup: first, me } = await fundedWallet(context, extensionId);
+  await expect(rows(first)).toHaveCount(1, { timeout: 15_000 });
+  // Closed while paying: an open popup would stream all 25 into the cache, and the reopened
+  // list would then be complete without paging (correct, but not what this test is about).
+  await first.close();
   const peer = Keypair.random();
   await fund(peer.publicKey());
   await pay(peer, me, "1", Memo.text("batch"), 25);
-  await popup.reload();
+  const popup = await openPopup(context, extensionId);
+  await popup.setViewportSize({ width: 360, height: 600 });
 
   await expect(rows(popup)).toHaveCount(10, { timeout: 30_000 }); // Home: last 10
   await popup.getByRole("button", { name: "View all" }).click();
