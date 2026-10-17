@@ -112,6 +112,12 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`
   - `RESET_WALLET` wiping storage and reopening onboarding without the `tabs` permission
 
+### Release-related checks
+
+- `reproducible` CI job: two runners build the zip, and their `SHA256SUMS` must be identical (SECURITY §9.3).
+- `scripts/verify-store-package.mjs`: checked against a real store package (uBlock Origin Lite vs its GitHub release: passes) and a tampered release (fails, listing every difference). See `docs/VERIFY_RELEASE.md`.
+- `pnpm --filter @stellix/extension store:assets` regenerates the store graphics from the built extension on live testnet. It's a separate Playwright config, not part of `pnpm test:e2e`.
+
 ## 4. Manual QA checklist (before each release)
 
 - [ ] Fresh Chrome profile install from the built zip.
