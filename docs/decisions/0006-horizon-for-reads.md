@@ -19,7 +19,7 @@ NETWORK.md assumed Horizon as the read and submit backend, and asked us to check
 ## Decision
 - **The MVP reads from Horizon** through core's `HorizonClient` interface (NETWORK.md §2), which already isolates callers from the backend.
 - **Defaults:** testnet uses `https://horizon-testnet.stellar.org`. Mainnet keeps `https://horizon.stellar.org` as the default while mainnet stays gated (CLAUDE.md §6.14).
-- **Before any public mainnet release (M5),** a mainnet provider is chosen and documented (operator, retention, rate limits, privacy terms). This is an M5 exit criterion.
+- **Before any public mainnet release (M5),** a mainnet provider is chosen and documented (operator, retention, rate limits, privacy terms). This is an M5 exit criterion. The comparison and proposed default are in ADR 0009; 0.1.0 is testnet-only (ADR 0008).
 - **History (M4)** must allow for the one-year window on SDF's Horizon: older activity may be absent, so the UI never implies "no older activity".
 
 ## Consequences
