@@ -12,6 +12,7 @@
     "e2e",
     "build",
     "branding",
+    "store",
     "wxt.config.ts",
     "vitest.config.ts",
     "playwright.config.ts"

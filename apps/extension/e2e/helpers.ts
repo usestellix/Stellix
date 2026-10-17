@@ -80,7 +80,7 @@ export async function importWalletViaUi(
 
 /** The active account's full address, read from the Receive screen (Home shows it truncated). */
 export async function activeAddress(popup: Page): Promise<string> {
-  await popup.getByRole("button", { name: "Receive" }).click();
+  await popup.getByRole("button", { name: "Receive", exact: true }).click();
   await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "receive");
   const text = await popup.getByTestId("full-address").innerText();
   await popup.getByRole("button", { name: "Back" }).click();
