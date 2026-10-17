@@ -59,6 +59,6 @@ Store docs: <https://developer.chrome.com/docs/webstore/update#protect-package-u
 ## 5. After approval
 
 - [ ] Publish in the dashboard.
-- [ ] Once the store serves the new version, run `node scripts/verify-store-package.mjs <extension-id> SHA256SUMS` (docs/VERIFY_RELEASE.md). It must pass.
+- [ ] Once the store serves the new version, run `node scripts/verify-store-package.mjs <extension-id> stellixextension-<version>-chrome.zip` (docs/VERIFY_RELEASE.md). It must print `OK`. If it doesn't, roll back and follow `docs/INCIDENT_RESPONSE.md`.
 - [ ] Publish the GitHub draft release.
 - [ ] If anything is wrong after publishing: roll back from the dashboard (previous version, no review, live in about a minute), then follow `docs/INCIDENT_RESPONSE.md`.
