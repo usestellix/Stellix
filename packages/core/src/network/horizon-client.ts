@@ -2,6 +2,7 @@ import type { z } from "zod";
 import { StellixError } from "../errors.js";
 import type { Platform } from "../platform.js";
 import { randomInt } from "../random.js";
+import { formatXlm } from "../stellar/amount.js";
 import {
   accountSchema,
   asyncSubmitSchema,
@@ -11,6 +12,7 @@ import {
   historyPageSchema,
   historyRecordSchema,
   orderBookSchema,
+  pathsPageSchema,
   paymentsPageSchema,
   rootSchema,
   transactionSchema,
@@ -22,6 +24,7 @@ import {
   type HorizonRoot,
   type LedgerRecord,
   type OrderBook,
+  type PathRecord,
   type PaymentRecord,
   type TransactionRecord,
 } from "./horizon-schemas.js";
@@ -68,10 +71,33 @@ export interface HorizonClient {
    * SHIELD §6.7). Both sides are priced in `buying` per `selling`; bids[0] is the best bid.
    */
   getOrderBook(selling: AssetRef, buying: AssetRef): Promise<OrderBook>;
+  /**
+   * GET /paths/strict-send: routes that deliver `destination` for exactly `sourceAmountStroops`
+   * of `source` (Shield PATH_LOW_MIN, SHIELD §6.7). Empty when Horizon finds none.
+   */
+  getStrictSendPaths(
+    source: AssetRef,
+    sourceAmountStroops: bigint,
+    destination: AssetRef,
+  ): Promise<PathRecord[]>;
+  /**
+   * GET /paths/strict-receive: routes that deliver exactly `destinationAmountStroops` of
+   * `destination`, paying `source`. Empty when Horizon finds none.
+   */
+  getStrictReceivePaths(
+    source: AssetRef,
+    destination: AssetRef,
+    destinationAmountStroops: bigint,
+  ): Promise<PathRecord[]>;
 }
 
 /** An asset as a Horizon query names it. Shield's DecodedAsset has this shape. */
 export type AssetRef = { type: "native" } | { type: "credit"; code: string; issuer: string };
+
+/** One entry of a Horizon asset list (`source_assets`, `destination_assets`): native or CODE:ISSUER. */
+export function assetListItem(asset: AssetRef): string {
+  return asset.type === "native" ? "native" : `${asset.code}:${asset.issuer}`;
+}
 
 /** `<prefix>asset_type` / `_code` / `_issuer` query parameters (Horizon's getAsset). */
 export function assetQuery(prefix: string, asset: AssetRef): string {
@@ -247,6 +273,20 @@ export function createHorizonClient(
         `order_book?${assetQuery("selling_", selling)}&${assetQuery("buying_", buying)}&limit=1`,
         orderBookSchema,
       ),
+    getStrictSendPaths: async (source, sourceAmountStroops, destination) =>
+      (
+        await required(
+          `paths/strict-send?${assetQuery("source_", source)}&source_amount=${formatXlm(sourceAmountStroops)}&destination_assets=${encodeURIComponent(assetListItem(destination))}`,
+          pathsPageSchema,
+        )
+      )._embedded.records,
+    getStrictReceivePaths: async (source, destination, destinationAmountStroops) =>
+      (
+        await required(
+          `paths/strict-receive?source_assets=${encodeURIComponent(assetListItem(source))}&${assetQuery("destination_", destination)}&destination_amount=${formatXlm(destinationAmountStroops)}`,
+          pathsPageSchema,
+        )
+      )._embedded.records,
     submitTransactionAsync: async (envelopeXdr) => {
       const controller = new AbortController();
       const timer = setTimeout(() => {

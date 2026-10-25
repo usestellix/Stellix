@@ -1,6 +1,7 @@
-import type { OrderBook } from "../network/horizon-schemas.js";
+import type { OrderBook, PathRecord } from "../network/horizon-schemas.js";
 import { pairKey, unavailableFrom } from "./lookups.js";
 import { checkedOffers } from "./rules/OFFER_BAD_PRICE.js";
+import { checkedPathPayments } from "./rules/PATH_LOW_MIN.js";
 import type { DecodedRequest, RuleData, RuleUnavailable, ShieldDeps } from "./types.js";
 
 // analyze's gather step (SHIELD §6.4): everything the rules need from the network is fetched
@@ -24,5 +25,16 @@ export async function gather(decoded: DecodedRequest, deps: ShieldDeps): Promise
       orderBooks.set(key, await lookup(() => deps.horizon.getOrderBook(selling, buying)));
     }
   }
-  return { orderBooks };
+  const paths = new Map<number, PathRecord[] | RuleUnavailable>();
+  for (const p of checkedPathPayments(decoded, deps.userAccount)) {
+    paths.set(
+      p.opIndex,
+      await lookup(() =>
+        p.mode === "strictSend"
+          ? deps.horizon.getStrictSendPaths(p.sendAsset, p.fixedStroops, p.destAsset)
+          : deps.horizon.getStrictReceivePaths(p.sendAsset, p.destAsset, p.fixedStroops),
+      ),
+    );
+  }
+  return { orderBooks, paths };
 }

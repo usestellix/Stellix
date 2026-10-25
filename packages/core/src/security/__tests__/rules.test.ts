@@ -22,7 +22,7 @@ const ctx: RuleContext = {
   origin: { type: "pasted" },
   userAccount: "GUSER",
   now: 1_000,
-  data: { orderBooks: new Map() },
+  data: { orderBooks: new Map(), paths: new Map() },
 };
 
 function finding(ruleId: RuleId, opIndex?: number): Finding {

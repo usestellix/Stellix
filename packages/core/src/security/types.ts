@@ -1,6 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
-import type { OrderBook } from "../network/horizon-schemas.js";
+import type { OrderBook, PathRecord } from "../network/horizon-schemas.js";
 import type { DecodedOperation, DecodedSignerKey } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
@@ -163,6 +163,8 @@ export interface RuleData {
    * buying)`, or why it couldn't be fetched.
    */
   orderBooks: ReadonlyMap<string, OrderBook | RuleUnavailable>;
+  /** PATH_LOW_MIN: Horizon's routes for each path payment it checks, keyed by op index. */
+  paths: ReadonlyMap<number, readonly PathRecord[] | RuleUnavailable>;
 }
 
 export interface RuleContext {

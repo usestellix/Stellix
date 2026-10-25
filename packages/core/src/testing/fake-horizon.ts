@@ -1,6 +1,7 @@
 import { StellixError } from "../errors.js";
 import {
   HISTORY_PAGE_SIZE,
+  assetListItem,
   assetQuery,
   type AssetRef,
   type HorizonClient,
@@ -14,6 +15,7 @@ import type {
   HistoryRecord,
   LedgerRecord,
   OrderBook,
+  PathRecord,
   PaymentRecord,
   TransactionRecord,
 } from "../network/horizon-schemas.js";
@@ -43,6 +45,8 @@ export class FakeHorizonClient implements HorizonClient {
   onSubmit?: (envelopeXdr: string) => void;
   /** Order books keyed by orderBookKey(selling, buying). A StellixError entry is thrown. */
   readonly orderBooks = new Map<string, OrderBook | StellixError>();
+  /** Path-finding results keyed by the request path (pathsKey). A StellixError entry is thrown. */
+  readonly paths = new Map<string, PathRecord[] | StellixError>();
   /** getTransaction throws NETWORK_ERROR while > 0 (decremented per call). */
   transactionFailures = 0;
   private inFlight = 0;
@@ -124,6 +128,17 @@ export class FakeHorizonClient implements HorizonClient {
       return book;
     });
   };
+  private findPaths(key: string) {
+    return this.track("findPaths", key, () => {
+      const result = this.paths.get(key) ?? FakeHorizonClient.missing(`paths ${key}`);
+      if (result instanceof StellixError) throw result;
+      return result;
+    });
+  }
+  getStrictSendPaths = (source: AssetRef, amount: bigint, destination: AssetRef) =>
+    this.findPaths(FakeHorizonClient.strictSendKey(source, amount, destination));
+  getStrictReceivePaths = (source: AssetRef, destination: AssetRef, amount: bigint) =>
+    this.findPaths(FakeHorizonClient.strictReceiveKey(source, destination, amount));
   submitTransactionAsync = (envelopeXdr: string) =>
     this.track("submitTransactionAsync", undefined, () => {
       this.onSubmit?.(envelopeXdr);
@@ -134,6 +149,14 @@ export class FakeHorizonClient implements HorizonClient {
 
   static orderBookKey(selling: AssetRef, buying: AssetRef): string {
     return `${assetQuery("selling_", selling)}&${assetQuery("buying_", buying)}`;
+  }
+
+  static strictSendKey(source: AssetRef, amount: bigint, destination: AssetRef): string {
+    return `send ${assetListItem(source)} ${amount.toString()} → ${assetListItem(destination)}`;
+  }
+
+  static strictReceiveKey(source: AssetRef, destination: AssetRef, amount: bigint): string {
+    return `receive ${assetListItem(source)} → ${assetListItem(destination)} ${amount.toString()}`;
   }
 
   count(method: string): number {

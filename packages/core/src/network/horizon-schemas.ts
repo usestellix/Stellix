@@ -199,3 +199,21 @@ export const orderBookSchema = z.looseObject({
   asks: z.array(priceLevelSchema),
 });
 export type OrderBook = z.output<typeof orderBookSchema>;
+
+/** A path from GET /paths/strict-send or /paths/strict-receive (Horizon protocol `Path`). */
+export const pathRecordSchema = z.looseObject({
+  source_asset_type: z.string(),
+  source_asset_code: z.string().optional(),
+  source_asset_issuer: z.string().optional(),
+  source_amount: amountString,
+  destination_asset_type: z.string(),
+  destination_asset_code: z.string().optional(),
+  destination_asset_issuer: z.string().optional(),
+  destination_amount: amountString,
+  path: z.array(z.looseObject({ asset_type: z.string() })),
+});
+export type PathRecord = z.output<typeof pathRecordSchema>;
+
+export const pathsPageSchema = z.looseObject({
+  _embedded: z.looseObject({ records: z.array(pathRecordSchema) }),
+});
