@@ -4,6 +4,7 @@ import {
   Memo,
   Operation,
   TransactionBuilder,
+  type FeeBumpTransaction,
   type Transaction,
 } from "@stellar/stellar-sdk/base";
 import { formatXlm } from "../stellar/amount.js";
@@ -56,6 +57,6 @@ export function rehydrateTransaction(xdrBase64: string, networkPassphrase: strin
   return tx;
 }
 
-export function transactionHashHex(tx: Transaction): string {
+export function transactionHashHex(tx: Transaction | FeeBumpTransaction): string {
   return Array.from(tx.hash(), (b) => b.toString(16).padStart(2, "0")).join("");
 }

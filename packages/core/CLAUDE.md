@@ -22,6 +22,7 @@ Platform-agnostic wallet logic shared by the extension and the future mobile app
 | `history/` | operation record normalization | NETWORK §5 |
 | `uri/` | SEP-7 | UI_FLOWS §6 |
 | `services/` | prepare/confirm/onboard/unlock orchestration called by shells | ARCHITECTURE §5–6 |
+| `security/` | Shield: decode, rules, policy, report, `assertSignable`. No direct clock or network (lint-enforced) | SHIELD |
 
 ## Testing
 - Every module has unit tests (TESTING §1). SEP-0005 vectors copied verbatim from the spec — never generated.

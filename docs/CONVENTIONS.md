@@ -77,7 +77,7 @@ export type ErrorCode =
   | "INTERNAL_ERROR";
 ```
 
-- The `SHIELD_*` codes are documented ahead of the code: they land in `core/errors.ts` and `ui/errorCopy.ts` together with Shield's core types (S1). Until then this list is ahead of `errors.ts` by exactly those six.
+- The `SHIELD_*` codes (in `core/errors.ts` and `ui/errorCopy.ts` since Shield's core types landed):
   - `SHIELD_DIGEST_MISMATCH`: the request changed after analysis; decode and analyze again.
   - `SHIELD_REPORT_EXPIRED`: the report is past `expiresAt`; analyze again.
   - `SHIELD_BLOCKED`: the policy decision is `blocked`. Never overridable.

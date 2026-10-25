@@ -60,6 +60,14 @@ export const ERROR_COPY: Readonly<Record<ErrorCode, string>> = {
   CLIPBOARD_UNAVAILABLE: "Couldn't copy. Select the text and copy it manually.",
   UNAUTHORIZED_SENDER: "This request was blocked for your security.",
   INVALID_REQUEST: "Something went wrong. Close and reopen Stellix.",
+  // shield
+  SHIELD_DIGEST_MISMATCH: "This request changed after Stellix checked it. Review it again.",
+  SHIELD_REPORT_EXPIRED: "Stellix's check of this request has expired. Review it again.",
+  SHIELD_BLOCKED: "Stellix won't sign this request. See the findings for why.",
+  SHIELD_CONFIRMATION_REQUIRED: "Confirm the warnings above before continuing.",
+  SHIELD_INPUT_INVALID:
+    "Stellix couldn't read this. Paste a transaction XDR or a web+stellar:tx link.",
+  SHIELD_INPUT_TOO_LARGE: "This is too large for Stellix to analyze.",
   // catch-all
   INTERNAL_ERROR: "Something went wrong. Close and reopen Stellix.",
 };
