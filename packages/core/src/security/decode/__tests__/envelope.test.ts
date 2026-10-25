@@ -79,7 +79,13 @@ describe("decodeTransactionEnvelope", () => {
       feeStroops: 1000n,
       sequence: 23110037903769626n,
       maxTime: 1792927684n,
-      operations: [{ kind: "undecoded", opType: "payment", source: null }],
+      operations: [
+        {
+          kind: "payment",
+          destination: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD",
+          amountStroops: 10_000_000n,
+        },
+      ],
       feeBump: {
         feeSource: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD",
         maxFeeStroops: 4000n,

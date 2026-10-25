@@ -110,7 +110,7 @@ describe("runRules", () => {
 });
 
 describe("registry", () => {
-  it("ships with zero rules (#11); every registered rule ID is unique and known", () => {
+  it("has unique, known rule IDs", () => {
     const ids = RULES.map((r) => r.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(RULE_IDS).toContain(id);

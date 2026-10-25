@@ -1,50 +1,20 @@
 import type { DecodedText } from "../types.js";
+import type {
+  AccountFlag,
+  DecodedAsset,
+  DecodedClaimant,
+  DecodedFlags,
+  DecodedPoolShare,
+  DecodedPrice,
+  DecodedSignerKey,
+  SponsoredEntry,
+  TrustLineFlag,
+} from "./value-types.js";
 
-// Decoded operation variants (SHIELD §3.1 decode/operations.ts). Addresses are StrKey strings;
-// money is bigint stroops. Each decoder issue adds its variants to DecodedOperation.
+export type * from "./value-types.js";
 
-export type DecodedAsset = { type: "native" } | { type: "credit"; code: string; issuer: string };
-
-export type DecodedTrustLineAsset =
-  | DecodedAsset
-  /** `liquidityPoolId` is the pool's L… StrKey. */
-  | { type: "poolShare"; liquidityPoolId: string };
-
-/**
- * When a claimant may claim (CAP-23). Relative times count from the balance's creation.
- * The decoder enforces what stellar-core does: and/or take exactly two, not takes one,
- * times are non-negative, nesting is at most 4 deep.
- */
-export type DecodedClaimPredicate =
-  | { type: "unconditional" }
-  | { type: "and"; predicates: readonly [DecodedClaimPredicate, DecodedClaimPredicate] }
-  | { type: "or"; predicates: readonly [DecodedClaimPredicate, DecodedClaimPredicate] }
-  | { type: "not"; predicate: DecodedClaimPredicate }
-  | { type: "beforeAbsoluteTime"; epochSeconds: bigint }
-  | { type: "beforeRelativeTime"; seconds: bigint };
-
-export interface DecodedClaimant {
-  /** G…. */
-  destination: string;
-  predicate: DecodedClaimPredicate;
-}
-
-/** `key` is the signer's StrKey: G… ed25519, T… pre-auth tx, X… hash(x), P… signed payload. */
-export interface DecodedSignerKey {
-  type: "ed25519" | "preAuthTx" | "hashX" | "signedPayload";
-  key: string;
-}
-
-/** What a revokeSponsorship targets: one ledger entry, or one signer on an account. */
-export type SponsoredEntry =
-  | { type: "account"; accountId: string }
-  | { type: "trustline"; accountId: string; asset: DecodedTrustLineAsset }
-  | { type: "offer"; sellerId: string; offerId: bigint }
-  | { type: "data"; accountId: string; dataName: DecodedText }
-  /** `balanceId` is the balance's B… StrKey. */
-  | { type: "claimableBalance"; balanceId: string }
-  | { type: "liquidityPool"; liquidityPoolId: string }
-  | { type: "signer"; accountId: string; signerKey: DecodedSignerKey };
+// Decoded operation variants (SHIELD §3.1 decode/operations.ts), one per XDR operation type.
+// `kind` and `opType` are the XDR OperationType name; `kind` discriminates the union.
 
 interface OperationBase {
   /** The op's own source account (G… or M…) as written; null means the transaction's source. */
@@ -52,13 +22,210 @@ interface OperationBase {
 }
 
 /**
- * An operation whose type has no decoder yet (SHIELD §9 S1); UNSUPPORTED_OP reports it.
- * `opType` is the XDR OperationType name, e.g. "payment", "invokeHostFunction".
+ * An op Shield doesn't analyze; UNSUPPORTED_OP reports each one (SHIELD §6.1, §9 S1).
+ * soroban: invokeHostFunction, extendFootprintTtl, restoreFootprint, or a revokeSponsorship of
+ * a Soroban ledger key (S3). obsolete: inflation. unknown: an op type this decoder predates.
  */
-export interface UndecodedOperation extends OperationBase {
-  kind: "undecoded";
+export interface UnsupportedOperation extends OperationBase {
+  kind: "unsupported";
   opType: string;
+  reason: "soroban" | "obsolete" | "unknown";
 }
+
+// Payments
+
+export interface CreateAccountOperation extends OperationBase {
+  kind: "createAccount";
+  opType: "createAccount";
+  /** G…. */
+  destination: string;
+  startingBalanceStroops: bigint;
+}
+
+export interface PaymentOperation extends OperationBase {
+  kind: "payment";
+  opType: "payment";
+  /** G… or M…. */
+  destination: string;
+  asset: DecodedAsset;
+  amountStroops: bigint;
+}
+
+export interface PathPaymentStrictReceiveOperation extends OperationBase {
+  kind: "pathPaymentStrictReceive";
+  opType: "pathPaymentStrictReceive";
+  sendAsset: DecodedAsset;
+  sendMaxStroops: bigint;
+  /** G… or M…. */
+  destination: string;
+  destAsset: DecodedAsset;
+  destAmountStroops: bigint;
+  /** Intermediate assets, in order. */
+  path: readonly DecodedAsset[];
+}
+
+export interface PathPaymentStrictSendOperation extends OperationBase {
+  kind: "pathPaymentStrictSend";
+  opType: "pathPaymentStrictSend";
+  sendAsset: DecodedAsset;
+  sendAmountStroops: bigint;
+  /** G… or M…. */
+  destination: string;
+  destAsset: DecodedAsset;
+  destMinStroops: bigint;
+  /** Intermediate assets, in order. */
+  path: readonly DecodedAsset[];
+}
+
+export interface AccountMergeOperation extends OperationBase {
+  kind: "accountMerge";
+  opType: "accountMerge";
+  /** G… or M…: receives the source account's whole XLM balance. */
+  destination: string;
+}
+
+// DEX and liquidity pools
+
+export interface ManageSellOfferOperation extends OperationBase {
+  kind: "manageSellOffer";
+  opType: "manageSellOffer";
+  selling: DecodedAsset;
+  buying: DecodedAsset;
+  /** Amount of `selling` offered; 0 deletes the offer. */
+  amountStroops: bigint;
+  /** Price of 1 unit of `selling` in units of `buying`. */
+  price: DecodedPrice;
+  /** 0 creates a new offer; otherwise the offer to update or delete. */
+  offerId: bigint;
+}
+
+export interface ManageBuyOfferOperation extends OperationBase {
+  kind: "manageBuyOffer";
+  opType: "manageBuyOffer";
+  selling: DecodedAsset;
+  buying: DecodedAsset;
+  /** Amount of `buying` wanted; 0 deletes the offer. */
+  buyAmountStroops: bigint;
+  /** Price of 1 unit of `buying` in units of `selling`. */
+  price: DecodedPrice;
+  /** 0 creates a new offer; otherwise the offer to update or delete. */
+  offerId: bigint;
+}
+
+export interface CreatePassiveSellOfferOperation extends OperationBase {
+  kind: "createPassiveSellOffer";
+  opType: "createPassiveSellOffer";
+  selling: DecodedAsset;
+  buying: DecodedAsset;
+  amountStroops: bigint;
+  /** Price of 1 unit of `selling` in units of `buying`. */
+  price: DecodedPrice;
+}
+
+export interface LiquidityPoolDepositOperation extends OperationBase {
+  kind: "liquidityPoolDeposit";
+  opType: "liquidityPoolDeposit";
+  /** L…. */
+  liquidityPoolId: string;
+  maxAmountAStroops: bigint;
+  maxAmountBStroops: bigint;
+  /** Bounds on the deposit price, A in units of B. */
+  minPrice: DecodedPrice;
+  maxPrice: DecodedPrice;
+}
+
+export interface LiquidityPoolWithdrawOperation extends OperationBase {
+  kind: "liquidityPoolWithdraw";
+  opType: "liquidityPoolWithdraw";
+  /** L…. */
+  liquidityPoolId: string;
+  /** Pool shares redeemed. */
+  amountStroops: bigint;
+  minAmountAStroops: bigint;
+  minAmountBStroops: bigint;
+}
+
+// Account configuration
+
+/** Every field is optional in XDR; null means "left unchanged". */
+export interface SetOptionsOperation extends OperationBase {
+  kind: "setOptions";
+  opType: "setOptions";
+  /** G…. */
+  inflationDest: string | null;
+  clearFlags: DecodedFlags<AccountFlag> | null;
+  setFlags: DecodedFlags<AccountFlag> | null;
+  masterWeight: number | null;
+  lowThreshold: number | null;
+  medThreshold: number | null;
+  highThreshold: number | null;
+  homeDomain: DecodedText | null;
+  /** Adds the signer, changes its weight, or removes it (weight 0). */
+  signer: { key: DecodedSignerKey; weight: number } | null;
+}
+
+export interface ManageDataOperation extends OperationBase {
+  kind: "manageData";
+  opType: "manageData";
+  dataName: DecodedText;
+  /** Null deletes the entry. */
+  dataValue: DecodedText | null;
+}
+
+export interface BumpSequenceOperation extends OperationBase {
+  kind: "bumpSequence";
+  opType: "bumpSequence";
+  bumpTo: bigint;
+}
+
+// Trust and issuer
+
+export interface ChangeTrustOperation extends OperationBase {
+  kind: "changeTrust";
+  opType: "changeTrust";
+  line: DecodedAsset | DecodedPoolShare;
+  /** 0 removes the trustline. */
+  limitStroops: bigint;
+}
+
+/** Deprecated by setTrustLineFlags, still valid. The asset's issuer is the op's source. */
+export interface AllowTrustOperation extends OperationBase {
+  kind: "allowTrust";
+  opType: "allowTrust";
+  /** G…. */
+  trustor: string;
+  assetCode: string;
+  /** The authorization flags the trustline ends up with; the other authorization flag is cleared. */
+  authorize: DecodedFlags<TrustLineFlag>;
+}
+
+export interface SetTrustLineFlagsOperation extends OperationBase {
+  kind: "setTrustLineFlags";
+  opType: "setTrustLineFlags";
+  /** G…. */
+  trustor: string;
+  asset: DecodedAsset;
+  clearFlags: DecodedFlags<TrustLineFlag>;
+  setFlags: DecodedFlags<TrustLineFlag>;
+}
+
+export interface ClawbackOperation extends OperationBase {
+  kind: "clawback";
+  opType: "clawback";
+  /** G… or M…: the account the asset is taken back from. */
+  from: string;
+  asset: DecodedAsset;
+  amountStroops: bigint;
+}
+
+export interface ClawbackClaimableBalanceOperation extends OperationBase {
+  kind: "clawbackClaimableBalance";
+  opType: "clawbackClaimableBalance";
+  /** B…. */
+  balanceId: string;
+}
+
+// Claimable balances and sponsorship
 
 export interface CreateClaimableBalanceOperation extends OperationBase {
   kind: "createClaimableBalance";
@@ -94,7 +261,25 @@ export interface RevokeSponsorshipOperation extends OperationBase {
 }
 
 export type DecodedOperation =
-  | UndecodedOperation
+  | UnsupportedOperation
+  | CreateAccountOperation
+  | PaymentOperation
+  | PathPaymentStrictReceiveOperation
+  | PathPaymentStrictSendOperation
+  | AccountMergeOperation
+  | ManageSellOfferOperation
+  | ManageBuyOfferOperation
+  | CreatePassiveSellOfferOperation
+  | LiquidityPoolDepositOperation
+  | LiquidityPoolWithdrawOperation
+  | SetOptionsOperation
+  | ManageDataOperation
+  | BumpSequenceOperation
+  | ChangeTrustOperation
+  | AllowTrustOperation
+  | SetTrustLineFlagsOperation
+  | ClawbackOperation
+  | ClawbackClaimableBalanceOperation
   | CreateClaimableBalanceOperation
   | ClaimClaimableBalanceOperation
   | BeginSponsoringFutureReservesOperation
