@@ -1,6 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
-import type { DecodedOperation } from "./decode/operation-types.js";
+import type { DecodedOperation, DecodedSignerKey } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
 // messaging to the UI, so no field may ever carry secret material.
@@ -109,6 +109,26 @@ export interface DecodedFeeBump {
 }
 
 /**
+ * A transaction's preconditions (CAP-21). A transaction without them decodes with every bound
+ * null, minSeqAgeSeconds 0, minSeqLedgerGap 0 and no extra signers, which is what the network
+ * applies.
+ */
+export interface DecodedPreconditions {
+  /** Epoch seconds. maxTime null: no upper time bound (XDR 0), for NO_MAX_TIME. */
+  timeBounds: { minTime: bigint; maxTime: bigint | null } | null;
+  /** Valid for ledgers minLedger ≤ n < maxLedger; maxLedger null: no upper bound (XDR 0). */
+  ledgerBounds: { minLedger: number; maxLedger: number | null } | null;
+  /** Null: valid only when the source's sequence is `sequence − 1`. */
+  minSeqNum: bigint | null;
+  /** Seconds since the source account's sequence last changed. 0 means no constraint. */
+  minSeqAgeSeconds: bigint;
+  /** Ledgers since the source account's sequence last changed. 0 means no constraint. */
+  minSeqLedgerGap: number;
+  /** Signers that must also sign (at most 2). */
+  extraSigners: readonly DecodedSignerKey[];
+}
+
+/**
  * A transaction envelope (SHIELD §3.1 decode/envelope.ts). For a fee bump, every field except
  * `feeBump` describes the inner transaction: its source is the ops' default source and its
  * fee bid is the inner one (§6.6).
@@ -125,6 +145,8 @@ export interface DecodedTransaction {
   operations: readonly DecodedOperation[];
   /** Upper time bound in seconds; null when absent (no time bounds, or maxTime 0). */
   maxTime: bigint | null;
+  /** Of the (inner) transaction; a fee bump has none of its own. */
+  preconditions: DecodedPreconditions;
   /** Present exactly when envelopeType is "txFeeBump". */
   feeBump: DecodedFeeBump | null;
 }

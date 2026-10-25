@@ -1,3 +1,4 @@
+import { NO_PRECONDITIONS } from "../decode/preconditions.js";
 import { describe, expect, it } from "vitest";
 import { RULES, RULE_SET_VERSION, runRules } from "../rules/index.js";
 import { THRESHOLDS } from "../rules/thresholds.js";
@@ -14,6 +15,7 @@ const ctx: RuleContext = {
     memo: { type: "none" },
     operations: [],
     maxTime: null,
+    preconditions: NO_PRECONDITIONS,
     feeBump: null,
   },
   network: "testnet",
