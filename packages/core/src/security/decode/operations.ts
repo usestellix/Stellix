@@ -8,6 +8,13 @@ import {
   decodePayment,
 } from "./ops-payment.js";
 import { decodeClaimClaimableBalance, decodeCreateClaimableBalance } from "./ops-claimable.js";
+import {
+  decodeCreatePassiveSellOffer,
+  decodeLiquidityPoolDeposit,
+  decodeLiquidityPoolWithdraw,
+  decodeManageBuyOffer,
+  decodeManageSellOffer,
+} from "./ops-dex.js";
 import { decodeBeginSponsoring, decodeRevokeSponsorship } from "./ops-sponsorship.js";
 import { muxedAddress } from "./xdr-values.js";
 
@@ -28,6 +35,16 @@ export function decodeOperation(op: xdr.Operation): DecodedOperation {
       return decodePathPaymentStrictSend(body.pathPaymentStrictSendOp, source);
     case "accountMerge":
       return decodeAccountMerge(body.destination, source);
+    case "manageSellOffer":
+      return decodeManageSellOffer(body.manageSellOfferOp, source);
+    case "manageBuyOffer":
+      return decodeManageBuyOffer(body.manageBuyOfferOp, source);
+    case "createPassiveSellOffer":
+      return decodeCreatePassiveSellOffer(body.createPassiveSellOfferOp, source);
+    case "liquidityPoolDeposit":
+      return decodeLiquidityPoolDeposit(body.liquidityPoolDepositOp, source);
+    case "liquidityPoolWithdraw":
+      return decodeLiquidityPoolWithdraw(body.liquidityPoolWithdrawOp, source);
     case "createClaimableBalance":
       return decodeCreateClaimableBalance(body.createClaimableBalanceOp, source);
     case "claimClaimableBalance":

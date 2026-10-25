@@ -10,6 +10,15 @@ export type DecodedTrustLineAsset =
   /** `liquidityPoolId` is the pool's L… StrKey. */
   | { type: "poolShare"; liquidityPoolId: string };
 
+/**
+ * An exact rational price (n/d), as written; never converted to a float. The decoder doesn't
+ * reject non-positive values (stellar-core does), so a rule must not divide by `d` unchecked.
+ */
+export interface DecodedPrice {
+  n: bigint;
+  d: bigint;
+}
+
 /** `key` is the signer's StrKey: G… ed25519, T… pre-auth tx, X… hash(x), P… signed payload. */
 export interface DecodedSignerKey {
   type: "ed25519" | "preAuthTx" | "hashX" | "signedPayload";

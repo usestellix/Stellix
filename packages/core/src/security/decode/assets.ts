@@ -1,6 +1,11 @@
 import { SignerKey, type xdr } from "@stellar/stellar-sdk/base";
 import { assertNever } from "../../assert-never.js";
-import type { DecodedAsset, DecodedSignerKey, DecodedTrustLineAsset } from "./value-types.js";
+import type {
+  DecodedAsset,
+  DecodedPrice,
+  DecodedSignerKey,
+  DecodedTrustLineAsset,
+} from "./value-types.js";
 import { accountAddress, invalidInput, liquidityPoolAddress } from "./xdr-values.js";
 
 // Assets, prices, flags and signer keys, shared by the op decoders.
@@ -50,6 +55,10 @@ export function decodeTrustLineAsset(asset: xdr.TrustLineAsset): DecodedTrustLin
     default:
       return assertNever(asset);
   }
+}
+
+export function decodePrice(price: xdr.Price): DecodedPrice {
+  return { n: BigInt(price.n), d: BigInt(price.d) };
 }
 
 const SIGNER_KEY_TYPES = {

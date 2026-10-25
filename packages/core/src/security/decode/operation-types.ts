@@ -1,4 +1,4 @@
-import type { DecodedAsset, DecodedClaimant, SponsoredEntry } from "./value-types.js";
+import type { DecodedAsset, DecodedClaimant, DecodedPrice, SponsoredEntry } from "./value-types.js";
 
 export type * from "./value-types.js";
 
@@ -71,6 +71,67 @@ export interface AccountMergeOperation extends OperationBase {
   destination: string;
 }
 
+// DEX and liquidity pools
+
+export interface ManageSellOfferOperation extends OperationBase {
+  kind: "manageSellOffer";
+  opType: "manageSellOffer";
+  selling: DecodedAsset;
+  buying: DecodedAsset;
+  /** Amount of `selling` offered; 0 deletes the offer. */
+  amountStroops: bigint;
+  /** Price of 1 unit of `selling` in units of `buying`. */
+  price: DecodedPrice;
+  /** 0 creates a new offer; otherwise the offer to update or delete. */
+  offerId: bigint;
+}
+
+export interface ManageBuyOfferOperation extends OperationBase {
+  kind: "manageBuyOffer";
+  opType: "manageBuyOffer";
+  selling: DecodedAsset;
+  buying: DecodedAsset;
+  /** Amount of `buying` wanted; 0 deletes the offer. */
+  buyAmountStroops: bigint;
+  /** Price of 1 unit of `buying` in units of `selling`. */
+  price: DecodedPrice;
+  /** 0 creates a new offer; otherwise the offer to update or delete. */
+  offerId: bigint;
+}
+
+export interface CreatePassiveSellOfferOperation extends OperationBase {
+  kind: "createPassiveSellOffer";
+  opType: "createPassiveSellOffer";
+  selling: DecodedAsset;
+  buying: DecodedAsset;
+  amountStroops: bigint;
+  /** Price of 1 unit of `selling` in units of `buying`. */
+  price: DecodedPrice;
+}
+
+export interface LiquidityPoolDepositOperation extends OperationBase {
+  kind: "liquidityPoolDeposit";
+  opType: "liquidityPoolDeposit";
+  /** L…. */
+  liquidityPoolId: string;
+  maxAmountAStroops: bigint;
+  maxAmountBStroops: bigint;
+  /** Bounds on the deposit price, A in units of B. */
+  minPrice: DecodedPrice;
+  maxPrice: DecodedPrice;
+}
+
+export interface LiquidityPoolWithdrawOperation extends OperationBase {
+  kind: "liquidityPoolWithdraw";
+  opType: "liquidityPoolWithdraw";
+  /** L…. */
+  liquidityPoolId: string;
+  /** Pool shares redeemed. */
+  amountStroops: bigint;
+  minAmountAStroops: bigint;
+  minAmountBStroops: bigint;
+}
+
 // Claimable balances and sponsorship
 
 export interface CreateClaimableBalanceOperation extends OperationBase {
@@ -113,6 +174,11 @@ export type DecodedOperation =
   | PathPaymentStrictReceiveOperation
   | PathPaymentStrictSendOperation
   | AccountMergeOperation
+  | ManageSellOfferOperation
+  | ManageBuyOfferOperation
+  | CreatePassiveSellOfferOperation
+  | LiquidityPoolDepositOperation
+  | LiquidityPoolWithdrawOperation
   | CreateClaimableBalanceOperation
   | ClaimClaimableBalanceOperation
   | BeginSponsoringFutureReservesOperation
