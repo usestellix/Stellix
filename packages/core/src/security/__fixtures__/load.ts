@@ -43,3 +43,38 @@ export function fixture(name: string): OpFixture {
   if (f === undefined) throw new Error(`no fixture ${name}`);
   return f;
 }
+
+/**
+ * A market fixture (scripts/capture-shield-extra-fixtures.mjs): the Horizon responses a rule's
+ * gather step reads, captured just before the user's transaction was submitted.
+ */
+export interface MarketFixture {
+  name: string;
+  description: string;
+  networkPassphrase: string;
+  userAccount: string;
+  /** Keyed by what they are (e.g. `orderBook`); `path` is relative to the Horizon root. */
+  lookups: Record<string, { path: string; status: number; body: unknown }>;
+  hash: string;
+  envelopeXdr: string;
+  transaction: { status: number; body: HorizonTransactionBody };
+}
+
+export const MARKET_FIXTURES: readonly MarketFixture[] = Object.values(
+  import.meta.glob<MarketFixture>("./market/*.json", { eager: true, import: "default" }),
+);
+
+export function marketFixture(name: string): MarketFixture {
+  const f = MARKET_FIXTURES.find((x) => x.name === name);
+  if (f === undefined) throw new Error(`no market fixture ${name}`);
+  return f;
+}
+
+export function lookup(
+  f: MarketFixture,
+  key: string,
+): { path: string; status: number; body: unknown } {
+  const l = f.lookups[key];
+  if (l === undefined) throw new Error(`${f.name} has no ${key} lookup`);
+  return l;
+}

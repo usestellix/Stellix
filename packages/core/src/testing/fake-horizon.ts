@@ -1,5 +1,10 @@
 import { StellixError } from "../errors.js";
-import { HISTORY_PAGE_SIZE, type HorizonClient } from "../network/horizon-client.js";
+import {
+  HISTORY_PAGE_SIZE,
+  assetQuery,
+  type AssetRef,
+  type HorizonClient,
+} from "../network/horizon-client.js";
 import type {
   AccountRecord,
   AsyncSubmitResponse,
@@ -8,6 +13,7 @@ import type {
   EffectRecord,
   HistoryRecord,
   LedgerRecord,
+  OrderBook,
   PaymentRecord,
   TransactionRecord,
 } from "../network/horizon-schemas.js";
@@ -35,6 +41,8 @@ export class FakeHorizonClient implements HorizonClient {
   submitScript: (AsyncSubmitResponse | StellixError)[] = [];
   /** Called on each submit (e.g. to put the tx "on chain" for later getTransaction). */
   onSubmit?: (envelopeXdr: string) => void;
+  /** Order books keyed by orderBookKey(selling, buying). A StellixError entry is thrown. */
+  readonly orderBooks = new Map<string, OrderBook | StellixError>();
   /** getTransaction throws NETWORK_ERROR while > 0 (decremented per call). */
   transactionFailures = 0;
   private inFlight = 0;
@@ -108,6 +116,14 @@ export class FakeHorizonClient implements HorizonClient {
       operationId,
       () => this.effects.get(operationId) ?? FakeHorizonClient.missing(`effects ${operationId}`),
     );
+  getOrderBook = (selling: AssetRef, buying: AssetRef) => {
+    const key = FakeHorizonClient.orderBookKey(selling, buying);
+    return this.track("getOrderBook", key, () => {
+      const book = this.orderBooks.get(key) ?? FakeHorizonClient.missing(`order book ${key}`);
+      if (book instanceof StellixError) throw book;
+      return book;
+    });
+  };
   submitTransactionAsync = (envelopeXdr: string) =>
     this.track("submitTransactionAsync", undefined, () => {
       this.onSubmit?.(envelopeXdr);
@@ -115,6 +131,10 @@ export class FakeHorizonClient implements HorizonClient {
       if (next instanceof StellixError) throw next;
       return next;
     });
+
+  static orderBookKey(selling: AssetRef, buying: AssetRef): string {
+    return `${assetQuery("selling_", selling)}&${assetQuery("buying_", buying)}`;
+  }
 
   count(method: string): number {
     return this.calls.filter((c) => c.method === method).length;

@@ -56,6 +56,7 @@ export interface HorizonClient {
   getTransaction(hash: string): Promise<TransactionRecord | null>;    // GET /transactions/{hash} (404 → null)
   getPayments(id: string, opts: PageOpts): Promise<Page<OperationRecord>>; // GET /accounts/{id}/payments
   getOperationEffects(opId: string): Promise<EffectRecord[]>;         // for account_merge amounts
+  getOrderBook(selling: AssetRef, buying: AssetRef): Promise<OrderBook>; // GET /order_book?…&limit=1 (Shield OFFER_BAD_PRICE)
   streamPayments(id: string, cursor: string, onRecord: (r: OperationRecord) => void): () => void; // SSE; returns unsubscribe
 }
 ```
