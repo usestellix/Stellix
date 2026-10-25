@@ -1,5 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
+import type { DecodedOperation } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
 // messaging to the UI, so no field may ever carry secret material.
@@ -84,19 +85,7 @@ export interface CheckUnavailable {
   reason: UnavailableReason;
 }
 
-/**
- * An operation whose type has no decoder yet (SHIELD §9 S1); UNSUPPORTED_OP reports it.
- * `opType` is the XDR OperationType name, e.g. "payment", "revokeSponsorship".
- */
-export interface UndecodedOperation {
-  kind: "undecoded";
-  opType: string;
-  /** The op's own source account (G… or M…) as written; null means the transaction's source. */
-  source: string | null;
-}
-export type DecodedOperation = UndecodedOperation;
-
-/** Bytes that are usually text (memo text, data names). Untrusted: never shown as Stellix's own words. */
+/** Bytes that are usually text (memo text, data names). Untrusted: never Stellix's own words. */
 export interface DecodedText {
   /** The bytes as UTF-8, or null when they aren't valid UTF-8. */
   text: string | null;

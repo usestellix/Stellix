@@ -1,13 +1,7 @@
-import {
-  FeeBumpTransaction,
-  StrKey,
-  TransactionBuilder,
-  xdr,
-  type Transaction,
-} from "@stellar/stellar-sdk/base";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { xdr } from "@stellar/stellar-sdk/base";
 import { assertNever } from "../../assert-never.js";
 import { NETWORKS, type NetworkId } from "../../network/config.js";
-import { transactionHashHex } from "../../tx/build.js";
 import type { DecodedMemo, DecodedTransaction } from "../types.js";
 import { decodeOperation } from "./operations.js";
 import { bytesHex, decodeText, invalidInput, muxedAddress } from "./xdr-values.js";
@@ -31,17 +25,34 @@ function parseEnvelope(xdrBase64: string): xdr.TransactionEnvelope {
   }
 }
 
-function hashes(env: xdr.TransactionEnvelope, network: NetworkId) {
-  let tx: Transaction | FeeBumpTransaction;
-  try {
-    tx = TransactionBuilder.fromXdr(env, NETWORKS[network].passphrase);
-  } catch {
-    throw invalidInput("Not a transaction envelope");
-  }
-  return {
-    hashHex: transactionHashHex(tx),
-    innerHashHex: tx instanceof FeeBumpTransaction ? transactionHashHex(tx.innerTransaction) : null,
-  };
+/**
+ * sha256 of the TransactionSignaturePayload: what the network signs and calls the transaction
+ * hash (SHIELD §5). Computed from the XDR itself, so it doesn't depend on the SDK's high-level
+ * classes accepting every operation.
+ */
+function payloadHash(
+  network: NetworkId,
+  tagged: xdr.TransactionSignaturePayloadTaggedTransaction,
+): string {
+  const networkId = new xdr.Hash(sha256(new TextEncoder().encode(NETWORKS[network].passphrase)));
+  const payload = new xdr.TransactionSignaturePayload({ networkId, taggedTransaction: tagged });
+  return bytesHex(sha256(payload.toXdr()));
+}
+
+/** A pre-protocol-13 v0 transaction as the network applies and hashes it: as v1. */
+function v0AsV1(tx: xdr.TransactionV0): xdr.Transaction {
+  return new xdr.Transaction({
+    sourceAccount: xdr.MuxedAccount.keyTypeEd25519(tx.sourceAccountEd25519),
+    fee: tx.fee,
+    seqNum: tx.seqNum,
+    cond:
+      tx.timeBounds === null
+        ? xdr.Preconditions.precondNone()
+        : xdr.Preconditions.precondTime(tx.timeBounds),
+    memo: tx.memo,
+    operations: tx.operations,
+    ext: xdr.TransactionExt.v0(),
+  });
 }
 
 function decodeMemo(memo: xdr.Memo): DecodedMemo {
@@ -76,19 +87,10 @@ function timeBounds(cond: xdr.Preconditions): xdr.TimeBounds | null {
 
 type Inner = Omit<DecodedTransaction, "kind" | "envelopeType" | "feeBump">;
 
-function decodeInner(
-  source: string,
-  tx: {
-    fee: number;
-    seqNum: bigint;
-    memo: xdr.Memo;
-    operations: xdr.Operation[];
-  },
-  bounds: xdr.TimeBounds | null,
-): Inner {
-  const maxTime = bounds?.maxTime ?? 0n;
+function decodeV1(tx: xdr.Transaction): Inner {
+  const maxTime = timeBounds(tx.cond)?.maxTime ?? 0n;
   return {
-    source,
+    source: muxedAddress(tx.sourceAccount),
     feeStroops: BigInt(tx.fee),
     sequence: tx.seqNum,
     memo: decodeMemo(tx.memo),
@@ -97,47 +99,42 @@ function decodeInner(
   };
 }
 
-function decodeV1(tx: xdr.Transaction): Inner {
-  return decodeInner(muxedAddress(tx.sourceAccount), tx, timeBounds(tx.cond));
+function decodeTx(tx: xdr.Transaction, network: NetworkId): DecodedEnvelope {
+  return {
+    decoded: { kind: "transaction", envelopeType: "tx", ...decodeV1(tx), feeBump: null },
+    hashHex: payloadHash(
+      network,
+      xdr.TransactionSignaturePayloadTaggedTransaction.envelopeTypeTx(tx),
+    ),
+  };
 }
 
 export function decodeTransactionEnvelope(xdrBase64: string, network: NetworkId): DecodedEnvelope {
   const env = parseEnvelope(xdrBase64);
-  const { hashHex, innerHashHex } = hashes(env, network);
-  let decoded: DecodedTransaction;
   switch (env.type) {
-    case "envelopeTypeTxV0": {
-      // Pre-protocol-13 layout; the network hashes and applies it as a v1 transaction.
-      const tx = env.v0.tx;
-      const source = StrKey.encodeEd25519PublicKey(tx.sourceAccountEd25519.value);
-      decoded = {
-        kind: "transaction",
-        envelopeType: "tx",
-        ...decodeInner(source, tx, tx.timeBounds),
-        feeBump: null,
-      };
-      break;
-    }
+    case "envelopeTypeTxV0":
+      return decodeTx(v0AsV1(env.v0.tx), network);
     case "envelopeTypeTx":
-      decoded = { kind: "transaction", envelopeType: "tx", ...decodeV1(env.v1.tx), feeBump: null };
-      break;
+      return decodeTx(env.v1.tx, network);
     case "envelopeTypeTxFeeBump": {
       const outer = env.feeBump.tx;
-      if (innerHashHex === null) throw invalidInput("Not a transaction envelope");
-      decoded = {
-        kind: "transaction",
-        envelopeType: "txFeeBump",
-        ...decodeV1(outer.innerTx.v1.tx),
-        feeBump: {
-          feeSource: muxedAddress(outer.feeSource),
-          maxFeeStroops: outer.fee,
-          innerHashHex,
+      const inner = outer.innerTx.v1.tx;
+      const tagged = xdr.TransactionSignaturePayloadTaggedTransaction;
+      return {
+        decoded: {
+          kind: "transaction",
+          envelopeType: "txFeeBump",
+          ...decodeV1(inner),
+          feeBump: {
+            feeSource: muxedAddress(outer.feeSource),
+            maxFeeStroops: outer.fee,
+            innerHashHex: payloadHash(network, tagged.envelopeTypeTx(inner)),
+          },
         },
+        hashHex: payloadHash(network, tagged.envelopeTypeTxFeeBump(outer)),
       };
-      break;
     }
     default:
       return assertNever(env);
   }
-  return { decoded, hashHex };
 }

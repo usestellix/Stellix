@@ -32,3 +32,13 @@ export function decodeText(bytes: Uint8Array): DecodedText {
 export function bytesHex(bytes: Uint8Array): string {
   return hex.encode(bytes);
 }
+
+/** L… StrKey of a liquidity pool. */
+export function liquidityPoolAddress(poolId: xdr.PoolId): string {
+  return StrKey.encodeLiquidityPool(poolId.value);
+}
+
+/** B… StrKey: the id's type byte (only v0 exists) followed by its hash. */
+export function claimableBalanceAddress(id: xdr.ClaimableBalanceId): string {
+  return StrKey.encodeClaimableBalance(new Uint8Array([0, ...id.v0.value]));
+}
