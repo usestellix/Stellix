@@ -154,9 +154,9 @@ export interface AnalysisReport {
   decoded: DecodedRequest;
   simulation: SimulationResult | { status: "not_applicable" } | { status: "unavailable"; reason: string };
   findings: Finding[];
-  checksUnavailable: RuleId[];         // rules that could not run (e.g. no RPC, toml timeout)
+  checksUnavailable: { ruleId: RuleId; reason: UnavailableReason }[]; // rules that could not run (e.g. no RPC, toml timeout)
   createdAt: number;
-  expiresAt: number;                   // min(tx maxTime, createdAt + REPORT_TTL)
+  expiresAt: number;                   // min(tx maxTime, createdAt + REPORT_TTL_MS); REPORT_TTL_MS = 300 s
 }
 
 export type PolicyDecision =
@@ -226,10 +226,23 @@ Severity = highest finding wins. Never average. Hard blocks are independent of s
 
 All thresholds live in `rules/thresholds.ts`, versioned with the rule set. Initial values are proposed in the S1/S3 plans for approval — do not hardcode values in rule files.
 
+Approved for S1 on 2026-10-25 (#11). Ratios are integer basis points, money is bigint stroops, time is seconds:
+
+| Threshold | Value |
+|---|---|
+| `OFFER_BAD_PRICE` | worse than the best opposing order-book price by more than 500 bps (5%) |
+| `PATH_LOW_MIN` | `destMin` / `sendMax` allows a loss of more than 500 bps vs Horizon's best path |
+| `NO_MAX_TIME` | `maxTime` absent (0), or more than 3,600 s after `now` |
+| `HIGH_FEE` | total maximum fee (fee bid, or fee-bump outer fee) above 1,000,000 stroops (0.1 XLM, 10× `MAX_FEE_STROOPS`) |
+
+Changing any value bumps `RULE_SET_VERSION`.
+
 ### 6.4 Rule implementation rules
 
-- One file per rule. Signature: `(ctx: RuleContext) => Finding[] | RuleUnavailable`.
-- A rule that needs data it can't get returns `RuleUnavailable`; the rule ID goes in `checksUnavailable` and the UI shows it.
+- One file per rule. Signature: `(ctx: RuleContext) => Finding[] | RuleUnavailable`. Rules are synchronous: network data they need (order books, accounts, `stellar.toml`) is fetched before they run, by `analyze`'s gather step, and reaches them as `RuleContext.data`. Each rule issue adds its own lookup there.
+- A rule that needs data it can't get returns `RuleUnavailable` with a reason (`no_source`, `unreachable`, `timeout`, `bad_response`, `not_found`); the rule ID and reason go in `checksUnavailable` and the UI shows them.
+- A rule that throws, or returns a finding under another rule's ID, is recorded as unavailable with reason `internal`. It never counts as a pass, and the other rules still run.
+- ESLint forbids `Date.now`, `fetch` and `performance` in `security/` (tests excepted); the clock and network come through `ShieldDeps`.
 - No rule reads the clock or network directly; everything comes via `RuleContext`.
 - Every rule has ≥ 1 positive and ≥ 1 negative fixture.
 - User-facing text lives in `copy/`, keyed by rule ID, with placeholders filled from `evidence`.
@@ -372,7 +385,7 @@ CI reports detection per rule category on the corpus, false positives on a benig
 
 ## 12. Open questions to raise in plans (don't guess)
 
-- Thresholds for `OFFER_BAD_PRICE`, `PATH_LOW_MIN`, `NO_MAX_TIME`, `HIGH_FEE`, `TOKEN_APPROVE_*`, `AUTH_LONG_EXPIRY`.
+- Thresholds for `TOKEN_APPROVE_*`, `AUTH_LONG_EXPIRY` (S3). The S1 thresholds are settled (§6.3).
 - Whether `ACCT_SIGNER_CHANGE` from a dapp should ever be overridable (current answer: no).
 - Mode B outflow comparison: what counts as "presented" when a dapp supplies no destinations.
 - Threat-list sources, maintainer, signing-key custody (S4).

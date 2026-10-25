@@ -6,6 +6,8 @@ import tseslint from "typescript-eslint";
 
 const CORE_FILE = "packages/core/src/__lint_self_test__.ts";
 const EXT_FILE = "apps/extension/src/__lint_self_test__.ts";
+// Shield's analysis code must stay platform-free too (SHIELD §3.1).
+const SHIELD_FILE = "packages/core/src/security/__lint_self_test__.ts";
 
 /** @type {[file: string, code: string, ruleId: string][]} */
 const CASES = [
@@ -27,6 +29,11 @@ const CASES = [
   [CORE_FILE, `export const a = globalThis.chrome;`, "no-restricted-properties"],
   [CORE_FILE, `export const a = Math.random();`, "no-restricted-properties"],
   [CORE_FILE, `console.log("x");`, "no-console"],
+  [SHIELD_FILE, `import "fs";`, "no-restricted-imports"],
+  [SHIELD_FILE, `export const a = chrome;`, "no-restricted-globals"],
+  [SHIELD_FILE, `export const a = Date.now();`, "no-restricted-properties"],
+  [SHIELD_FILE, `export const a = fetch;`, "no-restricted-globals"],
+  [SHIELD_FILE, `export const a = Math.random();`, "no-restricted-properties"],
   [EXT_FILE, `console.log("x");`, "no-console"],
   [EXT_FILE, `eval("1");`, "no-eval"],
   [EXT_FILE, `export const f = new Function("return 1");`, "no-new-func"],
@@ -34,7 +41,17 @@ const CASES = [
 
 // Shells may import platform modules; make sure the restriction is scoped to core.
 /** @type {[file: string, code: string, ruleId: string][]} */
-const MUST_PASS = [[EXT_FILE, `import "react";`, "no-restricted-imports"]];
+const MUST_PASS = [
+  [EXT_FILE, `import "react";`, "no-restricted-imports"],
+  // The clock ban is Shield-only; the rest of core reads time through Platform.now as before.
+  [CORE_FILE, `export const a = Date.now();`, "no-restricted-properties"],
+  // Shield tests may use real clocks and fixtures.
+  [
+    "packages/core/src/security/__tests__/__lint_self_test__.ts",
+    `export const a = Date.now();`,
+    "no-restricted-properties",
+  ],
+];
 
 const eslint = new ESLint({
   overrideConfig: [{ files: ["**/__lint_self_test__.ts"], ...tseslint.configs.disableTypeChecked }],
