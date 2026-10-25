@@ -6,5 +6,5 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["eslint.config.mjs", "scripts/*.mjs"]
+  "include": ["eslint.config.mjs", "scripts/*.mjs", "scripts/lib/*.mjs"]
 }

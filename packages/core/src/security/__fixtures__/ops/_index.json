@@ -31,7 +31,8 @@
       "payment-muxed-sources",
       "feeBump",
       "preconditions-no-max-time",
-      "preconditions-all"
+      "preconditions-all",
+      "preconditions-none"
     ],
     "createAccount": ["createAccount", "sponsorship-create-account"],
     "clawback": ["clawback"],
@@ -314,6 +315,11 @@
       "envelopeType": "envelopeTypeTx"
     },
     "preconditions-all": {
+      "opType": "preconditions",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "preconditions-none": {
       "opType": "preconditions",
       "opTypes": ["payment"],
       "envelopeType": "envelopeTypeTx"

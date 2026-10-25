@@ -5,6 +5,7 @@ import { assertNever } from "../../assert-never.js";
 import { NETWORKS, type NetworkId } from "../../network/config.js";
 import type { DecodedMemo, DecodedTransaction } from "../types.js";
 import { decodeOperation } from "./operations.js";
+import { decodePreconditions } from "./preconditions.js";
 import { bytesHex, decodeText, invalidInput, muxedAddress } from "./xdr-values.js";
 
 // TransactionEnvelope and FeeBumpTransactionEnvelope → DecodedTransaction (SHIELD §3.1, §5).
@@ -86,30 +87,18 @@ function decodeMemo(memo: xdr.Memo): DecodedMemo {
   }
 }
 
-function timeBounds(cond: xdr.Preconditions): xdr.TimeBounds | null {
-  switch (cond.type) {
-    case "precondNone":
-      return null;
-    case "precondTime":
-      return cond.timeBounds;
-    case "precondV2":
-      return cond.v2.timeBounds;
-    default:
-      return assertNever(cond);
-  }
-}
-
 type Inner = Omit<DecodedTransaction, "kind" | "envelopeType" | "feeBump">;
 
 function decodeV1(tx: xdr.Transaction): Inner {
-  const maxTime = timeBounds(tx.cond)?.maxTime ?? 0n;
+  const preconditions = decodePreconditions(tx.cond);
   return {
     source: muxedAddress(tx.sourceAccount),
     feeStroops: BigInt(tx.fee),
     sequence: tx.seqNum,
     memo: decodeMemo(tx.memo),
     operations: tx.operations.map(decodeOperation),
-    maxTime: maxTime === 0n ? null : maxTime,
+    maxTime: preconditions.timeBounds?.maxTime ?? null,
+    preconditions,
   };
 }
 

@@ -1,3 +1,4 @@
+import { NO_PRECONDITIONS } from "../decode/preconditions.js";
 import { describe, expect, it } from "vitest";
 import {
   RULE_POLICY,
@@ -83,6 +84,7 @@ function report(findings: Finding[], checksUnavailable: CheckUnavailable[] = [])
       memo: { type: "none" },
       operations: [],
       maxTime: null,
+      preconditions: NO_PRECONDITIONS,
       feeBump: null,
     },
     simulation: { status: "not_applicable" },
