@@ -217,3 +217,86 @@ describe("payments through the service worker", () => {
     });
   });
 });
+
+describe("Shield Mode A through the service worker (#24)", () => {
+  const prepare = async (send: Awaited<ReturnType<typeof setup>>["send"]) => {
+    const res = await send("PREPARE_PAYMENT", { destination: DEST, amount: "3" });
+    expect(res).toMatchObject({ ok: true });
+    return (res as { data: { preparedId: string } }).data.preparedId;
+  };
+
+  it("PREPARE returns the report view: a Stellix payment is ready with no unavailable checks", async () => {
+    const { send } = await setup();
+    const res = await send("PREPARE_PAYMENT", { destination: DEST, amount: "3" });
+    expect(res).toMatchObject({
+      ok: true,
+      data: {
+        report: {
+          network: "testnet",
+          findings: [],
+          checksUnavailable: [],
+          decision: { state: "ready" },
+        },
+      },
+    });
+    expect((res as { data: { report: object } }).data.report).not.toHaveProperty("decoded");
+  });
+
+  it("memo-required destination without a memo → MEMO_REQUIRED, as in M3", async () => {
+    const { h, send } = await setup();
+    h.accounts.set(DEST, { ...h.accounts.get(DEST)!, data: { "config.memo_required": "MQ==" } });
+    expect(await send("PREPARE_PAYMENT", { destination: DEST, amount: "3" })).toMatchObject({
+      ok: false,
+      error: { code: "MEMO_REQUIRED" },
+    });
+  });
+
+  it("a stored tx changed after PREPARE → SHIELD_DIGEST_MISMATCH, nothing submitted", async () => {
+    const { platform, h, send } = await setup();
+    landOnSubmit(h);
+    const preparedId = await prepare(send);
+    const key = `preparedTx:${preparedId}`;
+    const stored = (await platform.session.get<{ xdr: string }>(key))!;
+    const tampered = TransactionBuilder.cloneFrom(
+      TransactionBuilder.fromXdr(stored.xdr, NETWORKS.testnet.passphrase) as never,
+      { fee: "200" },
+    ).build();
+    await platform.session.set(key, { ...stored, xdr: tampered.toXdr() });
+    expect(await send("CONFIRM_PAYMENT", { preparedId })).toMatchObject({
+      ok: false,
+      error: { code: "SHIELD_DIGEST_MISMATCH" },
+    });
+    expect(h.count("submitTransactionAsync")).toBe(0);
+  });
+
+  it("a review decision fails closed until #36 → SHIELD_CONFIRMATION_REQUIRED", async () => {
+    const { platform, h, send } = await setup();
+    landOnSubmit(h);
+    const preparedId = await prepare(send);
+    const key = `preparedTx:${preparedId}`;
+    const stored = (await platform.session.get<{ report: object }>(key))!;
+    await platform.session.set(key, {
+      ...stored,
+      report: { ...stored.report, checksUnavailable: [{ ruleId: "HIGH_FEE", reason: "internal" }] },
+    });
+    expect(await send("CONFIRM_PAYMENT", { preparedId })).toMatchObject({
+      ok: false,
+      error: { code: "SHIELD_CONFIRMATION_REQUIRED" },
+    });
+    expect(h.count("submitTransactionAsync")).toBe(0);
+  });
+
+  it.each([
+    ["a report", { report: { findings: [], decision: { state: "ready" } } }],
+    ["a confirmation", { confirmation: { kind: "click" } }],
+  ])("CONFIRM_PAYMENT can't carry %s: the SW uses only what it stored", async (_label, extra) => {
+    const { h, send } = await setup();
+    landOnSubmit(h);
+    const preparedId = await prepare(send);
+    expect(await send("CONFIRM_PAYMENT", { preparedId, ...extra })).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_REQUEST" },
+    });
+    expect(h.count("submitTransactionAsync")).toBe(0);
+  });
+});
