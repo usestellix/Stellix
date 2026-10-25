@@ -1,0 +1,142 @@
+{
+  "name": "trust-listed-clawback",
+  "description": "changeTrust to SRT from an issuer whose stellar.toml lists it, with auth_clawback_enabled.",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T16:06:48.229Z",
+  "userAccount": "GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB",
+  "lookups": {
+    "issuer": {
+      "path": "accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN",
+      "status": 200,
+      "body": {
+        "_links": {
+          "self": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN"
+          },
+          "transactions": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/transactions{?cursor,limit,order}",
+            "templated": true
+          },
+          "operations": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/operations{?cursor,limit,order}",
+            "templated": true
+          },
+          "payments": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/payments{?cursor,limit,order}",
+            "templated": true
+          },
+          "effects": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/effects{?cursor,limit,order}",
+            "templated": true
+          },
+          "offers": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/offers{?cursor,limit,order}",
+            "templated": true
+          },
+          "trades": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/trades{?cursor,limit,order}",
+            "templated": true
+          },
+          "data": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN/data/{key}",
+            "templated": true
+          }
+        },
+        "id": "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN",
+        "account_id": "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN",
+        "sequence": "19692257548435465",
+        "sequence_ledger": 4844867,
+        "sequence_time": "1790247922",
+        "subentry_count": 0,
+        "home_domain": "4344.staging.register.nyala.de",
+        "last_modified_ledger": 4844867,
+        "last_modified_time": "2026-09-24T11:05:22Z",
+        "thresholds": { "low_threshold": 0, "med_threshold": 0, "high_threshold": 0 },
+        "flags": {
+          "auth_required": true,
+          "auth_revocable": true,
+          "auth_immutable": false,
+          "auth_clawback_enabled": true
+        },
+        "balances": [
+          {
+            "balance": "2.9998800",
+            "buying_liabilities": "0.0000000",
+            "selling_liabilities": "0.0000000",
+            "asset_type": "native"
+          }
+        ],
+        "signers": [
+          {
+            "weight": 1,
+            "key": "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN",
+            "type": "ed25519_public_key"
+          }
+        ],
+        "data": {},
+        "num_sponsoring": 0,
+        "num_sponsored": 0,
+        "paging_token": "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN"
+      }
+    },
+    "toml": {
+      "path": "https://4344.staging.register.nyala.de/.well-known/stellar.toml",
+      "status": 200,
+      "headers": { "content-type": "text/plain", "location": null },
+      "text": "SIGNING_KEY = \"GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN\"\nACCOUNTS = [ \"GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN\", ]\nPRINCIPALS = [ ]\n[DOCUMENTATION]\nORG_NAME = \"STRK\"\nORG_DBA = \"STRK\"\nORG_URL = \"https://staging.vault.nyala.de/\"\nORG_LOGO = \"https://4344.staging.register.nyala.de/logos/org.png\"\nORG_DESCRIPTION = \"ewrwe\"\nORG_PHYSICAL_ADDRESS = \"HBU78\"\nORG_OFFICIAL_EMAIL = \"test@gmail.com\"\n\n[[CURRENCIES]]\ncode = \"SRT\"\nissuer = \"GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN\"\ndesc = \"wqqe\"\nname = \"SRTE\"\n\n"
+    }
+  },
+  "hash": "497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0",
+  "envelopeXdr": "AAAAAgAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAA+gAUifgAAAAAQAAAAEAAAAAAAAAAAAAAABq3inGAAAAAAAAAAEAAAAAAAAABgAAAAFTUlQAAAAAAK9pVi5Kqi/HsHDrEGxcYtvKSWGCldPwy0w+qX1TDEmYf/////////8AAAAAAAAAAfAcu3AAAABA7lGPYRO41bGrL6K6UFXiqraVxlU0loMUsWTtiUkJg+2Ep20QFMlGqWbS/bDdWZByFVpAD6G42odzD4wsZ4G9Bw==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5384164" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23124808296325120"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23124808296325120"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0"
+        }
+      },
+      "id": "497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0",
+      "paging_token": "23124808296325120",
+      "successful": true,
+      "hash": "497211cf5958dc5b761953fe54317e7dc0d5d0740d9c71133ffb4f7a70d795d0",
+      "ledger": 5384164,
+      "created_at": "2026-10-25T16:06:47Z",
+      "source_account": "GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB",
+      "source_account_sequence": "23124791116431361",
+      "fee_account": "GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAA+gAUifgAAAAAQAAAAEAAAAAAAAAAAAAAABq3inGAAAAAAAAAAEAAAAAAAAABgAAAAFTUlQAAAAAAK9pVi5Kqi/HsHDrEGxcYtvKSWGCldPwy0w+qX1TDEmYf/////////8AAAAAAAAAAfAcu3AAAABA7lGPYRO41bGrL6K6UFXiqraVxlU0loMUsWTtiUkJg+2Ep20QFMlGqWbS/bDdWZByFVpAD6G42odzD4wsZ4G9Bw==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAGAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUifgAAAAAAAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAABdIdugAAFIn4AAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAEAUifkAAAAAAAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAABdIduecAFIn4AAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA==",
+      "memo_type": "none",
+      "signatures": [
+        "7lGPYRO41bGrL6K6UFXiqraVxlU0loMUsWTtiUkJg+2Ep20QFMlGqWbS/bDdWZByFVpAD6G42odzD4wsZ4G9Bw=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792944582" } }
+    }
+  }
+}

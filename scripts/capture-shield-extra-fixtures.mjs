@@ -7,6 +7,7 @@
 //   preconditions   a transaction without preconditions (PRECOND_NONE)
 //   offers          order books + offers at a known distance from the best bid (OFFER_BAD_PRICE)
 //   paths           path-finding results + path payments with known loss bounds (PATH_LOW_MIN)
+//   trust           issuer accounts + their stellar.toml + changeTrust (TRUST_UNVERIFIED, _CLAWBACK)
 //
 // Market fixtures (`__fixtures__/market/<name>.json`) pair the Horizon responses a rule's gather
 // step reads with the user's transaction, both captured on testnet: the lookups first (what
@@ -27,7 +28,7 @@ import {
 } from "./lib/shield-capture.mjs";
 
 const MARKET_DIR = "packages/core/src/security/__fixtures__/market";
-const GROUPS = ["preconditions", "offers", "paths"];
+const GROUPS = ["preconditions", "offers", "paths", "trust"];
 const groups = process.argv.slice(2);
 if (groups.length === 0 || groups.some((g) => !GROUPS.includes(g))) {
   throw new Error(`usage: capture-shield-extra-fixtures.mjs <${GROUPS.join("|")}>…`);
@@ -111,8 +112,24 @@ function strictReceivePath(send, dest, amount) {
   return `paths/strict-receive?source_assets=${encodeURIComponent(assetListItem(send))}&${assetParams("destination_", dest)}&destination_amount=${amount}`;
 }
 
-/** @param {string} path */
+/**
+ * A Horizon path (relative to its root, JSON body), or an issuer's stellar.toml (absolute https
+ * URL, kept as text with the headers the fetcher checks).
+ * @param {string} path
+ */
 async function lookup(path) {
+  if (path.startsWith("https://")) {
+    const res = await fetch(path, { redirect: "manual" });
+    return {
+      path,
+      status: res.status,
+      headers: {
+        "content-type": res.headers.get("content-type"),
+        location: res.headers.get("location"),
+      },
+      text: await res.text(),
+    };
+  }
   const res = await get(`${HORIZON}/${path}`);
   return { path, status: res.status, body: res.body };
 }
@@ -125,7 +142,7 @@ async function lookup(path) {
  * @param {import("@stellar/stellar-sdk/base").Keypair} user signer and the wallet user
  */
 async function captureMarket(name, description, lookups, tx, user) {
-  /** @type {Record<string, { path: string; status: number; body: unknown }>} */
+  /** @type {Record<string, unknown>} */
   const responses = {};
   for (const [key, path] of Object.entries(lookups)) responses[key] = await lookup(path);
   const record = await submit(tx, [user]);
@@ -148,7 +165,7 @@ async function captureMarket(name, description, lookups, tx, user) {
  * @param {string} name @param {string} description @param {Record<string, string>} lookups
  */
 async function captureLookups(name, description, lookups) {
-  /** @type {Record<string, { path: string; status: number; body: unknown }>} */
+  /** @type {Record<string, unknown>} */
   const responses = {};
   for (const [key, path] of Object.entries(lookups)) responses[key] = await lookup(path);
   await writeJson(`${MARKET_DIR}/${name}.json`, {
@@ -408,6 +425,71 @@ if (groups.includes("paths")) {
     "Path finding for 10 XLM → NOPATH, an asset with no market: no records.",
     { paths: strictSendPath(XLM, "10.0000000", NOPATH) },
   );
+}
+
+if (groups.includes("trust")) {
+  mkdirSync(MARKET_DIR, { recursive: true });
+  const user = Keypair.random();
+  const impostor = Keypair.random(); // claims a real issuer's home domain for the same code
+  const plain = Keypair.random(); // no home domain
+  process.stdout.write("Funding accounts via Friendbot…\n");
+  for (const kp of [user, impostor, plain]) await fund(kp);
+
+  // Third-party testnet issuers, found through Horizon's /assets toml links on 2026-10-25:
+  // nyala's staging SRT is listed in its toml and has auth_clawback_enabled; wetheunion.com's
+  // EURC issuer points at a parked domain that serves an HTML page instead of a toml.
+  const NYALA = "4344.staging.register.nyala.de";
+  const SRT = new Asset("SRT", "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN");
+  const EURC = new Asset("EURC", "GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK");
+  const FAKE_SRT = new Asset("SRT", impostor.publicKey());
+  const PLAIN = new Asset("PLAIN", plain.publicKey());
+  await submit(await txFrom(impostor, [Operation.setOptions({ homeDomain: NYALA })]), [impostor]);
+
+  /** @param {Asset} asset @param {string | null} homeDomain */
+  const trustLookups = (asset, homeDomain) => ({
+    issuer: `accounts/${String(asset.getIssuer())}`,
+    ...(homeDomain === null ? {} : { toml: `https://${homeDomain}/.well-known/stellar.toml` }),
+  });
+  const cases = [
+    [
+      "trust-listed-clawback",
+      "changeTrust to SRT from an issuer whose stellar.toml lists it, with auth_clawback_enabled.",
+      SRT,
+      NYALA,
+    ],
+    [
+      "trust-parked-domain",
+      "changeTrust to EURC from an issuer whose home domain serves an HTML page, not a toml.",
+      EURC,
+      "wetheunion.com",
+    ],
+    [
+      "trust-unlisted",
+      "changeTrust to SRT from an issuer claiming nyala's home domain; its toml lists SRT under another issuer.",
+      FAKE_SRT,
+      NYALA,
+    ],
+    [
+      "trust-no-home-domain",
+      "changeTrust to an asset whose issuer has no home domain.",
+      PLAIN,
+      null,
+    ],
+  ];
+  for (const [
+    name,
+    description,
+    asset,
+    homeDomain,
+  ] of /** @type {[string, string, Asset, string | null][]} */ (cases)) {
+    await captureMarket(
+      name,
+      description,
+      trustLookups(asset, homeDomain),
+      await txFrom(user, [Operation.changeTrust({ asset })]),
+      user,
+    );
+  }
 }
 
 const indexPath = `${OPS_DIR}/_index.json`;
