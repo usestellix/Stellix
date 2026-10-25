@@ -67,6 +67,7 @@ describe("analyze", () => {
     const report = await analyze(txRequest(fixture("payment-native").envelopeXdr), deps());
     expect(report).toMatchObject({
       network: "testnet",
+      origin: { type: "pasted" },
       ruleSetVersion: RULE_SET_VERSION,
       simulation: { status: "not_applicable" },
       findings: [],
@@ -106,6 +107,22 @@ describe("analyze", () => {
       });
     },
   );
+
+  it("accepts only the canonical base64 spelling of an envelope", async () => {
+    const xdr = fixture("payment-native").envelopeXdr;
+    const lenient = [
+      `${xdr.slice(0, 20)}\n${xdr.slice(20)}`,
+      xdr.replace(/=+$/, ""),
+      ` ${xdr}`,
+      xdr.replace(/\+/g, "-").replace(/\//g, "_"),
+    ];
+    for (const variant of lenient) {
+      if (variant === xdr) continue; // no '+', '/' or padding to change in this fixture
+      await expect(analyze(txRequest(variant), deps())).rejects.toMatchObject({
+        code: "SHIELD_INPUT_INVALID",
+      });
+    }
+  });
 
   it("rejects request kinds that arrive in later phases", async () => {
     await expect(

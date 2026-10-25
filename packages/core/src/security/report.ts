@@ -5,6 +5,7 @@ import type {
   CheckUnavailable,
   DecodedRequest,
   Finding,
+  Origin,
   SimulationStatus,
 } from "./types.js";
 
@@ -22,6 +23,7 @@ export function reportExpiresAt(createdAt: number, maxTime: bigint | null): numb
 export interface ReportInput {
   digest: string;
   network: NetworkId;
+  origin: Origin;
   decoded: DecodedRequest;
   simulation: SimulationStatus;
   findings: readonly Finding[];

@@ -72,6 +72,7 @@ function report(findings: Finding[], checksUnavailable: CheckUnavailable[] = [])
   return {
     digest: "00",
     network: "testnet",
+    origin: { type: "dapp", url: "https://example.com" },
     ruleSetVersion: "1",
     decoded: { kind: "transaction", envelopeType: "tx", operations: [], maxTime: null },
     simulation: { status: "not_applicable" },

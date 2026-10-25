@@ -35,6 +35,7 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
   return buildReport({
     digest: hashHex,
     network: req.network,
+    origin: req.origin,
     decoded,
     simulation: { status: "not_applicable" },
     findings,
@@ -43,6 +44,7 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
   });
 }
 
+export { assertSignable, type Confirmation } from "./assert-signable.js";
 export {
   RULE_POLICY,
   SEVERITY_FLOOR,
