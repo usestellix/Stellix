@@ -85,22 +85,59 @@ export interface CheckUnavailable {
 }
 
 /**
- * Placeholder until the decoder issues give each operation its own variant (SHIELD §9 S1).
+ * An operation whose type has no decoder yet (SHIELD §9 S1); UNSUPPORTED_OP reports it.
  * `opType` is the XDR OperationType name, e.g. "payment", "revokeSponsorship".
  */
 export interface UndecodedOperation {
   kind: "undecoded";
   opType: string;
+  /** The op's own source account (G… or M…) as written; null means the transaction's source. */
+  source: string | null;
 }
 export type DecodedOperation = UndecodedOperation;
 
+/** Bytes that are usually text (memo text, data names). Untrusted: never shown as Stellix's own words. */
+export interface DecodedText {
+  /** The bytes as UTF-8, or null when they aren't valid UTF-8. */
+  text: string | null;
+  hex: string;
+}
+
+export type DecodedMemo =
+  | { type: "none" }
+  | ({ type: "text" } & DecodedText)
+  | { type: "id"; id: bigint }
+  | { type: "hash"; hex: string }
+  | { type: "return"; hex: string };
+
+export interface DecodedFeeBump {
+  /** G… or M…; pays the fee. */
+  feeSource: string;
+  /** The outer fee: the most the fee source can be charged for the whole transaction. */
+  maxFeeStroops: bigint;
+  /** Hash of the inner transaction under the request's network. */
+  innerHashHex: string;
+}
+
+/**
+ * A transaction envelope (SHIELD §3.1 decode/envelope.ts). For a fee bump, every field except
+ * `feeBump` describes the inner transaction: its source is the ops' default source and its
+ * fee bid is the inner one (§6.6).
+ */
 export interface DecodedTransaction {
   kind: "transaction";
   envelopeType: "tx" | "txFeeBump";
-  /** For a fee bump, the inner transaction's operations. */
+  /** G… or M…. */
+  source: string;
+  /** Fee bid of the (inner) transaction. */
+  feeStroops: bigint;
+  sequence: bigint;
+  memo: DecodedMemo;
   operations: readonly DecodedOperation[];
   /** Upper time bound in seconds; null when absent (no time bounds, or maxTime 0). */
   maxTime: bigint | null;
+  /** Present exactly when envelopeType is "txFeeBump". */
+  feeBump: DecodedFeeBump | null;
 }
 export type DecodedRequest = DecodedTransaction; // auth entries (S3), messages (S2)
 
