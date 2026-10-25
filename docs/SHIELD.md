@@ -255,6 +255,15 @@ Changing any value bumps `RULE_SET_VERSION`.
 | Review, typed | Typed confirm | Typed confirm | Show finding |
 | Review, click | Explicit confirm | Explicit confirm | Show finding |
 
+How `evaluate` decides (`policy/policy.ts`; settled in #13):
+- **Per-rule outcome** from the §6.1 Policy column. Rows that §6.1 leaves open: `ACCT_SIGNER_CHANGE` and `ACCT_MASTER_WEIGHT` also block in Mode A (Stellix never builds them, so seeing one there is a bug or an attack); `ACCT_MERGE` from Mode A needs a typed confirmation; `MEMO_REQUIRED` is a non-overridable block.
+- **Mode C is evaluated as Mode B.** The report says what Stellix would do if a site asked it to sign the request; nothing pasted is ever signed.
+- **Severity floor**, whatever the rule's own policy: critical needs at least a typed confirmation, medium and high at least a click, info and low nothing.
+- **Strictest wins:** ready < click < typed < block, across all findings. Never averaged (invariant 20).
+- **An unavailable check counts as if its rule had fired**, and needs at least a click (invariant 18). This fails closed: a blocking rule can't be bypassed by crafting input that makes it fail.
+- **A typed review uses the phrase `CONFIRM`** (`TYPED_CONFIRMATION_PHRASE`), returned as `typedPhrase`.
+- **`blocked` lists each blocking rule once and has no override** in any mode or message type (invariant 19). Tests sweep every subset of the S1 rules, fired and unavailable, in every mode.
+
 ### 6.6 Effective source
 
 `op.source ?? tx.source`. For fee bumps, the inner transaction's source applies to ops; the fee source pays the fee. An op is "from the user" if its effective source's base account equals the user's `G…` (decode muxed sources).
