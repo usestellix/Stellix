@@ -177,6 +177,11 @@ export interface RuleData {
   paths: ReadonlyMap<number, readonly PathRecord[] | RuleUnavailable>;
   /** TRUST_UNVERIFIED, TRUST_CLAWBACK: what's known about each issuer, keyed by its G…. */
   issuers: ReadonlyMap<string, IssuerInfo | RuleUnavailable>;
+  /**
+   * MEMO_REQUIRED: whether each destination it checks requires a memo (SEP-29), keyed by its G….
+   * An account that doesn't exist requires none.
+   */
+  memoRequired: ReadonlyMap<string, boolean | RuleUnavailable>;
 }
 
 export interface IssuerInfo {

@@ -1,5 +1,7 @@
 import type { OrderBook, PathRecord } from "../network/horizon-schemas.js";
+import { requiresMemo } from "../tx/sep29.js";
 import { isUnavailable, pairKey, unavailableFrom } from "./lookups.js";
+import { checkedMemoDestinations } from "./rules/MEMO_REQUIRED.js";
 import { checkedOffers } from "./rules/OFFER_BAD_PRICE.js";
 import { checkedPathPayments } from "./rules/PATH_LOW_MIN.js";
 import { checkedTrustlines } from "./rules/trust.js";
@@ -54,5 +56,14 @@ export async function gather(decoded: DecodedRequest, deps: ShieldDeps): Promise
   for (const { issuer } of checkedTrustlines(decoded, deps.userAccount)) {
     if (!issuers.has(issuer)) issuers.set(issuer, await issuerInfo(issuer, deps));
   }
-  return { orderBooks, paths, issuers };
+  const memoRequired = new Map<string, boolean | RuleUnavailable>();
+  for (const { destination } of checkedMemoDestinations(decoded)) {
+    if (memoRequired.has(destination)) continue;
+    const account = await lookup(() => deps.horizon.getAccount(destination));
+    memoRequired.set(
+      destination,
+      isUnavailable(account) ? account : account !== null && requiresMemo(account),
+    );
+  }
+  return { orderBooks, paths, issuers, memoRequired };
 }
