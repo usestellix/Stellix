@@ -43,6 +43,7 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
   });
 }
 
+export { RULE_COPY, fillTemplate, findingCopy, type RuleCopy } from "./copy/index.js";
 export {
   RULE_POLICY,
   SEVERITY_FLOOR,
