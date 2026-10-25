@@ -35,7 +35,6 @@ import { fallbackFee, feeFromStats, type FeeChoice } from "../tx/fee.js";
 import { decodeResultXdr } from "../tx/result-codes.js";
 import { resolveTransaction } from "../tx/resolve.js";
 import { selectOperation } from "../tx/select-op.js";
-import { requiresMemo } from "../tx/sep29.js";
 import { assertSameSummary, summarizeTransaction, type PaymentSummary } from "../tx/summary.js";
 import { validatePayment, type PaymentInput } from "../tx/validate.js";
 import { openVaultWithKey } from "../vault/vault.js";
@@ -159,14 +158,7 @@ export async function preparePayment(
 
   const destRecord = await horizon.getAccount(payment.destinationBase);
   const kind = selectOperation(payment.muxed, destRecord !== null);
-  if (
-    destRecord !== null &&
-    !payment.muxed &&
-    payment.memo.type === "none" &&
-    requiresMemo(destRecord)
-  ) {
-    throw new StellixError("MEMO_REQUIRED", "Destination requires a memo (SEP-29)");
-  }
+  // SEP-29 is Shield's MEMO_REQUIRED rule, checked on the built tx below (blockedAtPrepare).
 
   const fee = await chooseFee(platform, horizon, network);
   const reserve = await getBaseReserveStroops(network, horizon, {
