@@ -57,10 +57,19 @@ export {
   type PolicyOutcome,
 } from "./policy/policy.js";
 export { compareSeverity, maxSeverity } from "./policy/severity.js";
-export { REPORT_TTL_MS, reportExpiresAt } from "./report.js";
+export {
+  REPORT_TTL_MS,
+  fromStoredReport,
+  reportExpiresAt,
+  reportView,
+  toStoredReport,
+  type ReportView,
+  type StoredReport,
+} from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
 export { isUnavailable, pairKey, unavailableFrom } from "./lookups.js";
+export { NO_TOML } from "./intel/no-toml.js";
 export {
   TOML_CACHE_TTL_MS,
   TOML_MAX_BYTES,

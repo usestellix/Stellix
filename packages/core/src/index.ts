@@ -228,6 +228,7 @@ export {
 } from "./history/normalize.js";
 export { SEP7_SCHEME, encodePayRequest, type PayRequest } from "./uri/sep7.js";
 export {
+  NO_TOML,
   REPORT_TTL_MS,
   RULES,
   RULE_POLICY,
@@ -252,6 +253,7 @@ export {
   evaluate,
   maxSeverity,
   reportExpiresAt,
+  reportView,
   ruleOutcome,
   runRules,
   type AnalysisReport,
@@ -271,6 +273,7 @@ export {
   type RuleData,
   type RuleId,
   type RuleRun,
+  type ReportView,
   type RuleUnavailable,
   type Severity,
   type ShieldDeps,

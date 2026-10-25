@@ -5,6 +5,9 @@ import {
   sanitizeErrorDetails,
   NETWORK_IDS,
   RESET_CONFIRMATION,
+  RULE_IDS,
+  SEVERITIES,
+  UNAVAILABLE_REASONS,
   VERIFY_WORD_COUNT,
   accountMetaSchema,
   type ErrorCode,
@@ -106,6 +109,48 @@ const paymentSummarySchema = z.strictObject({
   expiresAt: z.number().int(),
   firstTimeDestination: z.boolean(),
   feeEstimated: z.boolean(),
+});
+
+const ruleIdSchema = z.enum(RULE_IDS);
+
+/**
+ * SHIELD §4 ReportView: public data only, no decoded request. SW → UI only; no request type
+ * accepts a report (the SW signs on the one it stored). `decision` is for display: the SW
+ * re-evaluates the stored report at confirm.
+ */
+const reportViewSchema = z.strictObject({
+  digest: z.string().regex(/^[0-9a-f]{64}$/),
+  network: z.enum(NETWORK_IDS),
+  ruleSetVersion: z.string(),
+  findings: z
+    .array(
+      z.strictObject({
+        ruleId: ruleIdSchema,
+        severity: z.enum(SEVERITIES),
+        confidence: z.enum(["high", "medium", "low"]),
+        opIndex: z.number().int().nonnegative().optional(),
+        evidence: z.record(z.string(), z.string()).readonly(),
+      }),
+    )
+    .readonly(),
+  checksUnavailable: z
+    .array(z.strictObject({ ruleId: ruleIdSchema, reason: z.enum(UNAVAILABLE_REASONS) }))
+    .readonly(),
+  decision: z.discriminatedUnion("state", [
+    z.strictObject({ state: z.literal("ready") }),
+    z.strictObject({
+      state: z.literal("review"),
+      requires: z.enum(["click", "typed"]),
+      typedPhrase: z.string().optional(),
+    }),
+    z.strictObject({
+      state: z.literal("blocked"),
+      ruleIds: z.array(ruleIdSchema).readonly(),
+      overridable: z.literal(false),
+    }),
+  ]),
+  createdAt: z.number().int(),
+  expiresAt: z.number().int(),
 });
 
 const errorCodeSchema = z.enum(ERROR_CODES);
@@ -279,7 +324,10 @@ export const REQUESTS = {
     allowedFrom: BOTH,
     countsAsActivity: true,
   }),
-  /** TRANSACTIONS §3: builds and stores an unsigned tx; returns its summary for review. */
+  /**
+   * TRANSACTIONS §3: builds and stores an unsigned tx; returns its summary and Shield's report
+   * (Mode A, SHIELD §8) for review.
+   */
   PREPARE_PAYMENT: defineRequest({
     payload: z.strictObject({
       destination: z.string().max(128),
@@ -290,6 +338,7 @@ export const REQUESTS = {
       preparedId: z.string().regex(/^[0-9a-f]{32}$/),
       summary: paymentSummarySchema,
       expiresAt: z.number().int(),
+      report: reportViewSchema,
     }),
     allowedFrom: BOTH,
     countsAsActivity: true,
