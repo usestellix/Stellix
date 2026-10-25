@@ -6,3 +6,4 @@ playwright-report/
 .e2e-profile/
 .DS_Store
 *.log
+.output-screenshots/

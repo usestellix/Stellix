@@ -41,6 +41,13 @@ export { assertSignable, type Confirmation } from "./assert-signable.js";
 export { RULE_COPY, fillTemplate, findingCopy, type RuleCopy } from "./copy/index.js";
 export { describeClaimant, describePredicate } from "./copy/predicate.js";
 export {
+  CHECK_NAMES,
+  EVIDENCE_LABELS,
+  FINDINGS_UI_TEXT,
+  SEVERITY_LABELS,
+  UNAVAILABLE_REASON_TEXT,
+} from "./copy/ui.js";
+export {
   RULE_POLICY,
   SEVERITY_FLOOR,
   TYPED_CONFIRMATION_PHRASE,

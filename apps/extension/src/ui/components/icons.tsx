@@ -199,3 +199,46 @@ export function CopyIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Critical severity: a stop octagon with "!". */
+export function OctagonAlertIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M7 2.75h6L17.25 7v6L13 17.25H7L2.75 13V7L7 2.75Z" />
+      <path d="M10 6.5v4" />
+      <path d="M10 13.5h.01" strokeWidth={2} />
+    </Icon>
+  );
+}
+
+/** High severity: a warning triangle with "!". */
+export function TriangleAlertIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M8.7 3.5a1.5 1.5 0 0 1 2.6 0l6.1 10.75a1.5 1.5 0 0 1-1.3 2.25H3.9a1.5 1.5 0 0 1-1.3-2.25L8.7 3.5Z" />
+      <path d="M10 7.75v3.5" />
+      <path d="M10 14h.01" strokeWidth={2} />
+    </Icon>
+  );
+}
+
+/** Low severity: a circle with a dash. */
+export function CircleDashIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="10" r="7.25" />
+      <path d="M6.75 10h6.5" />
+    </Icon>
+  );
+}
+
+/** A check that couldn't run: a dashed circle with "?". Deliberately unlike CheckIcon. */
+export function NotCheckedIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="10" r="7.25" strokeDasharray="2.5 2.5" />
+      <path d="M8.25 8a1.85 1.85 0 1 1 2.6 1.7c-.55.25-.85.7-.85 1.3v.25" />
+      <path d="M10 13.75h.01" strokeWidth={2} />
+    </Icon>
+  );
+}
