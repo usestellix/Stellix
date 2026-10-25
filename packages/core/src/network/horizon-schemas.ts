@@ -181,3 +181,21 @@ export type EffectRecord = z.output<typeof effectSchema>;
 export const effectsPageSchema = z.looseObject({
   _embedded: z.looseObject({ records: z.array(effectSchema) }),
 });
+
+/**
+ * A price level of GET /order_book. For `?selling=S&buying=B`, both sides are priced in B per S:
+ * asks are offers selling S, bids are offers selling B with their price inverted by Horizon
+ * (stellar-horizon internal/db2/history/orderbook.go). Horizon reduces price_r and writes it as
+ * int32, so n and d are positive integers.
+ */
+const priceLevelSchema = z.looseObject({
+  price_r: z.looseObject({ n: z.number().int().positive(), d: z.number().int().positive() }),
+  amount: amountString,
+});
+
+/** Bids best (highest) first, asks best (lowest) first, as Horizon orders them. */
+export const orderBookSchema = z.looseObject({
+  bids: z.array(priceLevelSchema),
+  asks: z.array(priceLevelSchema),
+});
+export type OrderBook = z.output<typeof orderBookSchema>;

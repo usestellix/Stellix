@@ -10,6 +10,7 @@ import {
   effectsPageSchema,
   historyPageSchema,
   historyRecordSchema,
+  orderBookSchema,
   paymentsPageSchema,
   rootSchema,
   transactionSchema,
@@ -20,6 +21,7 @@ import {
   type FeeStats,
   type HorizonRoot,
   type LedgerRecord,
+  type OrderBook,
   type PaymentRecord,
   type TransactionRecord,
 } from "./horizon-schemas.js";
@@ -61,6 +63,25 @@ export interface HorizonClient {
   getHistoryPage(id: string, cursor?: string): Promise<HistoryPage>;
   /** GET /operations/{id}/effects (merge amounts). */
   getOperationEffects(operationId: string): Promise<EffectRecord[]>;
+  /**
+   * GET /order_book for selling → buying, best price level per side (Shield OFFER_BAD_PRICE,
+   * SHIELD §6.7). Both sides are priced in `buying` per `selling`; bids[0] is the best bid.
+   */
+  getOrderBook(selling: AssetRef, buying: AssetRef): Promise<OrderBook>;
+}
+
+/** An asset as a Horizon query names it. Shield's DecodedAsset has this shape. */
+export type AssetRef = { type: "native" } | { type: "credit"; code: string; issuer: string };
+
+/** `<prefix>asset_type` / `_code` / `_issuer` query parameters (Horizon's getAsset). */
+export function assetQuery(prefix: string, asset: AssetRef): string {
+  if (asset.type === "native") return `${prefix}asset_type=native`;
+  const type = asset.code.length <= 4 ? "credit_alphanum4" : "credit_alphanum12";
+  return [
+    `${prefix}asset_type=${type}`,
+    `${prefix}asset_code=${encodeURIComponent(asset.code)}`,
+    `${prefix}asset_issuer=${encodeURIComponent(asset.issuer)}`,
+  ].join("&");
 }
 
 const HISTORY_QUERY = "include_failed=false&join=transactions";
@@ -221,6 +242,11 @@ export function createHorizonClient(
           effectsPageSchema,
         )
       )._embedded.records,
+    getOrderBook: (selling, buying) =>
+      required(
+        `order_book?${assetQuery("selling_", selling)}&${assetQuery("buying_", buying)}&limit=1`,
+        orderBookSchema,
+      ),
     submitTransactionAsync: async (envelopeXdr) => {
       const controller = new AbortController();
       const timer = setTimeout(() => {

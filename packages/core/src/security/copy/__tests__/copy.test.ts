@@ -13,7 +13,6 @@ const PENDING: readonly RuleId[] = [
   "ACCT_MERGE",
   "FOREIGN_SOURCE_OP",
   "UNNAMED_OUTFLOW",
-  "OFFER_BAD_PRICE",
   "PATH_LOW_MIN",
   "CLAIMABLE_TO_OTHER",
   "TRUST_UNVERIFIED",
@@ -26,6 +25,16 @@ const PENDING: readonly RuleId[] = [
 /** Evidence that fills every placeholder of a rule's copy. */
 const SAMPLE_EVIDENCE: Partial<Record<RuleId, Record<string, string>>> = {
   MEMO_REQUIRED: { destination: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD" },
+  OFFER_BAD_PRICE: {
+    opNumber: "1",
+    selling: "XLM",
+    buying: "MKT",
+    offerPrice: "1.8",
+    bestBidPrice: "2",
+    worsePercent: "10",
+    lossAmount: "2",
+    lossAsset: "MKT",
+  },
   UNSUPPORTED_OP: { opNumber: "2", opType: "invokeHostFunction" },
 };
 

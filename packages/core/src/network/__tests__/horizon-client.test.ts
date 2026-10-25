@@ -5,9 +5,11 @@ import {
   feeStatsSchema,
   ledgerPageSchema,
   nativeBalanceOf,
+  orderBookSchema,
   problemSchema,
   rootSchema,
 } from "../horizon-schemas.js";
+import { MARKET_FIXTURES, lookup, marketFixture } from "../../security/__fixtures__/load.js";
 import { fixture, fromFixture, json, scriptedFetch } from "./fixtures.js";
 
 const BASE = "https://horizon-testnet.stellar.org";
@@ -167,5 +169,71 @@ describe("createHorizonClient", () => {
     const f = scriptedFetch([fromFixture("account-not-found")]);
     await createHorizonClient(BASE, f, { sleep: noSleep }).getAccount("G/../x");
     expect(f.calls[0]!.url).toBe(`${BASE}/accounts/G%2F..%2Fx`);
+  });
+});
+
+describe("getOrderBook", () => {
+  const MKT = {
+    type: "credit",
+    code: "MKT",
+    issuer: "GD3DX7KUDIY55UBPLQP7L6Q5PRYL4XKY25EOWXUYUPNPSW443PY75H5Y",
+  } as const;
+  const XLM = { type: "native" } as const;
+
+  it.each(MARKET_FIXTURES.filter((f) => f.name.startsWith("offer-")).map((f) => [f.name, f]))(
+    "%s: requests the captured path and parses the captured book",
+    async (_name, f) => {
+      const book = lookup(f, "orderBook");
+      const fetch = scriptedFetch([json(book.status, book.body)]);
+      const counter = (book.body as { counter: { asset_code: string; asset_issuer: string } })
+        .counter;
+      const result = await createHorizonClient(BASE, fetch, { sleep: noSleep }).getOrderBook(XLM, {
+        type: "credit",
+        code: counter.asset_code,
+        issuer: counter.asset_issuer,
+      });
+      expect(fetch.calls[0]!.url).toBe(`${BASE}/${book.path}`);
+      expect(orderBookSchema.safeParse(book.body).success).toBe(true);
+      expect(result.bids.length).toBeLessThanOrEqual(1);
+    },
+  );
+
+  it("bids are inverted to buying per selling, best first (captured)", () => {
+    // The maker sold MKT at 1/2 and 2/3 XLM per MKT; in the XLM→MKT book those are bids of 2
+    // and 1.5 MKT per XLM, and limit=1 returns the best one.
+    const book = orderBookSchema.parse(
+      lookup(marketFixture("offer-sell-10pct-below"), "orderBook").body,
+    );
+    expect(book.bids[0]?.price_r).toEqual({ n: 2, d: 1 });
+    expect(book.asks).toEqual([]);
+  });
+
+  it("names alphanum12 assets with their type", async () => {
+    const fetch = scriptedFetch([json(200, { bids: [], asks: [] })]);
+    await createHorizonClient(BASE, fetch, { sleep: noSleep }).getOrderBook(
+      { type: "credit", code: "LONGERCODE", issuer: MKT.issuer },
+      XLM,
+    );
+    expect(fetch.calls[0]!.url).toBe(
+      `${BASE}/order_book?selling_asset_type=credit_alphanum12&selling_asset_code=LONGERCODE&selling_asset_issuer=${MKT.issuer}&buying_asset_type=native&limit=1`,
+    );
+  });
+
+  it("rejects a non-positive price → HORIZON_BAD_RESPONSE", async () => {
+    const body = { bids: [{ price_r: { n: 2, d: 0 }, amount: "1.0000000" }], asks: [] };
+    const fetch = scriptedFetch([json(200, body)]);
+    const err = await codeOf(
+      createHorizonClient(BASE, fetch, { sleep: noSleep }).getOrderBook(XLM, MKT),
+    );
+    expect(err?.code).toBe("HORIZON_BAD_RESPONSE");
+  });
+
+  it("an unreachable Horizon → NETWORK_ERROR after retries", async () => {
+    const down = () => new Error("offline");
+    const fetch = scriptedFetch([down(), down(), down(), down()]);
+    const err = await codeOf(
+      createHorizonClient(BASE, fetch, { sleep: noSleep }).getOrderBook(XLM, MKT),
+    );
+    expect(err).toMatchObject({ code: "NETWORK_ERROR", retryable: true });
   });
 });

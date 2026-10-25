@@ -291,7 +291,7 @@ How `evaluate` decides (`policy/policy.ts`; settled in #13):
 
 ### 6.7 Price references (S1)
 
-- Offers: Horizon order book for the pair (`GET /order_book`), best opposing price.
+- Offers: Horizon order book for the pair (`GET /order_book`), best opposing price. Verified against Horizon's source (`stellar-horizon` `internal/db2/history/orderbook.go`) and captured testnet books: for `?selling=S&buying=B`, both sides are priced in B per S; bids are the offers selling B, with their price inverted, best (highest) first. An offer selling S is compared with `bids[0]`. `manageSellOffer` / `createPassiveSellOffer` prices are already B per S; a `manageBuyOffer` price is S per B and is inverted first. Only offers whose effective source is the user are checked; deletions (amount 0) are skipped. Evidence: how much worse (bps and %), and the most the user could lose at the offer's price vs the best bid (in the received asset for a sell offer, in the paid asset for a buy offer). An empty opposing side → `RuleUnavailable("not_found")`.
 - Path payments: Horizon `strict-send` / `strict-receive` path finding for the same assets/amount.
 - Reference unavailable → `RuleUnavailable`, not a pass.
 

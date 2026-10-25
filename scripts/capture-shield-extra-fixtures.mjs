@@ -5,18 +5,27 @@
 //
 // Usage: node scripts/capture-shield-extra-fixtures.mjs <group>…
 //   preconditions   a transaction without preconditions (PRECOND_NONE)
+//   offers          order books + offers at a known distance from the best bid (OFFER_BAD_PRICE)
+//
+// Market fixtures (`__fixtures__/market/<name>.json`) pair the Horizon responses a rule's gather
+// step reads with the user's transaction, both captured on testnet: the lookups first (what
+// analysis would see before signing), then the transaction is submitted.
 import { Asset, Keypair, Operation, TransactionBuilder, xdr } from "@stellar/stellar-sdk/base";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import {
+  HORIZON,
   OPS_DIR,
   PASSPHRASE,
   captureOpFixture,
   fund,
+  get,
+  submit,
   txFrom,
   writeJson,
 } from "./lib/shield-capture.mjs";
 
-const GROUPS = ["preconditions"];
+const MARKET_DIR = "packages/core/src/security/__fixtures__/market";
+const GROUPS = ["preconditions", "offers"];
 const groups = process.argv.slice(2);
 if (groups.length === 0 || groups.some((g) => !GROUPS.includes(g))) {
   throw new Error(`usage: capture-shield-extra-fixtures.mjs <${GROUPS.join("|")}>…`);
@@ -66,6 +75,182 @@ if (groups.includes("preconditions")) {
     [user],
   );
   added["preconditions-none"] = entry;
+}
+
+/**
+ * Horizon asset query parameters, as HorizonClient writes them (`selling_` / `buying_` prefix).
+ * @param {string} prefix @param {Asset} asset
+ */
+function assetParams(prefix, asset) {
+  if (asset.isNative()) return `${prefix}asset_type=native`;
+  const type = asset.getCode().length <= 4 ? "credit_alphanum4" : "credit_alphanum12";
+  const issuer = asset.getIssuer();
+  if (issuer === undefined) throw new Error("credit asset without issuer");
+  return `${prefix}asset_type=${type}&${prefix}asset_code=${asset.getCode()}&${prefix}asset_issuer=${issuer}`;
+}
+
+/** The order-book path HorizonClient.getOrderBook requests. @param {Asset} selling @param {Asset} buying */
+function orderBookPath(selling, buying) {
+  return `order_book?${assetParams("selling_", selling)}&${assetParams("buying_", buying)}&limit=1`;
+}
+
+/** @param {string} path */
+async function lookup(path) {
+  const res = await get(`${HORIZON}/${path}`);
+  return { path, status: res.status, body: res.body };
+}
+
+/**
+ * Captures `lookups` (Horizon paths), then submits `tx`, and writes `<MARKET_DIR>/<name>.json`.
+ * @param {string} name @param {string} description
+ * @param {Record<string, string>} lookups key → Horizon path
+ * @param {import("@stellar/stellar-sdk/base").Transaction} tx
+ * @param {import("@stellar/stellar-sdk/base").Keypair} user signer and the wallet user
+ */
+async function captureMarket(name, description, lookups, tx, user) {
+  /** @type {Record<string, { path: string; status: number; body: unknown }>} */
+  const responses = {};
+  for (const [key, path] of Object.entries(lookups)) responses[key] = await lookup(path);
+  const record = await submit(tx, [user]);
+  await writeJson(`${MARKET_DIR}/${name}.json`, {
+    name,
+    description,
+    networkPassphrase: PASSPHRASE,
+    capturedAt: new Date().toISOString(),
+    userAccount: user.publicKey(),
+    lookups: responses,
+    hash: Buffer.from(tx.hash()).toString("hex"),
+    envelopeXdr: tx.toXdr(),
+    transaction: record,
+  });
+  process.stdout.write(`  market/${name}.json\n`);
+}
+
+if (groups.includes("offers")) {
+  mkdirSync(MARKET_DIR, { recursive: true });
+  const issuer = Keypair.random();
+  const maker = Keypair.random();
+  const user = Keypair.random();
+  process.stdout.write("Funding accounts via Friendbot…\n");
+  for (const kp of [issuer, maker, user]) await fund(kp);
+  const MKT = new Asset("MKT", issuer.publicKey());
+  const XLM = Asset.native();
+
+  await submit(await txFrom(maker, [Operation.changeTrust({ asset: MKT })]), [maker]);
+  await submit(await txFrom(user, [Operation.changeTrust({ asset: MKT })]), [user]);
+  await submit(
+    await txFrom(issuer, [
+      Operation.payment({ destination: maker.publicKey(), asset: MKT, amount: "1000000" }),
+    ]),
+    [issuer],
+  );
+  // The maker sells MKT for XLM. In the XLM→MKT book these are bids, priced in MKT per XLM:
+  // 1/2 XLM per MKT is a bid of 2 MKT/XLM (the best), 2/3 XLM per MKT a worse bid of 1.5.
+  await submit(
+    await txFrom(maker, [
+      Operation.manageSellOffer({
+        selling: MKT,
+        buying: XLM,
+        amount: "100000",
+        price: { n: 1, d: 2 },
+      }),
+      Operation.manageSellOffer({
+        selling: MKT,
+        buying: XLM,
+        amount: "100000",
+        price: { n: 2, d: 3 },
+      }),
+    ]),
+    [maker],
+  );
+
+  const book = { orderBook: orderBookPath(XLM, MKT) };
+  // Best bid 2 MKT/XLM. 1.8 (9/5) is 10% (1000 bps) below it; 1.98 (99/50) is 1% (100 bps).
+  // A buy offer's price is the inverse (XLM per MKT): 5/9 and 50/99.
+  const cases = [
+    [
+      "offer-sell-10pct-below",
+      "manageSellOffer: 10 XLM for MKT at 1.8 MKT/XLM, 10% below the best bid (2).",
+      Operation.manageSellOffer({ selling: XLM, buying: MKT, amount: "10", price: { n: 9, d: 5 } }),
+    ],
+    [
+      "offer-sell-1pct-below",
+      "manageSellOffer: 10 XLM for MKT at 1.98 MKT/XLM, 1% below the best bid (2).",
+      Operation.manageSellOffer({
+        selling: XLM,
+        buying: MKT,
+        amount: "10",
+        price: { n: 99, d: 50 },
+      }),
+    ],
+    [
+      "offer-buy-10pct-below",
+      "manageBuyOffer: buy 10 MKT with XLM at 5/9 XLM/MKT (sells XLM at 1.8 MKT/XLM, 10% below the best bid).",
+      Operation.manageBuyOffer({
+        selling: XLM,
+        buying: MKT,
+        buyAmount: "10",
+        price: { n: 5, d: 9 },
+      }),
+    ],
+    [
+      "offer-buy-1pct-below",
+      "manageBuyOffer: buy 10 MKT with XLM at 50/99 XLM/MKT (sells XLM at 1.98 MKT/XLM, 1% below the best bid).",
+      Operation.manageBuyOffer({
+        selling: XLM,
+        buying: MKT,
+        buyAmount: "10",
+        price: { n: 50, d: 99 },
+      }),
+    ],
+    [
+      "offer-passive-10pct-below",
+      "createPassiveSellOffer: 10 XLM for MKT at 1.8 MKT/XLM, 10% below the best bid (2).",
+      Operation.createPassiveSellOffer({
+        selling: XLM,
+        buying: MKT,
+        amount: "10",
+        price: { n: 9, d: 5 },
+      }),
+    ],
+    [
+      "offer-passive-1pct-below",
+      "createPassiveSellOffer: 10 XLM for MKT at 1.98 MKT/XLM, 1% below the best bid (2).",
+      Operation.createPassiveSellOffer({
+        selling: XLM,
+        buying: MKT,
+        amount: "10",
+        price: { n: 99, d: 50 },
+      }),
+    ],
+  ];
+  for (const [
+    name,
+    description,
+    op,
+  ] of /** @type {[string, string, import("@stellar/stellar-sdk/base").xdr.Operation][]} */ (
+    cases
+  )) {
+    await captureMarket(name, description, book, await txFrom(user, [op]), user);
+  }
+
+  // A pair nobody trades: the opposing side is empty, so there is no reference price.
+  const EMPTY = new Asset("NOBK", issuer.publicKey());
+  await submit(await txFrom(user, [Operation.changeTrust({ asset: EMPTY })]), [user]);
+  await captureMarket(
+    "offer-empty-book",
+    "manageSellOffer: 10 XLM for NOBK, a pair with no offers (no reference price).",
+    { orderBook: orderBookPath(XLM, EMPTY) },
+    await txFrom(user, [
+      Operation.manageSellOffer({
+        selling: XLM,
+        buying: EMPTY,
+        amount: "10",
+        price: { n: 1, d: 1 },
+      }),
+    ]),
+    user,
+  );
 }
 
 const indexPath = `${OPS_DIR}/_index.json`;

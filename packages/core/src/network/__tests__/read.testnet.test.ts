@@ -86,3 +86,14 @@ describe("testnet: reads", () => {
     expect(BigInt(stats.last_ledger_base_fee)).toBeGreaterThan(0n);
   });
 });
+
+describe("testnet: order book", () => {
+  it("serves a book for a never-traded pair, with both sides empty", async () => {
+    const [issuer] = await derivePublicKeys(generateMnemonic(), [0]);
+    const book = await horizon.getOrderBook(
+      { type: "native" },
+      { type: "credit", code: "NONE", issuer: issuer! },
+    );
+    expect(book).toMatchObject({ bids: [], asks: [] });
+  });
+});
