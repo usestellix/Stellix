@@ -1,4 +1,5 @@
 import { sha256 } from "@noble/hashes/sha2.js";
+import { base64 } from "@scure/base";
 import { xdr } from "@stellar/stellar-sdk/base";
 import { assertNever } from "../../assert-never.js";
 import { NETWORKS, type NetworkId } from "../../network/config.js";
@@ -16,11 +17,24 @@ export interface DecodedEnvelope {
   hashHex: string;
 }
 
+/**
+ * The XDR parser accepts lenient base64 (whitespace, missing padding, URL-safe characters), so
+ * one transaction would have many accepted spellings. Only the canonical one is accepted.
+ */
+function isCanonicalBase64(input: string): boolean {
+  try {
+    return base64.encode(base64.decode(input)) === input;
+  } catch {
+    return false;
+  }
+}
+
 function parseEnvelope(xdrBase64: string): xdr.TransactionEnvelope {
+  // Never echo the input: it's untrusted and may be large.
+  if (!isCanonicalBase64(xdrBase64)) throw invalidInput("Envelope is not canonical base64");
   try {
     return xdr.TransactionEnvelope.fromXdr(xdrBase64, "base64");
   } catch {
-    // Never echo the input: it's untrusted and may be large.
     throw invalidInput("Not a transaction envelope");
   }
 }

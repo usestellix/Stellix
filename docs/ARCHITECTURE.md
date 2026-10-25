@@ -140,7 +140,7 @@ No message is handled until SW startup work (access level, migrations) has finis
 |---|---|---|---|
 | `SHIELD_ANALYZE` | `{ input: string; network }`: a transaction XDR or a `web+stellar:tx` URI | `AnalysisReport` (public data only) | Mode C. Never signs and creates nothing that can be signed. Input is size-limited: too large → `SHIELD_INPUT_TOO_LARGE`, undecodable → `SHIELD_INPUT_INVALID`. Allowed pages and whether it needs the wallet unlocked are set in its S1 plan. |
 | `PREPARE_PAYMENT` | unchanged | adds `report` to the result | Mode A: runs `analyze` on the built transaction. |
-| `CONFIRM_PAYMENT` | unchanged | unchanged | Calls `assertSignable` before signing: `SHIELD_DIGEST_MISMATCH`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure. |
+| `CONFIRM_PAYMENT` | unchanged | unchanged | Calls `assertSignable` before signing: `NETWORK_MISMATCH`, `SHIELD_DIGEST_MISMATCH`, `SHIELD_INPUT_INVALID`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure (SHIELD §4 lists the order). |
 
 Provider request types (SEP-43, S2/S3) come with their own ADR; they arrive from a content script, so the sender rules above get an origin-grant check for them.
 
