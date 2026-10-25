@@ -1,0 +1,70 @@
+{
+  "name": "preconditions-all",
+  "opType": "preconditions",
+  "opTypes": ["payment"],
+  "description": "Every v2 precondition: time bounds, ledger bounds, min sequence, min sequence age and ledger gap, and an extra signer.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:25:28.964Z",
+  "hash": "e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289",
+  "envelopeXdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAAHAAAAAIAAAABAAAAAGrd5uUAAAAAat3n1QAAAAEAUhqyAFIbFgAAAAEAUhp1AAAAGwAAAAAAAAABAAAAAQAAAAEAAAAAM4PAjhV6QIizONvwYq32KaCKnIe4nwWV0bSN7vxUYxsAAAAAAAAAAQAAAAAAAAABAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAAAmJaAAAAAAAAAAAIh62CSAAAAQP3MZb9a69AVPWqTlFSQflQ1sfyD1qibDB23YbRFfOoZWbq88u+Z9zDgd9XzLtyv32lF7VS0xepHie5zk85n1gv8VGMbAAAAQJAt5R7OVr0wUUNOakWiqHhCVZeMC6jL+5oW+4YJ7MfC3dr4LLikeykxFNoNfPTFSosyZQI00uEhzwK8Q3xhTQ8=",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380788" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110308486721536"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110308486721536"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289"
+        }
+      },
+      "id": "e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289",
+      "paging_token": "23110308486721536",
+      "successful": true,
+      "hash": "e066b347659869a374183b2c9fcaec6c5a28fcccf86b784ca1b689a200c6a289",
+      "ledger": 5380788,
+      "created_at": "2026-10-25T11:25:27Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "source_account_sequence": "23110037903769628",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAAHAAAAAIAAAABAAAAAGrd5uUAAAAAat3n1QAAAAEAUhqyAFIbFgAAAAEAUhp1AAAAGwAAAAAAAAABAAAAAQAAAAEAAAAAM4PAjhV6QIizONvwYq32KaCKnIe4nwWV0bSN7vxUYxsAAAAAAAAAAQAAAAAAAAABAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAAAmJaAAAAAAAAAAAIh62CSAAAAQP3MZb9a69AVPWqTlFSQflQ1sfyD1qibDB23YbRFfOoZWbq88u+Z9zDgd9XzLtyv32lF7VS0xepHie5zk85n1gv8VGMbAAAAQJAt5R7OVr0wUUNOakWiqHhCVZeMC6jL+5oW+4YJ7MfC3dr4LLikeykxFNoNfPTFSosyZQI00uEhzwK8Q3xhTQ8=",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqxAAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABcMtekkAFIadQAAABsAAAAHAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAEZVXwAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGrEAAAAAat3nGAAAAAAAAAABAFIatAAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAXDLXowABSGnUAAAAbAAAABwAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAABGVV8AAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqxAAAAAGrd5xgAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "/cxlv1rr0BU9apOUVJB+VDWx/IPWqJsMHbdhtEV86hlZurzy75n3MOB31fMu3K/faUXtVLTF6keJ7nOTzmfWCw==",
+        "kC3lHs5WvTBRQ05qRaKoeEJVl4wLqMv7mhb7hgnsx8Ld2vgsuKR7KTEU2g189MVKizJlAjTS4SHPArxDfGFNDw=="
+      ],
+      "preconditions": {
+        "timebounds": { "min_time": "1792927461", "max_time": "1792927701" },
+        "ledgerbounds": { "min_ledger": 5380786, "max_ledger": 5380886 },
+        "min_account_sequence": "23110037903769627",
+        "min_account_sequence_age": "1",
+        "min_account_sequence_ledger_gap": 1,
+        "extra_signers": ["GAZYHQEOCV5EBCFTHDN7AYVN6YU2BCU4Q64J6BMV2G2I33X4KRRRWQZB"]
+      }
+    }
+  }
+}

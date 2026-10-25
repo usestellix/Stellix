@@ -1,0 +1,67 @@
+{
+  "name": "payment-muxed-sources",
+  "opType": "payment",
+  "opTypes": ["payment"],
+  "description": "Muxed transaction source (user, id 1); the op's source is a muxed peer account paying the user.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:21:44.031Z",
+  "hash": "324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733",
+  "envelopeXdr": "AAAAAgAAAQAAAAAAAAAAAXVJvqwLISl7lA/5XYIVgCFmw1rrUWEhSdh5dskh62CSAAAD6ABSGnUAAAAFAAAAAQAAAAAAAAAAAAAAAGrd5vcAAAAAAAAAAQAAAAEAAAEAAAAAAAAAAAfvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAEAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAAAAAAAAExLQAAAAAAAAAAAiHrYJIAAABASMbs+UR3A8NzwEJ8axGbcAIcnw97kRCl268XDiF8ckrPGac+yaqpYPmjF/9mwp9etBgcXjGXt5+Qyu/lc+7kAlC7BoAAAABA7GukLNotXo/AdIz6NLmNSJtZ+5Cr16ETRdOOWAwG+JbMAi6ZKF+orJthpKlDiQlQPV8pEEl2LUWKauwB6bbGCA==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380743" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110115213189120"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110115213189120"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733"
+        }
+      },
+      "id": "324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733",
+      "paging_token": "23110115213189120",
+      "successful": true,
+      "hash": "324585ef8d55dbf0cdba900f06aadcbaf989d3ae7f3cf85c223de23857b9e733",
+      "ledger": 5380743,
+      "created_at": "2026-10-25T11:21:42Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "account_muxed": "MB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJEAAAAAAAAAAAAH73U",
+      "account_muxed_id": "1",
+      "source_account_sequence": "23110037903769605",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_account_muxed": "MB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJEAAAAAAAAAAAAH73U",
+      "fee_account_muxed_id": "1",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAQAAAAAAAAAAAXVJvqwLISl7lA/5XYIVgCFmw1rrUWEhSdh5dskh62CSAAAD6ABSGnUAAAAFAAAAAQAAAAAAAAAAAAAAAGrd5vcAAAAAAAAAAQAAAAEAAAEAAAAAAAAAAAfvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAEAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAAAAAAAAExLQAAAAAAAAAAAiHrYJIAAABASMbs+UR3A8NzwEJ8axGbcAIcnw97kRCl268XDiF8ckrPGac+yaqpYPmjF/9mwp9etBgcXjGXt5+Qyu/lc+7kAlC7BoAAAABA7GukLNotXo/AdIz6NLmNSJtZ+5Cr16ETRdOOWAwG+JbMAi6ZKF+orJthpKlDiQlQPV8pEEl2LUWKauwB6bbGCA==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqGAAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABdHH5PQAFIadQAAAAQAAAACAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGoYAAAAAat3mQQAAAAAAAAABAFIahwAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAXRx+TbABSGnUAAAAEAAAAAgAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqGAAAAAGrd5kEAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "SMbs+UR3A8NzwEJ8axGbcAIcnw97kRCl268XDiF8ckrPGac+yaqpYPmjF/9mwp9etBgcXjGXt5+Qyu/lc+7kAg==",
+        "7GukLNotXo/AdIz6NLmNSJtZ+5Cr16ETRdOOWAwG+JbMAi6ZKF+orJthpKlDiQlQPV8pEEl2LUWKauwB6bbGCA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927479" } }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "revokeSponsorship-signer",
+  "opType": "revokeSponsorship",
+  "opTypes": ["revokeSponsorship"],
+  "description": "Sponsor stops sponsoring a signer.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:24:58.941Z",
+  "hash": "2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970",
+  "envelopeXdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAAGAAAAAEAAAAAAAAAAAAAAABq3ee6AAAAAAAAAAEAAAAAAAAAEgAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAA8vAUqmKKzVP1O8bc7Ot5AlRof5ZcI/9TRT/FaDccLAsAAAAAAAAAASHrYJIAAABAc/KYDRmHMAve8AU5FdCDJYHDLnEvO7q5GTB4c1yp+y18wXaz+BBZj/VXZjqf85O/APQV0HGKISR74g88yoJCDg==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380782" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110282716917760"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110282716917760"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970"
+        }
+      },
+      "id": "2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970",
+      "paging_token": "23110282716917760",
+      "successful": true,
+      "hash": "2b26faeb19c346d0ac2a5f561ac9cd78ec8191c1dc50bd540360a4fa8d29c970",
+      "ledger": 5380782,
+      "created_at": "2026-10-25T11:24:57Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "source_account_sequence": "23110037903769624",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAAGAAAAAEAAAAAAAAAAAAAAABq3ee6AAAAAAAAAAEAAAAAAAAAEgAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAA8vAUqmKKzVP1O8bc7Ot5AlRof5ZcI/9TRT/FaDccLAsAAAAAAAAAASHrYJIAAABAc/KYDRmHMAve8AU5FdCDJYHDLnEvO7q5GTB4c1yp+y18wXaz+BBZj/VXZjqf85O/APQV0HGKISR74g88yoJCDg==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAASAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqtAAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABcN5xgYAFIadQAAABcAAAAHAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAEZVXwAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAADAAAAAABSGq0AAAAAat3nBAAAAAAAAAABAFIargAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAXDecXtABSGnUAAAAXAAAABwAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAABGVV8AAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAwAAAAAAUhqtAAAAAGrd5wQAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "c/KYDRmHMAve8AU5FdCDJYHDLnEvO7q5GTB4c1yp+y18wXaz+BBZj/VXZjqf85O/APQV0HGKISR74g88yoJCDg=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927674" } }
+    }
+  }
+}

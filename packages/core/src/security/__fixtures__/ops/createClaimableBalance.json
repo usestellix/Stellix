@@ -1,0 +1,62 @@
+{
+  "name": "createClaimableBalance",
+  "opType": "createClaimableBalance",
+  "opTypes": ["createClaimableBalance"],
+  "description": "User locks 5 XLM: the peer can claim any time; the user with nested and/or/not time predicates.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:24:03.778Z",
+  "hash": "47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e",
+  "envelopeXdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAADwAAAAEAAAAAAAAAAAAAAABq3eeDAAAAAAAAAAEAAAAAAAAADgAAAAAAAAAAAvrwgAAAAAIAAAAAAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAACAAAAAgAAAAEAAAACAAAAAwAAAAEAAAAFAAAAAAAADhAAAAAEAAAAAGy/Gk4AAAAFAAAAAAAAADwAAAAAAAAAASHrYJIAAABA+PdHqHTH5DTjLPPqBzVVmI2/amffDfZ7E4EOTJKd0BJHdpChmg//jGfGNByiiulXXMIE9QZJcJdZpV6uPxKpCQ==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380771" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110235472269312"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110235472269312"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e"
+        }
+      },
+      "id": "47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e",
+      "paging_token": "23110235472269312",
+      "successful": true,
+      "hash": "47b03d94b7f55d381c2dce4812e7539b8b13aaa62d11ca584b38b93c6320d81e",
+      "ledger": 5380771,
+      "created_at": "2026-10-25T11:24:02Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "source_account_sequence": "23110037903769615",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAADwAAAAEAAAAAAAAAAAAAAABq3eeDAAAAAAAAAAEAAAAAAAAADgAAAAAAAAAAAvrwgAAAAAIAAAAAAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAACAAAAAgAAAAEAAAACAAAAAwAAAAEAAAAFAAAAAAAADhAAAAAEAAAAAGy/Gk4AAAAFAAAAAAAAADwAAAAAAAAAASHrYJIAAABA+PdHqHTH5DTjLPPqBzVVmI2/amffDfZ7E4EOTJKd0BJHdpChmg//jGfGNByiiulXXMIE9QZJcJdZpV6uPxKpCQ==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAAjs9DhWNKMZJLpTsUIOTMGaYZ1QCvmDsxsywiUguO+nwAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqiAAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABcT3QAgAFIadQAAAA4AAAAHAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAEZVXwAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGpQAAAAAat3mhwAAAAAAAAABAFIaowAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAXE9z/vABSGnUAAAAOAAAABwAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAABGVV8AAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqUAAAAAGrd5ocAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "+PdHqHTH5DTjLPPqBzVVmI2/amffDfZ7E4EOTJKd0BJHdpChmg//jGfGNByiiulXXMIE9QZJcJdZpV6uPxKpCQ=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927619" } }
+    }
+  }
+}

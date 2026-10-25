@@ -1,0 +1,62 @@
+{
+  "name": "bumpSequence",
+  "opType": "bumpSequence",
+  "opTypes": ["bumpSequence"],
+  "description": "Bumps the account's sequence number 100 ahead.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:23:43.870Z",
+  "hash": "1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125",
+  "envelopeXdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAACgAAAAEAAAAAAAAAAAAAAABq3edvAAAAAAAAAAEAAAAAAAAACwBSGnoAAABtAAAAAAAAAAG8t7AAAAAAQMMgK+7+kllT3hweZY0Gt9mqwAXARjiZb6zdDsfWhtj1KY7ECvMoanZkZfEKmV0tEmf6bOSf6ILz5PIZrRKG2Ag=",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380767" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110218292400128"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110218292400128"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125"
+        }
+      },
+      "id": "1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125",
+      "paging_token": "23110218292400128",
+      "successful": true,
+      "hash": "1773a5f8fc58dab15a2dd25f61c9c30cad58e2ef4485da04a8bfd049c3495125",
+      "ledger": 5380767,
+      "created_at": "2026-10-25T11:23:42Z",
+      "source_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "source_account_sequence": "23110059378606090",
+      "fee_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAACgAAAAEAAAAAAAAAAAAAAABq3edvAAAAAAAAAAEAAAAAAAAACwBSGnoAAABtAAAAAAAAAAG8t7AAAAAAQMMgK+7+kllT3hweZY0Gt9mqwAXARjiZb6zdDsfWhtj1KY7ECvMoanZkZfEKmV0tEmf6bOSf6ILz5PIZrRKG2Ag=",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAALAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqeAAAAAAAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAABdIduR8AFIaegAAAAkAAAADAAAAAQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAAAAAALZXhhbXBsZS5jb20ACgECAwAAAAMAAAABhBc1opWPKZW81OJALlG8d4AGYMYiTjFi7rT4JpcBpoAAAAABAAAAAokw4zJffV+Ge3WGS/d8m0p5Z58ItWaPqRsW8baRiKAQAAAAAQAAAAPJ5VYWD5Mzp6zUuqbqpaxEK5A9F7sa0MfWfkx2LrdWswAAABZzdGVsbGl4IHNoaWVsZCBmaXh0dXJlAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqeAAAAAGrd5rkAAAAAAAAAAQBSGp8AAAAAAAAAALnSEFjnGbxPuTczw6IHABYxGb/TfXXhyrfo37u8t7AAAAAAF0h25BgAUhp6AAAACQAAAAMAAAABAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAtleGFtcGxlLmNvbQAKAQIDAAAAAwAAAAGEFzWilY8plbzU4kAuUbx3gAZgxiJOMWLutPgmlwGmgAAAAAEAAAACiTDjMl99X4Z7dYZL93ybSnlnnwi1Zo+pGxbxtpGIoBAAAAABAAAAA8nlVhYPkzOnrNS6puqlrEQrkD0XuxrQx9Z+THYut1azAAAAFnN0ZWxsaXggc2hpZWxkIGZpeHR1cmUAAAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAADAAAAAABSGp4AAAAAat3muQAAAAA=",
+      "memo_type": "none",
+      "signatures": [
+        "wyAr7v6SWVPeHB5ljQa32arABcBGOJlvrN0Ox9aG2PUpjsQK8yhqdmRl8QqZXS0SZ/ps5J/ogvPk8hmtEobYCA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927599" } }
+    }
+  }
+}

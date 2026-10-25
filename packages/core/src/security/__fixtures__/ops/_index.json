@@ -1,0 +1,322 @@
+{
+  "capturedAt": "2026-10-25T11:25:29.204Z",
+  "network": "testnet",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "horizonVersion": "30.0.0-b3ff4119cc99ebcc8048334f5ec64e78c16d1666",
+  "protocolVersion": 29,
+  "opTypes": {
+    "setOptions": [
+      "setOptions-set-flags",
+      "setOptions-account-fields",
+      "setOptions-clear-flags",
+      "setOptions-signer-ed25519",
+      "setOptions-signer-pre-auth-tx",
+      "setOptions-signer-sha256-hash",
+      "setOptions-signer-signed-payload",
+      "setOptions-signer-remove",
+      "sponsorship-entries"
+    ],
+    "changeTrust": [
+      "changeTrust-asset",
+      "changeTrust-pool-share",
+      "changeTrust-remove",
+      "sponsorship-entries"
+    ],
+    "allowTrust": ["allowTrust"],
+    "setTrustLineFlags": ["setTrustLineFlags"],
+    "payment": [
+      "payment-credit",
+      "payment-native",
+      "payment-muxed-destination",
+      "payment-muxed-sources",
+      "feeBump",
+      "preconditions-no-max-time",
+      "preconditions-all"
+    ],
+    "createAccount": ["createAccount", "sponsorship-create-account"],
+    "clawback": ["clawback"],
+    "manageSellOffer": [
+      "manageSellOffer-create",
+      "manageSellOffer-update",
+      "manageSellOffer-delete",
+      "sponsorship-entries"
+    ],
+    "manageBuyOffer": ["manageBuyOffer-create"],
+    "createPassiveSellOffer": ["createPassiveSellOffer"],
+    "pathPaymentStrictSend": ["pathPaymentStrictSend"],
+    "pathPaymentStrictReceive": ["pathPaymentStrictReceive"],
+    "liquidityPoolDeposit": ["liquidityPoolDeposit"],
+    "liquidityPoolWithdraw": ["liquidityPoolWithdraw"],
+    "manageData": ["manageData-set", "manageData-delete", "sponsorship-entries"],
+    "bumpSequence": ["bumpSequence"],
+    "accountMerge": ["accountMerge"],
+    "createClaimableBalance": ["createClaimableBalance", "sponsorship-entries"],
+    "claimClaimableBalance": ["claimClaimableBalance"],
+    "clawbackClaimableBalance": ["clawbackClaimableBalance"],
+    "beginSponsoringFutureReserves": [
+      "sponsorship-create-account",
+      "sponsorship-entries",
+      "revokeSponsorship-claimable-balance"
+    ],
+    "endSponsoringFutureReserves": [
+      "sponsorship-create-account",
+      "sponsorship-entries",
+      "revokeSponsorship-claimable-balance"
+    ],
+    "revokeSponsorship": [
+      "revokeSponsorship-account",
+      "revokeSponsorship-trustline",
+      "revokeSponsorship-pool-share-trustline",
+      "revokeSponsorship-offer",
+      "revokeSponsorship-data",
+      "revokeSponsorship-signer",
+      "revokeSponsorship-claimable-balance"
+    ]
+  },
+  "fixtures": {
+    "setOptions-set-flags": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "changeTrust-asset": {
+      "opType": "changeTrust",
+      "opTypes": ["changeTrust"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "allowTrust": {
+      "opType": "allowTrust",
+      "opTypes": ["allowTrust"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setTrustLineFlags": {
+      "opType": "setTrustLineFlags",
+      "opTypes": ["setTrustLineFlags"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "payment-credit": {
+      "opType": "payment",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "payment-native": {
+      "opType": "payment",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "payment-muxed-destination": {
+      "opType": "payment",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "payment-muxed-sources": {
+      "opType": "payment",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "createAccount": {
+      "opType": "createAccount",
+      "opTypes": ["createAccount"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "clawback": { "opType": "clawback", "opTypes": ["clawback"], "envelopeType": "envelopeTypeTx" },
+    "manageSellOffer-create": {
+      "opType": "manageSellOffer",
+      "opTypes": ["manageSellOffer"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "manageSellOffer-update": {
+      "opType": "manageSellOffer",
+      "opTypes": ["manageSellOffer"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "manageSellOffer-delete": {
+      "opType": "manageSellOffer",
+      "opTypes": ["manageSellOffer"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "manageBuyOffer-create": {
+      "opType": "manageBuyOffer",
+      "opTypes": ["manageBuyOffer"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "createPassiveSellOffer": {
+      "opType": "createPassiveSellOffer",
+      "opTypes": ["createPassiveSellOffer"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "pathPaymentStrictSend": {
+      "opType": "pathPaymentStrictSend",
+      "opTypes": ["pathPaymentStrictSend"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "pathPaymentStrictReceive": {
+      "opType": "pathPaymentStrictReceive",
+      "opTypes": ["pathPaymentStrictReceive"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "changeTrust-pool-share": {
+      "opType": "changeTrust",
+      "opTypes": ["changeTrust"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "liquidityPoolDeposit": {
+      "opType": "liquidityPoolDeposit",
+      "opTypes": ["liquidityPoolDeposit"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "liquidityPoolWithdraw": {
+      "opType": "liquidityPoolWithdraw",
+      "opTypes": ["liquidityPoolWithdraw"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-account-fields": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-clear-flags": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-signer-ed25519": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-signer-pre-auth-tx": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-signer-sha256-hash": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-signer-signed-payload": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "setOptions-signer-remove": {
+      "opType": "setOptions",
+      "opTypes": ["setOptions"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "manageData-set": {
+      "opType": "manageData",
+      "opTypes": ["manageData"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "manageData-delete": {
+      "opType": "manageData",
+      "opTypes": ["manageData"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "bumpSequence": {
+      "opType": "bumpSequence",
+      "opTypes": ["bumpSequence"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "changeTrust-remove": {
+      "opType": "changeTrust",
+      "opTypes": ["changeTrust"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "accountMerge": {
+      "opType": "accountMerge",
+      "opTypes": ["accountMerge"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "createClaimableBalance": {
+      "opType": "createClaimableBalance",
+      "opTypes": ["createClaimableBalance"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "claimClaimableBalance": {
+      "opType": "claimClaimableBalance",
+      "opTypes": ["claimClaimableBalance"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "clawbackClaimableBalance": {
+      "opType": "clawbackClaimableBalance",
+      "opTypes": ["clawbackClaimableBalance"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "sponsorship-create-account": {
+      "opType": "beginSponsoringFutureReserves",
+      "opTypes": ["beginSponsoringFutureReserves", "createAccount", "endSponsoringFutureReserves"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "sponsorship-entries": {
+      "opType": "endSponsoringFutureReserves",
+      "opTypes": [
+        "beginSponsoringFutureReserves",
+        "changeTrust",
+        "changeTrust",
+        "manageData",
+        "setOptions",
+        "manageSellOffer",
+        "createClaimableBalance",
+        "endSponsoringFutureReserves"
+      ],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-account": {
+      "opType": "revokeSponsorship",
+      "opTypes": ["revokeSponsorship"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-trustline": {
+      "opType": "revokeSponsorship",
+      "opTypes": ["revokeSponsorship"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-pool-share-trustline": {
+      "opType": "revokeSponsorship",
+      "opTypes": ["revokeSponsorship"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-offer": {
+      "opType": "revokeSponsorship",
+      "opTypes": ["revokeSponsorship"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-data": {
+      "opType": "revokeSponsorship",
+      "opTypes": ["revokeSponsorship"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-signer": {
+      "opType": "revokeSponsorship",
+      "opTypes": ["revokeSponsorship"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "revokeSponsorship-claimable-balance": {
+      "opType": "revokeSponsorship",
+      "opTypes": [
+        "beginSponsoringFutureReserves",
+        "revokeSponsorship",
+        "endSponsoringFutureReserves"
+      ],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "feeBump": {
+      "opType": "feeBump",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTxFeeBump"
+    },
+    "preconditions-no-max-time": {
+      "opType": "preconditions",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    },
+    "preconditions-all": {
+      "opType": "preconditions",
+      "opTypes": ["payment"],
+      "envelopeType": "envelopeTypeTx"
+    }
+  }
+}

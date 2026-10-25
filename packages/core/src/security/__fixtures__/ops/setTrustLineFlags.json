@@ -1,0 +1,62 @@
+{
+  "name": "setTrustLineFlags",
+  "opType": "setTrustLineFlags",
+  "opTypes": ["setTrustLineFlags"],
+  "description": "Issuer sets the authorized flag on the peer's trustline.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:21:18.851Z",
+  "hash": "d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b",
+  "envelopeXdr": "AAAAAgAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAA+gAUhp4AAAAAwAAAAEAAAAAAAAAAAAAAABq3ebeAAAAAAAAAAEAAAAAAAAAFQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAFDTEFXAAAAAH/xzgkx8wk73hgq4x3pajExnCgmhGWO+MkJXOaciCGOAAAAAAAAAAEAAAAAAAAAAZyIIY4AAABAhBAPAW/8aG3TohsWqxyxSPY03S0qw+nviIL8qkt9kPXf4SRZ7CkjOYkTYSFDCH5Q+bDf8c/H1PpbtavNa0mZDQ==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380738" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110093738356736"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110093738356736"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b"
+        }
+      },
+      "id": "d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b",
+      "paging_token": "23110093738356736",
+      "successful": true,
+      "hash": "d1d67ad512e32477e6986668ae2e45ebcf4c488914aa6343f361fb9f4126b40b",
+      "ledger": 5380738,
+      "created_at": "2026-10-25T11:21:17Z",
+      "source_account": "GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH",
+      "source_account_sequence": "23110050788671491",
+      "fee_account": "GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAA+gAUhp4AAAAAwAAAAEAAAAAAAAAAAAAAABq3ebeAAAAAAAAAAEAAAAAAAAAFQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAFDTEFXAAAAAH/xzgkx8wk73hgq4x3pajExnCgmhGWO+MkJXOaciCGOAAAAAAAAAAEAAAAAAAAAAZyIIY4AAABAhBAPAW/8aG3TohsWqxyxSPY03S0qw+nviIL8qkt9kPXf4SRZ7CkjOYkTYSFDCH5Q+bDf8c/H1PpbtavNa0mZDQ==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAVAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqBAAAAAAAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAABdIduc4AFIaeAAAAAIAAAAAAAAAAAAAAAsAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGoEAAAAAat3mKAAAAAAAAAABAFIaggAAAAAAAAAAf/HOCTHzCTveGCrjHelqMTGcKCaEZY74yQlc5pyIIY4AAAAXSHbm1ABSGngAAAACAAAAAAAAAAAAAAALAAAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqBAAAAAGrd5igAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "hBAPAW/8aG3TohsWqxyxSPY03S0qw+nviIL8qkt9kPXf4SRZ7CkjOYkTYSFDCH5Q+bDf8c/H1PpbtavNa0mZDQ=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927454" } }
+    }
+  }
+}

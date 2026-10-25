@@ -1,0 +1,62 @@
+{
+  "name": "payment-credit",
+  "opType": "payment",
+  "opTypes": ["payment"],
+  "description": "Issuer issues 1000 CLAW to the user.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:21:23.886Z",
+  "hash": "65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950",
+  "envelopeXdr": "AAAAAgAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAA+gAUhp4AAAABAAAAAEAAAAAAAAAAAAAAABq3ebjAAAAAAAAAAEAAAAAAAAAAQAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAAAFDTEFXAAAAAH/xzgkx8wk73hgq4x3pajExnCgmhGWO+MkJXOaciCGOAAAAAlQL5AAAAAAAAAAAAZyIIY4AAABAcl1QvXirnY8Cp2Ve3xmHjlxqxFq7it2JARrKovY10WejGkezL4HDzRWrV6fPgZwI/j5dXh8p5bbHisvYQjcbDA==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380739" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110098033315840"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110098033315840"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950"
+        }
+      },
+      "id": "65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950",
+      "paging_token": "23110098033315840",
+      "successful": true,
+      "hash": "65543c1afb2b1ff59e53023502807817ab263cece190f4a5737de7c9e5482950",
+      "ledger": 5380739,
+      "created_at": "2026-10-25T11:21:22Z",
+      "source_account": "GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH",
+      "source_account_sequence": "23110050788671492",
+      "fee_account": "GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAA+gAUhp4AAAABAAAAAEAAAAAAAAAAAAAAABq3ebjAAAAAAAAAAEAAAAAAAAAAQAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAAAFDTEFXAAAAAH/xzgkx8wk73hgq4x3pajExnCgmhGWO+MkJXOaciCGOAAAAAlQL5AAAAAAAAAAAAZyIIY4AAABAcl1QvXirnY8Cp2Ve3xmHjlxqxFq7it2JARrKovY10WejGkezL4HDzRWrV6fPgZwI/j5dXh8p5bbHisvYQjcbDA==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqCAAAAAAAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAABdIdubUAFIaeAAAAAMAAAAAAAAAAAAAAAsAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGoIAAAAAat3mLQAAAAAAAAABAFIagwAAAAAAAAAAf/HOCTHzCTveGCrjHelqMTGcKCaEZY74yQlc5pyIIY4AAAAXSHbmcABSGngAAAADAAAAAAAAAAAAAAALAAAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqCAAAAAGrd5i0AAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "cl1QvXirnY8Cp2Ve3xmHjlxqxFq7it2JARrKovY10WejGkezL4HDzRWrV6fPgZwI/j5dXh8p5bbHisvYQjcbDA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927459" } }
+    }
+  }
+}
