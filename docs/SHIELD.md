@@ -301,7 +301,12 @@ How `evaluate` decides (`policy/policy.ts`; settled in #13):
 - Timeout 5 s; max body 100 KB; parse as TOML data only.
 - Cache per domain in session storage, 1 h.
 - A fetch failure → `TRUST_UNVERIFIED` returns `RuleUnavailable` with reason, not a finding of "malicious".
-- Add a TOML parser only if it's pure JS, zero-dep, ≥ 14 days old; justify in the plan.
+- Add a TOML parser only if it's pure JS, zero-dep, ≥ 14 days old; justify in the plan. Approved in #31: `smol-toml@1.9.1`.
+- Implemented in `intel/toml.ts` (#31). The home domain is attacker-controlled, so before any request it must be a multi-label public DNS name: IPv4/IPv6 literals (any spelling), single-label names, `localhost`, `*.local`, `*.internal`, `*.home.arpa` (and the rest of `.arpa`), ports, credentials, paths and trailing dots are refused → `RuleUnavailable("bad_response")`, never a finding. A name that resolves to a private address can't be detected from an extension or app; the platform's own protections apply.
+- `redirect: "error"`, `credentials: "omit"`, no headers. A response that was redirected anyway (platforms that ignore the option) or is 3xx → `bad_response`. 404 → `not_found`, 5xx or network failure → `unreachable`, timeout → `timeout`, any other status, oversize body, invalid UTF-8 or malformed TOML → `bad_response`.
+- Only `CURRENCIES[].code` and `.issuer` strings are read, through a zod schema, into new plain objects; the parsed document is never spread or returned (prototype-pollution keys are inert; tested).
+- The cache is keyed by the lowercased domain in session storage (`shield:toml:<domain>`) and holds successes only.
+- TRUST_UNVERIFIED / TRUST_CLAWBACK check `changeTrust` ops from the user that add or change a credit trustline (removals and pool shares are skipped). The issuer's `home_domain` and `auth_clawback_enabled` come from Horizon (`GET /accounts/{issuer}`); an unavailable or missing issuer account makes both rules unavailable.
 
 ---
 

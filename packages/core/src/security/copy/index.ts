@@ -35,6 +35,20 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "{limitAsset}. If the price moves before it runs, you could lose up to {lossAmount} " +
       "{limitAsset} ({lossPercent}%) compared with that route.",
   },
+  TRUST_UNVERIFIED: {
+    title: "Asset not verified by its issuer's website",
+    body:
+      "Operation {opNumber} adds a trustline to {assetCode} issued by {issuer}. " +
+      "{verification} Anyone can create an asset with any code, so {assetCode} here may not " +
+      "be the asset you expect. Check the issuer address with the asset's official source.",
+  },
+  TRUST_CLAWBACK: {
+    title: "Issuer can take this asset back",
+    body:
+      "Operation {opNumber} adds a trustline to {assetCode} issued by {issuer}. This issuer " +
+      "has clawback enabled: it can remove {assetCode} from your account at any time, without " +
+      "your approval.",
+  },
   UNSUPPORTED_OP: {
     title: "Operation Stellix can't read",
     body:

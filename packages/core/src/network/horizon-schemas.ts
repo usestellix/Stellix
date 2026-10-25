@@ -56,6 +56,9 @@ export const accountSchema = z.looseObject({
   signers: z.array(z.looseObject({ key: z.string(), weight: z.number().int(), type: z.string() })),
   balances: z.array(z.union([nativeBalanceSchema, otherBalanceSchema])),
   data: z.record(z.string(), z.string()),
+  /** Absent when unset. Shield reads it for an asset issuer (TRUST_UNVERIFIED). */
+  home_domain: z.string().optional(),
+  flags: z.looseObject({ auth_clawback_enabled: z.boolean() }).optional(),
 });
 export type AccountRecord = z.output<typeof accountSchema>;
 export type NativeBalance = z.output<typeof nativeBalanceSchema>;

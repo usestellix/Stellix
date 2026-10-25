@@ -16,9 +16,19 @@ export type ShieldRequest =
   | { kind: "authEntry"; xdr: string; network: NetworkId; origin: Origin } // S3
   | { kind: "message"; message: string; network: NetworkId; origin: Origin }; // S2, SEP-53
 
-/** Fetches an issuer's `stellar.toml` (SHIELD §6.8). The result shape is defined by its issue. */
+/** What Shield reads from an issuer's stellar.toml: CURRENCIES entries with a code and issuer. */
+export interface IssuerToml {
+  currencies: readonly { code: string; issuer: string }[];
+}
+
+export type TomlResult = IssuerToml | RuleUnavailable;
+
+/**
+ * Fetches an issuer's `stellar.toml` (SHIELD §6.8; intel/toml.ts). Never throws for a bad
+ * domain or response: those come back as RuleUnavailable with a reason.
+ */
 export interface TomlFetcher {
-  fetchToml(homeDomain: string): Promise<unknown>;
+  fetchToml(homeDomain: string): Promise<TomlResult>;
 }
 
 export interface ShieldDeps {
@@ -165,6 +175,17 @@ export interface RuleData {
   orderBooks: ReadonlyMap<string, OrderBook | RuleUnavailable>;
   /** PATH_LOW_MIN: Horizon's routes for each path payment it checks, keyed by op index. */
   paths: ReadonlyMap<number, readonly PathRecord[] | RuleUnavailable>;
+  /** TRUST_UNVERIFIED, TRUST_CLAWBACK: what's known about each issuer, keyed by its G…. */
+  issuers: ReadonlyMap<string, IssuerInfo | RuleUnavailable>;
+}
+
+export interface IssuerInfo {
+  /** The issuer account's home_domain; null when it has none. Untrusted text. */
+  homeDomain: string | null;
+  /** auth_clawback_enabled; null when Horizon didn't report the account's flags. */
+  clawbackEnabled: boolean | null;
+  /** Its stellar.toml, or why it couldn't be read; null when there's no home domain. */
+  toml: TomlResult | null;
 }
 
 export interface RuleContext {
