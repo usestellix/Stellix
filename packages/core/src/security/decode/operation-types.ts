@@ -22,12 +22,14 @@ interface OperationBase {
 }
 
 /**
- * An operation whose type has no decoder yet (SHIELD §9 S1); UNSUPPORTED_OP reports it.
- * `opType` is the XDR OperationType name, e.g. "invokeHostFunction".
+ * An op Shield doesn't analyze; UNSUPPORTED_OP reports each one (SHIELD §6.1, §9 S1).
+ * soroban: invokeHostFunction, extendFootprintTtl, restoreFootprint, or a revokeSponsorship of
+ * a Soroban ledger key (S3). obsolete: inflation. unknown: an op type this decoder predates.
  */
-export interface UndecodedOperation extends OperationBase {
-  kind: "undecoded";
+export interface UnsupportedOperation extends OperationBase {
+  kind: "unsupported";
   opType: string;
+  reason: "soroban" | "obsolete" | "unknown";
 }
 
 // Payments
@@ -259,7 +261,7 @@ export interface RevokeSponsorshipOperation extends OperationBase {
 }
 
 export type DecodedOperation =
-  | UndecodedOperation
+  | UnsupportedOperation
   | CreateAccountOperation
   | PaymentOperation
   | PathPaymentStrictReceiveOperation

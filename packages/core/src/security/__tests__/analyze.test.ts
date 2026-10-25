@@ -40,7 +40,7 @@ describe("analyze", () => {
     }
   });
 
-  it("builds a report with no findings while the registry is empty", async () => {
+  it("builds a report with no findings for a plain payment", async () => {
     const report = await analyze(txRequest(fixture("payment-native").envelopeXdr), deps());
     expect(report).toMatchObject({
       network: "testnet",

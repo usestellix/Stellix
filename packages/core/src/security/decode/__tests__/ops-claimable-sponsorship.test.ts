@@ -266,13 +266,18 @@ describe("revokeSponsorship", () => {
     });
   });
 
-  it("leaves a Soroban ledger key undecoded, so UNSUPPORTED_OP reports it", () => {
+  it("marks a Soroban ledger key unsupported, so UNSUPPORTED_OP reports it", () => {
     const [decoded] = decodeWith(
       revoke(
         xdr.LedgerKey.ttl(new xdr.LedgerKeyTtl({ keyHash: new xdr.Hash(new Uint8Array(32)) })),
       ),
     );
-    expect(decoded).toEqual({ kind: "undecoded", opType: "revokeSponsorship", source: null });
+    expect(decoded).toEqual({
+      kind: "unsupported",
+      opType: "revokeSponsorship",
+      reason: "soroban",
+      source: null,
+    });
   });
 
   it("decodes each signer key type", () => {

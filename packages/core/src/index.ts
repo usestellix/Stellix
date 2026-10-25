@@ -268,8 +268,8 @@ export {
   type ShieldRequest,
   type SimulationStatus,
   type TomlFetcher,
-  type UndecodedOperation,
   type UnavailableReason,
+  type UnsupportedOperation,
 } from "./security/index.js";
 export {
   awaitOutcome,

@@ -1,5 +1,5 @@
 import type { xdr } from "@stellar/stellar-sdk/base";
-import type { DecodedOperation } from "./operation-types.js";
+import type { DecodedOperation, UnsupportedOperation } from "./operation-types.js";
 import {
   decodeAccountMerge,
   decodeCreateAccount,
@@ -26,8 +26,16 @@ import {
 } from "./ops-trust.js";
 import { muxedAddress } from "./xdr-values.js";
 
-// Every classic op → DecodedOperation (SHIELD §3.1). Op types without a decoder yet stay
-// "undecoded" so UNSUPPORTED_OP reports them instead of anything being silently shown.
+// Every classic op → DecodedOperation (SHIELD §3.1, §9 S1). Soroban ops and inflation become
+// "unsupported", which UNSUPPORTED_OP reports: nothing is ever silently dropped.
+
+function unsupported(
+  opType: string,
+  reason: UnsupportedOperation["reason"],
+  source: string | null,
+): UnsupportedOperation {
+  return { kind: "unsupported", opType, reason, source };
+}
 
 export function decodeOperation(op: xdr.Operation): DecodedOperation {
   const source = op.sourceAccount === null ? null : muxedAddress(op.sourceAccount);
@@ -83,13 +91,20 @@ export function decodeOperation(op: xdr.Operation): DecodedOperation {
       };
     case "revokeSponsorship":
       return (
-        decodeRevokeSponsorship(body.revokeSponsorshipOp, source) ?? {
-          kind: "undecoded",
-          opType: body.type,
-          source,
-        }
+        decodeRevokeSponsorship(body.revokeSponsorshipOp, source) ??
+        unsupported(body.type, "soroban", source)
       );
-    default:
-      return { kind: "undecoded", opType: body.type, source };
+    case "invokeHostFunction":
+    case "extendFootprintTtl":
+    case "restoreFootprint":
+      return unsupported(body.type, "soroban", source);
+    case "inflation":
+      return unsupported(body.type, "obsolete", source);
+    default: {
+      // Unreachable with this SDK (its parser rejects unknown op types), and a compile error
+      // when an SDK upgrade adds one. Kept so a new op type is reported, never dropped.
+      const unknown: never = body;
+      return unsupported(String((unknown as { type: unknown }).type), "unknown", source);
+    }
   }
 }
