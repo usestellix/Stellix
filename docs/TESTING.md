@@ -38,6 +38,8 @@ Three layers. Each has a clear job; don't use a slower layer for something a fas
 
 Horizon response fixtures live in `packages/core/src/__fixtures__/horizon/*.json`, captured from real testnet responses (scrub nothing — they're public), named by scenario (`account-funded.json`, `account-multisig.json`, `account-memo-required.json`, `submit-bad-seq.json`, `payments-mixed.json`…). Re-capture when Horizon changes; zod schema tests run against every fixture.
 
+Shield operation fixtures live in `packages/core/src/security/__fixtures__/ops/*.json`, captured by `node scripts/capture-shield-fixtures.mjs`: one real testnet transaction per classic operation type (SHIELD §9 S1), plus variants the decoders need (offer create/update/delete, every `setOptions` field and signer key type, each `revokeSponsorship` variant that can succeed on chain, a fee bump, every precondition, muxed sources and destinations). Each file holds the signed envelope XDR, the Horizon transaction record, the operation type(s), the network passphrase and the capture date. `_index.json` maps each operation type to its fixtures, and the script fails if an S1 type has none. The script rewrites every fixture; never edit one by hand.
+
 ### Fakes
 
 - `FakeHorizonClient` implementing `HorizonClient` with scripted responses.

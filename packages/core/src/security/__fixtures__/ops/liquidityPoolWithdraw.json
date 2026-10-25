@@ -1,0 +1,62 @@
+{
+  "name": "liquidityPoolWithdraw",
+  "opType": "liquidityPoolWithdraw",
+  "opTypes": ["liquidityPoolWithdraw"],
+  "description": "User withdraws 10 pool shares from the XLM/PLN pool.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:22:48.917Z",
+  "hash": "f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152",
+  "envelopeXdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAADgAAAAEAAAAAAAAAAAAAAABq3ec4AAAAAAAAAAEAAAAAAAAAFz4WiEXTNJdWhfZHneUQk4U9gLjDNxRf4J8LzhTXIkF+AAAAAAX14QAAAAAAAJiWgAAAAAAAmJaAAAAAAAAAAAEh62CSAAAAQETVNnNeM/0ZXLsG23JbO5isrzVM5XI3u1JcktqDbiuD7B9bhtGzlbZAHSD0rWAhQGaDlbOzeCPd/ggvMNdp7QM=",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380756" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110171047772160"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110171047772160"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152"
+        }
+      },
+      "id": "f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152",
+      "paging_token": "23110171047772160",
+      "successful": true,
+      "hash": "f94fb509bf8816b4b0408222a5d5ac1e50668b21f75462ab09ebd14d0bf37152",
+      "ledger": 5380756,
+      "created_at": "2026-10-25T11:22:47Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "source_account_sequence": "23110037903769614",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAADgAAAAEAAAAAAAAAAAAAAABq3ec4AAAAAAAAAAEAAAAAAAAAFz4WiEXTNJdWhfZHneUQk4U9gLjDNxRf4J8LzhTXIkF+AAAAAAX14QAAAAAAAJiWgAAAAAAAmJaAAAAAAAAAAAEh62CSAAAAQETVNnNeM/0ZXLsG23JbO5isrzVM5XI3u1JcktqDbiuD7B9bhtGzlbZAHSD0rWAhQGaDlbOzeCPd/ggvMNdp7QM=",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAXAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqTAAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABcMtfLoAFIadQAAAA0AAAAHAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAEZVXwAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGpMAAAAAat3mggAAAAAAAAABAFIalAAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAXDLXyhABSGnUAAAANAAAABwAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAABGVV8AAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqTAAAAAGrd5oIAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "RNU2c14z/Rlcuwbbcls7mKyvNUzlcje7UlyS2oNuK4PsH1uG0bOVtkAdIPStYCFAZoOVs7N4I93+CC8w12ntAw=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927544" } }
+    }
+  }
+}

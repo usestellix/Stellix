@@ -27,8 +27,8 @@ Do not build any of these unless the roadmap (`docs/ROADMAP.md`) says the milest
 
 - Non-native assets, trustlines, USDC
 - Swaps / path payments / SDEX
-- dapp connectivity: injected provider, content scripts, SEP-43, Stellar Wallets Kit module
-- Soroban: contract calls, `signAuthEntry`, contract tokens
+- dapp connectivity: injected provider, content scripts, SEP-43, Stellar Wallets Kit module (arrives as Shield S2, `docs/SHIELD.md`)
+- Soroban: contract calls, `signAuthEntry`, contract tokens (arrives as Shield S3)
 - Anchors: SEP-10 / SEP-24 / SEP-31 / SEP-38
 - Hardware wallets (Ledger)
 - Importing a raw secret key (`S...`) — recovery phrase only for MVP
@@ -54,6 +54,7 @@ Before writing code for an area, read the doc for that area. These docs are the 
 | Screens, copy, UX states | `docs/UI_FLOWS.md` |
 | Tests | `docs/TESTING.md` |
 | Code style, errors, naming, commits | `docs/CONVENTIONS.md` |
+| Shield: decoding, analysis rules, policy, `assertSignable`, dapp requests | `docs/SHIELD.md`, `docs/SECURITY.md`, `docs/decisions/0010-stellix-shield.md` |
 | What to build next | `docs/ROADMAP.md` |
 | Anything that must also work on mobile | `docs/MOBILE_MIGRATION.md` |
 | Why a past decision was made | `docs/decisions/` (ADRs) |
@@ -84,6 +85,7 @@ stellix/
 │           ├── history/          ← normalize Horizon operation records
 │           ├── uri/              ← SEP-7 encode/decode
 │           ├── services/         ← onboard/unlock/prepare/confirm orchestration called by shells
+│           ├── security/         ← Shield: decode, rules, policy, report, assertSignable (SHIELD.md)
 │           ├── errors.ts         ← StellixError + error codes
 │           └── platform.ts       ← StorageAdapter and other platform interfaces
 └── apps/
@@ -150,7 +152,7 @@ Before declaring any task done: `pnpm typecheck && pnpm lint && pnpm test` must 
 
 ## 6. Non-negotiable invariants
 
-These are security and correctness rules. Breaking one is a bug even if all tests pass. Details and rationale are in `docs/SECURITY.md`.
+These are security and correctness rules. Breaking one is a bug even if all tests pass. Details and rationale are in `docs/SECURITY.md`; for 15–22, in `docs/SHIELD.md`.
 
 **Secrets**
 
@@ -177,6 +179,17 @@ These are security and correctness rules. Breaking one is a bug even if all test
 **Mainnet**
 
 14. Mainnet is off by default. Switching to it requires an explicit confirmation step. The current network is always visible in the UI header. Builds without `STELLIX_MAINNET_ENABLED=true` don't offer mainnet at all; the SW refuses it (ADR 0008).
+
+**Shield** (pre-signing analysis, `docs/SHIELD.md`, ADR 0010)
+
+15. Shield output is evidence. Only `assertSignable` inside the SW signing handler authorizes a signature.
+16. Analysis never modifies a transaction or auth entry.
+17. Text supplied by a dapp is never displayed as Stellix's own analysis.
+18. An unavailable or failed check is never displayed as safe, and never yields `ready` without review.
+19. Non-overridable blocks have no override path in any UI or message type. Tests must prove it.
+20. Highest severity wins; findings are never averaged.
+21. New network destinations are limited to: configured Horizon, configured Stellar RPC (S3), issuers' `stellar.toml` (SHIELD §6.8), the threat-list URL (S4). Each is listed in `PRIVACY.md`.
+22. No analytics. Metrics come from test corpora (SHIELD §10.3).
 
 ---
 
@@ -221,3 +234,5 @@ These are security and correctness rules. Breaking one is a bug even if all test
 | Session key | AES key derived from the password, held in `chrome.storage.session` while unlocked. |
 | Prepared transaction | A built, unsigned transaction stored in the SW awaiting user confirmation. |
 | SEP | Stellar Ecosystem Proposal — the ecosystem's standards. |
+| Shield | Stellix's on-device pre-signing analysis: decode, simulate, rules, policy (`docs/SHIELD.md`). |
+| Analysis report | Shield's output for one request: findings, checks that couldn't run, digest and expiry. Evidence, not a decision. |

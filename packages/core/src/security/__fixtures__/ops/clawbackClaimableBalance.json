@@ -1,0 +1,62 @@
+{
+  "name": "clawbackClaimableBalance",
+  "opType": "clawbackClaimableBalance",
+  "opTypes": ["clawbackClaimableBalance"],
+  "description": "Issuer claws back a 5 CLAW claimable balance.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:24:18.771Z",
+  "hash": "c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3",
+  "envelopeXdr": "AAAAAgAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAA+gAUhp4AAAABgAAAAEAAAAAAAAAAAAAAABq3eeSAAAAAAAAAAEAAAAAAAAAFAAAAABMZ/w7JpKvMiUyWPcq3FMYIQ30BBR3gG2DHUNCeinqEwAAAAAAAAABnIghjgAAAEB6/2x+9ZTtDb0/8bDGGuFM2HXu37CUol206y1ztuBQr6A0Yv/PqN1Wn9PveZ0qbJgad5JJ45pT6igG42JzcUUI",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380774" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110248357175296"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110248357175296"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3"
+        }
+      },
+      "id": "c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3",
+      "paging_token": "23110248357175296",
+      "successful": true,
+      "hash": "c0aa7c1fe99d7a1162ce5c518fd689e47f1a6a441d997ee4d1feed9d6df44cf3",
+      "ledger": 5380774,
+      "created_at": "2026-10-25T11:24:17Z",
+      "source_account": "GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH",
+      "source_account_sequence": "23110050788671494",
+      "fee_account": "GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAA+gAUhp4AAAABgAAAAEAAAAAAAAAAAAAAABq3eeSAAAAAAAAAAEAAAAAAAAAFAAAAABMZ/w7JpKvMiUyWPcq3FMYIQ30BBR3gG2DHUNCeinqEwAAAAAAAAABnIghjgAAAEB6/2x+9ZTtDb0/8bDGGuFM2HXu37CUol206y1ztuBQr6A0Yv/PqN1Wn9PveZ0qbJgad5JJ45pT6igG42JzcUUI",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAUAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqJAAAAAAAAAAB/8c4JMfMJO94YKuMd6WoxMZwoJoRljvjJCVzmnIghjgAAABdIduYMAFIaeAAAAAUAAAAAAAAAAAAAAAsAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSGokAAAAAat3mUAAAAAAAAAABAFIapgAAAAAAAAAAf/HOCTHzCTveGCrjHelqMTGcKCaEZY74yQlc5pyIIY4AAAAXSHblqABSGngAAAAFAAAAAAAAAAAAAAALAAAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqJAAAAAGrd5lAAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "ev9sfvWU7Q29P/GwxhrhTNh17t+wlKJdtOstc7bgUK+gNGL/z6jdVp/T73mdKmyYGneSSeOaU+ooBuNic3FFCA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927634" } }
+    }
+  }
+}

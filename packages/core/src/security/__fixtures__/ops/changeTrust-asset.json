@@ -1,0 +1,62 @@
+{
+  "name": "changeTrust-asset",
+  "opType": "changeTrust",
+  "opTypes": ["changeTrust"],
+  "description": "User adds a trustline to a credit asset with an explicit limit.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:20:58.706Z",
+  "hash": "667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be",
+  "envelopeXdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAAAQAAAAEAAAAAAAAAAAAAAABq3ebJAAAAAAAAAAEAAAAAAAAABgAAAAFDTEFXAAAAAH/xzgkx8wk73hgq4x3pajExnCgmhGWO+MkJXOaciCGOAAAJGE5yoAAAAAAAAAAAASHrYJIAAABAW8Dz22zyVUsTyB3E3vJoImSGkHwnTbrrwDfJYcVDSoo+ai/QnWzh6nA5EvAGIAgIH7c3pdKXL4LCrCxmVf4yCA==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380734" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110076558479360"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110076558479360"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be"
+        }
+      },
+      "id": "667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be",
+      "paging_token": "23110076558479360",
+      "successful": true,
+      "hash": "667e0eee6d32c3932e73da00ac3df7442998fa2a4226a0e87c23cf649c8fc5be",
+      "ledger": 5380734,
+      "created_at": "2026-10-25T11:20:57Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "source_account_sequence": "23110037903769601",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAA+gAUhp1AAAAAQAAAAEAAAAAAAAAAAAAAABq3ebJAAAAAAAAAAEAAAAAAAAABgAAAAFDTEFXAAAAAH/xzgkx8wk73hgq4x3pajExnCgmhGWO+MkJXOaciCGOAAAJGE5yoAAAAAAAAAAAASHrYJIAAABAW8Dz22zyVUsTyB3E3vJoImSGkHwnTbrrwDfJYcVDSoo+ai/QnWzh6nA5EvAGIAgIH7c3pdKXL4LCrCxmVf4yCA==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAGAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhp1AAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABdIdugAAFIadQAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAEAUhp+AAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABdIduecAFIadQAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA==",
+      "memo_type": "none",
+      "signatures": [
+        "W8Dz22zyVUsTyB3E3vJoImSGkHwnTbrrwDfJYcVDSoo+ai/QnWzh6nA5EvAGIAgIH7c3pdKXL4LCrCxmVf4yCA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927433" } }
+    }
+  }
+}

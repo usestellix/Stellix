@@ -70,10 +70,19 @@ export type ErrorCode =
   | "CLIPBOARD_UNAVAILABLE"
   // messaging
   | "UNAUTHORIZED_SENDER" | "INVALID_REQUEST"
+  // shield (post-MVP, SHIELD.md §8)
+  | "SHIELD_DIGEST_MISMATCH" | "SHIELD_REPORT_EXPIRED" | "SHIELD_BLOCKED"
+  | "SHIELD_CONFIRMATION_REQUIRED" | "SHIELD_INPUT_INVALID" | "SHIELD_INPUT_TOO_LARGE"
   // catch-all
   | "INTERNAL_ERROR";
 ```
 
+- The `SHIELD_*` codes are documented ahead of the code: they land in `core/errors.ts` and `ui/errorCopy.ts` together with Shield's core types (S1). Until then this list is ahead of `errors.ts` by exactly those six.
+  - `SHIELD_DIGEST_MISMATCH`: the request changed after analysis; decode and analyze again.
+  - `SHIELD_REPORT_EXPIRED`: the report is past `expiresAt`; analyze again.
+  - `SHIELD_BLOCKED`: the policy decision is `blocked`. Never overridable.
+  - `SHIELD_CONFIRMATION_REQUIRED`: the decision is `review` and the required click or typed confirmation wasn't recorded.
+  - `SHIELD_INPUT_INVALID` / `SHIELD_INPUT_TOO_LARGE`: pasted or dapp input that doesn't decode, or exceeds the size limit.
 - Throw `StellixError` from core. Catch at boundaries (message handler, React error boundary) and convert.
 - Unknown thrown values become `INTERNAL_ERROR` with a sanitized message; the original is logged at `debug` (never containing secrets — see SECURITY §7).
 - Errors may carry **details**, but only the keys a code declares in `ERROR_DETAIL_KEYS` (`core/errors.ts`), with units in the name, e.g. `INSUFFICIENT_BALANCE → { maxSendableStroops }`. Unknown keys are stripped on both sides of messaging. Details are public values only.

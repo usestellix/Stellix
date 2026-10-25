@@ -1,0 +1,72 @@
+{
+  "name": "sponsorship-entries",
+  "opType": "endSponsoringFutureReserves",
+  "opTypes": [
+    "beginSponsoringFutureReserves",
+    "changeTrust",
+    "changeTrust",
+    "manageData",
+    "setOptions",
+    "manageSellOffer",
+    "createClaimableBalance",
+    "endSponsoringFutureReserves"
+  ],
+  "description": "Begin/end sandwich: the user sponsors another account's trustlines, data, signer, offer and claimable balance.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:24:28.748Z",
+  "hash": "592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6",
+  "envelopeXdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAH0AAUhp1AAAAEgAAAAEAAAAAAAAAAAAAAABq3eecAAAAAAAAAAgAAAAAAAAAEAAAAABrQnfvKjmd/vqPr6QpUNBRASilBFZtSsgKtaEp4InoAgAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAGAAAAAVBMTgAAAAAA53CJTIfb0WCLT7lwDB4ugXUmUVqHmQa2htaOkj6oE5Z//////////wAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAGAAAAAwAAAAAAAAAAAAAAAVBMTgAAAAAA53CJTIfb0WCLT7lwDB4ugXUmUVqHmQa2htaOkj6oE5YAAAAef/////////8AAAABAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAACgAAAAlzcG9uc29yZWQAAAAAAAABAAAAATEAAAAAAAABAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAADy8BSqYorNU/U7xtzs63kCVGh/llwj/1NFP8VoNxwsCwAAAAEAAAABAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAAAwAAAAAAAAABUExOAAAAAADncIlMh9vRYItPuXAMHi6BdSZRWoeZBraG1o6SPqgTlgAAAAAAmJaAAAAAZAAAAAEAAAAAAAAAAAAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAOAAAAAAAAAAAAmJaAAAAAAQAAAAAAAAAA77udofXakMWOs5/MwqpfRFZcfGJLcqBFqaP06VC7BoAAAAAAAAAAAQAAAABrQnfvKjmd/vqPr6QpUNBRASilBFZtSsgKtaEp4InoAgAAABEAAAAAAAAAAiHrYJIAAABA64I7TcPK7WE/lUZDL3lB2BCt/LZjZoncVV/3hsxmXHqvpgb97FewRifcOG1w7Gjdbr1Y81bFRgCQwroafYndCOCJ6AIAAABAXOx6mpjNNQ4usQc0/LG16onz1Zz1hM60MVH9G1gHpv5MbLYnyYIJWSrW4b/RxIeDpPqrD6WMk4w2+eaC09OEDQ==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380776" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110256947109888"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110256947109888"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6"
+        }
+      },
+      "id": "592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6",
+      "paging_token": "23110256947109888",
+      "successful": true,
+      "hash": "592fbda50dcb551bdfa3b7df31405fd97f97ad45ebae730de700977d6763e0f6",
+      "ledger": 5380776,
+      "created_at": "2026-10-25T11:24:27Z",
+      "source_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "source_account_sequence": "23110037903769618",
+      "fee_account": "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+      "fee_charged": "800",
+      "max_fee": "8000",
+      "operation_count": 8,
+      "envelope_xdr": "AAAAAgAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAH0AAUhp1AAAAEgAAAAEAAAAAAAAAAAAAAABq3eecAAAAAAAAAAgAAAAAAAAAEAAAAABrQnfvKjmd/vqPr6QpUNBRASilBFZtSsgKtaEp4InoAgAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAGAAAAAVBMTgAAAAAA53CJTIfb0WCLT7lwDB4ugXUmUVqHmQa2htaOkj6oE5Z//////////wAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAGAAAAAwAAAAAAAAAAAAAAAVBMTgAAAAAA53CJTIfb0WCLT7lwDB4ugXUmUVqHmQa2htaOkj6oE5YAAAAef/////////8AAAABAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAACgAAAAlzcG9uc29yZWQAAAAAAAABAAAAATEAAAAAAAABAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAADy8BSqYorNU/U7xtzs63kCVGh/llwj/1NFP8VoNxwsCwAAAAEAAAABAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAAAwAAAAAAAAABUExOAAAAAADncIlMh9vRYItPuXAMHi6BdSZRWoeZBraG1o6SPqgTlgAAAAAAmJaAAAAAZAAAAAEAAAAAAAAAAAAAAAEAAAAAa0J37yo5nf76j6+kKVDQUQEopQRWbUrICrWhKeCJ6AIAAAAOAAAAAAAAAAAAmJaAAAAAAQAAAAAAAAAA77udofXakMWOs5/MwqpfRFZcfGJLcqBFqaP06VC7BoAAAAAAAAAAAQAAAABrQnfvKjmd/vqPr6QpUNBRASilBFZtSsgKtaEp4InoAgAAABEAAAAAAAAAAiHrYJIAAABA64I7TcPK7WE/lUZDL3lB2BCt/LZjZoncVV/3hsxmXHqvpgb97FewRifcOG1w7Gjdbr1Y81bFRgCQwroafYndCOCJ6AIAAABAXOx6mpjNNQ4usQc0/LG16onz1Zz1hM60MVH9G1gHpv5MbLYnyYIJWSrW4b/RxIeDpPqrD6WMk4w2+eaC09OEDQ==",
+      "result_xdr": "AAAAAAAAAyAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAGtCd+8qOZ3++o+vpClQ0FEBKKUEVm1KyAq1oSngiegCAAAAAAAONpYAAAAAAAAAAVBMTgAAAAAA53CJTIfb0WCLT7lwDB4ugXUmUVqHmQa2htaOkj6oE5YAAAAAAJiWgAAAAGQAAAABAAAAAAAAAAAAAAAAAAAADgAAAAAAAAAAo3GH2Se3Ie23eTVE8xWgU1fHl7HADfYQcLyau2EikqAAAAAAAAAAEQAAAAAAAAAA",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqnAAAAAAAAAAB1Sb6sCyEpe5QP+V2CFYAhZsNa61FhIUnYeXbJIetgkgAAABcN5x0sAFIadQAAABEAAAAHAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAEZVXwAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAADAAAAAABSGqcAAAAAat3m5gAAAAAAAAABAFIaqAAAAAAAAAAAdUm+rAshKXuUD/ldghWAIWbDWutRYSFJ2Hl2ySHrYJIAAAAXDecaDABSGnUAAAARAAAABwAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAABGVV8AAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAwAAAAAAUhqnAAAAAGrd5uYAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "64I7TcPK7WE/lUZDL3lB2BCt/LZjZoncVV/3hsxmXHqvpgb97FewRifcOG1w7Gjdbr1Y81bFRgCQwroafYndCA==",
+        "XOx6mpjNNQ4usQc0/LG16onz1Zz1hM60MVH9G1gHpv5MbLYnyYIJWSrW4b/RxIeDpPqrD6WMk4w2+eaC09OEDQ=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927644" } }
+    }
+  }
+}

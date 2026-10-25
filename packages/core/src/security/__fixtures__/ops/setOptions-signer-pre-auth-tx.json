@@ -1,0 +1,62 @@
+{
+  "name": "setOptions-signer-pre-auth-tx",
+  "opType": "setOptions",
+  "opTypes": ["setOptions"],
+  "description": "Adds a pre-authorized transaction signer (hash of a transaction) with weight 1.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:23:13.261Z",
+  "hash": "933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306",
+  "envelopeXdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAABAAAAAEAAAAAAAAAAAAAAABq3edQAAAAAAAAAAEAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAGEFzWilY8plbzU4kAuUbx3gAZgxiJOMWLutPgmlwGmgAAAAAEAAAAAAAAAAby3sAAAAABAft5HwKFyRgcNcJdxNYGDQJKBp/lD9l4qBR0F41FOhlyrp1+ol3pymJzWHuH1C1uhLNzUjFzg52QRMKs4toxpCA==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380761" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110192522604544"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110192522604544"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306"
+        }
+      },
+      "id": "933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306",
+      "paging_token": "23110192522604544",
+      "successful": true,
+      "hash": "933abcfa0074457162a2928f7a214060815bb63a2f31297dde396a0398918306",
+      "ledger": 5380761,
+      "created_at": "2026-10-25T11:23:12Z",
+      "source_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "source_account_sequence": "23110059378606084",
+      "fee_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAABAAAAAEAAAAAAAAAAAAAAABq3edQAAAAAAAAAAEAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAGEFzWilY8plbzU4kAuUbx3gAZgxiJOMWLutPgmlwGmgAAAAAEAAAAAAAAAAby3sAAAAABAft5HwKFyRgcNcJdxNYGDQJKBp/lD9l4qBR0F41FOhlyrp1+ol3pymJzWHuH1C1uhLNzUjFzg52QRMKs4toxpCA==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqYAAAAAAAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAABdIdubUAFIaegAAAAMAAAABAAAAAQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAAAAAALZXhhbXBsZS5jb20ACgECAwAAAAEAAAAAaBc8+SGlhG3Rk5ytUyxFSS/jN8uKEsb6yYK+cHgricgAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAABAAAAAAAAAAMAAAAAAFIamAAAAABq3eabAAAAAAAAAAEAUhqZAAAAAAAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAABdIduZwAFIaegAAAAMAAAABAAAAAQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAAAAAALZXhhbXBsZS5jb20ACgECAwAAAAEAAAAAaBc8+SGlhG3Rk5ytUyxFSS/jN8uKEsb6yYK+cHgricgAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAABAAAAAAAAAAMAAAAAAFIamAAAAABq3eabAAAAAA==",
+      "memo_type": "none",
+      "signatures": [
+        "ft5HwKFyRgcNcJdxNYGDQJKBp/lD9l4qBR0F41FOhlyrp1+ol3pymJzWHuH1C1uhLNzUjFzg52QRMKs4toxpCA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927568" } }
+    }
+  }
+}

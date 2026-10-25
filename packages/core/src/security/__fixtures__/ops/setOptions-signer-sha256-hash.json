@@ -1,0 +1,62 @@
+{
+  "name": "setOptions-signer-sha256-hash",
+  "opType": "setOptions",
+  "opTypes": ["setOptions"],
+  "description": "Adds a hash(x) signer with weight 1.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:23:18.303Z",
+  "hash": "1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114",
+  "envelopeXdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAABQAAAAEAAAAAAAAAAAAAAABq3edVAAAAAAAAAAEAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAKJMOMyX31fhnt1hkv3fJtKeWefCLVmj6kbFvG2kYigEAAAAAEAAAAAAAAAAby3sAAAAABAfSh0h2iXr57VnnV2xBLWl2SLf+RUrW/aOf71Ba+UdMomU9JBAjXgW7lKlLVi3GsIiolGOUhSp6ozeD/vEgnzDw==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380762" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110196817571840"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110196817571840"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114"
+        }
+      },
+      "id": "1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114",
+      "paging_token": "23110196817571840",
+      "successful": true,
+      "hash": "1f2f03ef58ede5143363753d0a6869127b2d80c40e6e695ff8fbf91aaadd2114",
+      "ledger": 5380762,
+      "created_at": "2026-10-25T11:23:17Z",
+      "source_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "source_account_sequence": "23110059378606085",
+      "fee_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAABQAAAAEAAAAAAAAAAAAAAABq3edVAAAAAAAAAAEAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAKJMOMyX31fhnt1hkv3fJtKeWefCLVmj6kbFvG2kYigEAAAAAEAAAAAAAAAAby3sAAAAABAfSh0h2iXr57VnnV2xBLWl2SLf+RUrW/aOf71Ba+UdMomU9JBAjXgW7lKlLVi3GsIiolGOUhSp6ozeD/vEgnzDw==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqZAAAAAAAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAABdIduZwAFIaegAAAAQAAAACAAAAAQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAAAAAALZXhhbXBsZS5jb20ACgECAwAAAAIAAAAAaBc8+SGlhG3Rk5ytUyxFSS/jN8uKEsb6yYK+cHgricgAAAABAAAAAYQXNaKVjymVvNTiQC5RvHeABmDGIk4xYu60+CaXAaaAAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAwAAAAAAUhqZAAAAAGrd5qAAAAAAAAAAAQBSGpoAAAAAAAAAALnSEFjnGbxPuTczw6IHABYxGb/TfXXhyrfo37u8t7AAAAAAF0h25gwAUhp6AAAABAAAAAIAAAABAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAtleGFtcGxlLmNvbQAKAQIDAAAAAgAAAABoFzz5IaWEbdGTnK1TLEVJL+M3y4oSxvrJgr5weCuJyAAAAAEAAAABhBc1opWPKZW81OJALlG8d4AGYMYiTjFi7rT4JpcBpoAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAABSGpkAAAAAat3moAAAAAA=",
+      "memo_type": "none",
+      "signatures": [
+        "fSh0h2iXr57VnnV2xBLWl2SLf+RUrW/aOf71Ba+UdMomU9JBAjXgW7lKlLVi3GsIiolGOUhSp6ozeD/vEgnzDw=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927573" } }
+    }
+  }
+}

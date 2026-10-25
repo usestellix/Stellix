@@ -1,0 +1,62 @@
+{
+  "name": "manageData-set",
+  "opType": "manageData",
+  "opTypes": ["manageData"],
+  "description": "Sets data entry `stellix-fixture`.",
+  "envelopeType": "envelopeTypeTx",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T11:23:33.607Z",
+  "hash": "f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366",
+  "envelopeXdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAACAAAAAEAAAAAAAAAAAAAAABq3edkAAAAAAAAAAEAAAAAAAAACgAAAA9zdGVsbGl4LWZpeHR1cmUAAAAAAQAAAAZzaGllbGQAAAAAAAAAAAABvLewAAAAAECtsttBIBXe6XIdvcq/qe3EhNfeQv/7Gki4D0WcbwZqr6IPuStMb4G60LSER8+3ckU3/gdP6H4ar0+cUQxzcDcD",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5380765" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23110209702473728"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23110209702473728"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366"
+        }
+      },
+      "id": "f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366",
+      "paging_token": "23110209702473728",
+      "successful": true,
+      "hash": "f1cce5d861cac7efb9f8a3ce974ef5505acd9c3fd175e08f5198d3d2542bf366",
+      "ledger": 5380765,
+      "created_at": "2026-10-25T11:23:32Z",
+      "source_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "source_account_sequence": "23110059378606088",
+      "fee_account": "GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAA+gAUhp6AAAACAAAAAEAAAAAAAAAAAAAAABq3edkAAAAAAAAAAEAAAAAAAAACgAAAA9zdGVsbGl4LWZpeHR1cmUAAAAAAQAAAAZzaGllbGQAAAAAAAAAAAABvLewAAAAAECtsttBIBXe6XIdvcq/qe3EhNfeQv/7Gki4D0WcbwZqr6IPuStMb4G60LSER8+3ckU3/gdP6H4ar0+cUQxzcDcD",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAKAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUhqcAAAAAAAAAAC50hBY5xm8T7k3M8OiBwAWMRm/03114cq36N+7vLewAAAAABdIduVEAFIaegAAAAcAAAADAAAAAQAAAADvu52h9dqQxY6zn8zCql9EVlx8YktyoEWpo/TpULsGgAAAAAAAAAALZXhhbXBsZS5jb20ACgECAwAAAAMAAAABhBc1opWPKZW81OJALlG8d4AGYMYiTjFi7rT4JpcBpoAAAAABAAAAAokw4zJffV+Ge3WGS/d8m0p5Z58ItWaPqRsW8baRiKAQAAAAAQAAAAPJ5VYWD5Mzp6zUuqbqpaxEK5A9F7sa0MfWfkx2LrdWswAAABZzdGVsbGl4IHNoaWVsZCBmaXh0dXJlAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAwAAAAAAUhqcAAAAAGrd5q8AAAAAAAAAAQBSGp0AAAAAAAAAALnSEFjnGbxPuTczw6IHABYxGb/TfXXhyrfo37u8t7AAAAAAF0h25OAAUhp6AAAABwAAAAMAAAABAAAAAO+7naH12pDFjrOfzMKqX0RWXHxiS3KgRamj9OlQuwaAAAAAAAAAAAtleGFtcGxlLmNvbQAKAQIDAAAAAwAAAAGEFzWilY8plbzU4kAuUbx3gAZgxiJOMWLutPgmlwGmgAAAAAEAAAACiTDjMl99X4Z7dYZL93ybSnlnnwi1Zo+pGxbxtpGIoBAAAAABAAAAA8nlVhYPkzOnrNS6puqlrEQrkD0XuxrQx9Z+THYut1azAAAAFnN0ZWxsaXggc2hpZWxkIGZpeHR1cmUAAAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAADAAAAAABSGpwAAAAAat3mrwAAAAA=",
+      "memo_type": "none",
+      "signatures": [
+        "rbLbQSAV3ulyHb3Kv6ntxITX3kL/+xpIuA9FnG8Gaq+iD7krTG+ButC0hEfPt3JFN/4HT+h+Gq9PnFEMc3A3Aw=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792927588" } }
+    }
+  }
+}
