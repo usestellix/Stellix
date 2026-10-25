@@ -1,19 +1,12 @@
 import { StellixError } from "../errors.js";
 import { decodeTransactionEnvelope } from "./decode/index.js";
+import { gather } from "./gather.js";
 import { buildReport } from "./report.js";
 import { RULES, runRules } from "./rules/index.js";
-import type { AnalysisReport, RuleData, ShieldDeps, ShieldRequest } from "./types.js";
+import type { AnalysisReport, ShieldDeps, ShieldRequest } from "./types.js";
 
 // Public API of Shield (SHIELD §3, §4): decode → gather → rules → report. The report is
 // evidence only; evaluate (policy) and assertSignable come with their own issues.
-
-/**
- * Fetches what the rules need before they run. Each rule issue adds its lookups here, taking
- * the decoded request and deps; none exist yet.
- */
-function gather(): Promise<RuleData> {
-  return Promise.resolve({});
-}
 
 export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<AnalysisReport> {
   if (req.kind !== "transaction") {
@@ -22,7 +15,7 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
   }
   const { decoded, hashHex } = decodeTransactionEnvelope(req.xdr, req.network);
   const now = deps.now();
-  const data = await gather();
+  const data = await gather(decoded, deps);
   const { findings, checksUnavailable } = runRules(RULES, {
     request: req,
     decoded,
@@ -60,6 +53,7 @@ export { compareSeverity, maxSeverity } from "./policy/severity.js";
 export { REPORT_TTL_MS, reportExpiresAt } from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
+export { isUnavailable, pairKey, unavailableFrom } from "./lookups.js";
 export type * from "./decode/operation-types.js";
 export {
   resolveSources,

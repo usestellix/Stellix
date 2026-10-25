@@ -19,6 +19,14 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "{destination} requires a memo, and this transaction has none. Exchanges and other " +
       "services use the memo to credit a payment. Without it, the funds may be lost.",
   },
+  OFFER_BAD_PRICE: {
+    title: "Offer below the market price",
+    body:
+      "Operation {opNumber} offers {selling} at {offerPrice} {buying} per {selling}. The best " +
+      "bid on the order book is {bestBidPrice} {buying} per {selling}, so this price is " +
+      "{worsePercent}% worse. If the offer is filled at its own price, you could get up to " +
+      "{lossAmount} {lossAsset} less than at the best bid.",
+  },
   UNSUPPORTED_OP: {
     title: "Operation Stellix can't read",
     body:

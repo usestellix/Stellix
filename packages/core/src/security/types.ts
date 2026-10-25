@@ -1,5 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
+import type { OrderBook } from "../network/horizon-schemas.js";
 import type { DecodedOperation, DecodedSignerKey } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
@@ -156,9 +157,13 @@ export type DecodedRequest = DecodedTransaction; // auth entries (S3), messages 
  * Data fetched before the rules run (order books, accounts, stellar.toml), so rules stay pure
  * and never touch the network (SHIELD §6.4). Each rule issue adds the fields it needs.
  */
-// Empty until the first rule that needs fetched data adds its field.
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface RuleData {}
+export interface RuleData {
+  /**
+   * OFFER_BAD_PRICE: the order book of each offer pair it checks, keyed by `pairKey(selling,
+   * buying)`, or why it couldn't be fetched.
+   */
+  orderBooks: ReadonlyMap<string, OrderBook | RuleUnavailable>;
+}
 
 export interface RuleContext {
   request: ShieldRequest;
