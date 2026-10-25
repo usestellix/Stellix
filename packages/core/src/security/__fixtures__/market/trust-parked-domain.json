@@ -1,0 +1,142 @@
+{
+  "name": "trust-parked-domain",
+  "description": "changeTrust to EURC from an issuer whose home domain serves an HTML page, not a toml.",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T16:06:51.963Z",
+  "userAccount": "GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB",
+  "lookups": {
+    "issuer": {
+      "path": "accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK",
+      "status": 200,
+      "body": {
+        "_links": {
+          "self": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK"
+          },
+          "transactions": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/transactions{?cursor,limit,order}",
+            "templated": true
+          },
+          "operations": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/operations{?cursor,limit,order}",
+            "templated": true
+          },
+          "payments": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/payments{?cursor,limit,order}",
+            "templated": true
+          },
+          "effects": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/effects{?cursor,limit,order}",
+            "templated": true
+          },
+          "offers": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/offers{?cursor,limit,order}",
+            "templated": true
+          },
+          "trades": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/trades{?cursor,limit,order}",
+            "templated": true
+          },
+          "data": {
+            "href": "https://horizon-testnet.stellar.org/accounts/GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK/data/{key}",
+            "templated": true
+          }
+        },
+        "id": "GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK",
+        "account_id": "GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK",
+        "sequence": "89116276424710",
+        "sequence_ledger": 92291,
+        "sequence_time": "1766453926",
+        "subentry_count": 0,
+        "home_domain": "wetheunion.com",
+        "last_modified_ledger": 92291,
+        "last_modified_time": "2025-12-23T01:38:46Z",
+        "thresholds": { "low_threshold": 0, "med_threshold": 0, "high_threshold": 0 },
+        "flags": {
+          "auth_required": false,
+          "auth_revocable": false,
+          "auth_immutable": false,
+          "auth_clawback_enabled": false
+        },
+        "balances": [
+          {
+            "balance": "9679.9999300",
+            "buying_liabilities": "0.0000000",
+            "selling_liabilities": "0.0000000",
+            "asset_type": "native"
+          }
+        ],
+        "signers": [
+          {
+            "weight": 1,
+            "key": "GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK",
+            "type": "ed25519_public_key"
+          }
+        ],
+        "data": {},
+        "num_sponsoring": 0,
+        "num_sponsored": 0,
+        "paging_token": "GA5NJ3H2BQG2Y7SGCHLMSQS3VFDJ236NRUTVF3HQDPKCQED6IN7GYLZK"
+      }
+    },
+    "toml": {
+      "path": "https://wetheunion.com/.well-known/stellar.toml",
+      "status": 200,
+      "headers": { "content-type": "text/html", "location": null },
+      "text": "<!DOCTYPE html><html><head><script>window.onload=function(){window.location.href=\"/lander\"}</script></head></html>"
+    }
+  },
+  "hash": "fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2",
+  "envelopeXdr": "AAAAAgAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAA+gAUifgAAAAAgAAAAEAAAAAAAAAAAAAAABq3inMAAAAAAAAAAEAAAAAAAAABgAAAAFFVVJDAAAAADrU7PoMDax+RhHWyUJbqUadb82NJ1Ls8BvUKBB+Q35sf/////////8AAAAAAAAAAfAcu3AAAABAKrNFUtmzqiqStMKOpyI8lNnKlvUGxpaaX7PwiHnEtiO7sSGr/I2/eyPpLN8fqqIztNvDDQLRvjzKhQBV6rMaBw==",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5384165" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23124812591288320"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23124812591288320"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2"
+        }
+      },
+      "id": "fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2",
+      "paging_token": "23124812591288320",
+      "successful": true,
+      "hash": "fbc623fdb39b687975354a09e4829e4902457128b07a99b4e19c69a84249e8c2",
+      "ledger": 5384165,
+      "created_at": "2026-10-25T16:06:52Z",
+      "source_account": "GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB",
+      "source_account_sequence": "23124791116431362",
+      "fee_account": "GAME4KPJRQWZ75T52SBOROMMVBJCPZLQIOFYCJV7W72VHGXQDS5XAZXB",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAA+gAUifgAAAAAgAAAAEAAAAAAAAAAAAAAABq3inMAAAAAAAAAAEAAAAAAAAABgAAAAFFVVJDAAAAADrU7PoMDax+RhHWyUJbqUadb82NJ1Ls8BvUKBB+Q35sf/////////8AAAAAAAAAAfAcu3AAAABAKrNFUtmzqiqStMKOpyI8lNnKlvUGxpaaX7PwiHnEtiO7sSGr/I2/eyPpLN8fqqIztNvDDQLRvjzKhQBV6rMaBw==",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAGAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUifkAAAAAAAAAAAYTinpjC2f9n3Ugui5jKhSJ+VwQ4uBJr+39VOa8By7cAAAABdIduecAFIn4AAAAAEAAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAABSJ+QAAAAAat4pFwAAAAAAAAABAFIn5QAAAAAAAAAAGE4p6Ywtn/Z91ILouYyoUiflcEOLgSa/t/VTmvAcu3AAAAAXSHbnOABSJ+AAAAABAAAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAwAAAAAAUifkAAAAAGreKRcAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "KrNFUtmzqiqStMKOpyI8lNnKlvUGxpaaX7PwiHnEtiO7sSGr/I2/eyPpLN8fqqIztNvDDQLRvjzKhQBV6rMaBw=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1792944588" } }
+    }
+  }
+}

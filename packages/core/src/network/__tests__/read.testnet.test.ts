@@ -9,6 +9,7 @@ import { NETWORKS } from "../config.js";
 import { fundWithFriendbot } from "../friendbot.js";
 import { createHorizonClient } from "../horizon-client.js";
 import { validateHorizonOverride } from "../horizon-url.js";
+import { createTomlFetcher } from "../../security/intel/toml.js";
 
 // Live Stellar testnet (TESTING §2). Fresh keys every run; never depends on existing testnet state.
 
@@ -104,5 +105,19 @@ describe("testnet: path finding", () => {
     const none = { type: "credit", code: "NONE", issuer: issuer! } as const;
     expect(await horizon.getStrictSendPaths({ type: "native" }, 10_000_000n, none)).toEqual([]);
     expect(await horizon.getStrictReceivePaths({ type: "native" }, none, 10_000_000n)).toEqual([]);
+  });
+});
+
+describe("testnet: stellar.toml", () => {
+  it("reads CURRENCIES from SDF's test anchor", async () => {
+    const fetcher = createTomlFetcher({
+      fetch: globalThis.fetch.bind(globalThis),
+      session: new MemoryKeyValueStore(),
+      now: () => Date.now(),
+    });
+    const result = await fetcher.fetchToml("testanchor.stellar.org");
+    expect(result).toHaveProperty("currencies");
+    if ("unavailable" in result) return;
+    expect(result.currencies.some((c) => c.code === "SRT")).toBe(true);
   });
 });

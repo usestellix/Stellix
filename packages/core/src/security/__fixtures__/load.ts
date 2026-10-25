@@ -53,7 +53,7 @@ export interface MarketFixture {
   description: string;
   networkPassphrase: string;
   /** Keyed by what they are (e.g. `orderBook`); `path` is relative to the Horizon root. */
-  lookups: Record<string, { path: string; status: number; body: unknown }>;
+  lookups: Record<string, MarketLookup>;
   /** Absent in a lookups-only fixture (a case whose transaction would fail on chain). */
   userAccount?: string;
   hash?: string;
@@ -79,10 +79,19 @@ export function marketFixture(name: string): MarketFixture {
   return f;
 }
 
-export function lookup(
-  f: MarketFixture,
-  key: string,
-): { path: string; status: number; body: unknown } {
+/**
+ * One captured response: Horizon's JSON (`body`), or an issuer's stellar.toml as served (`text`
+ * and the headers the fetcher checks; `path` is then the absolute https URL).
+ */
+export interface MarketLookup {
+  path: string;
+  status: number;
+  body?: unknown;
+  text?: string;
+  headers?: Record<string, string | null>;
+}
+
+export function lookup(f: MarketFixture, key: string): MarketLookup {
   const l = f.lookups[key];
   if (l === undefined) throw new Error(`${f.name} has no ${key} lookup`);
   return l;

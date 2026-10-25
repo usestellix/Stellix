@@ -122,6 +122,7 @@ The core/shell split is the most important structural rule: **`packages/core` mu
 | KDF | `@noble/hashes` scrypt (async variant) | Params versioned in the vault header. |
 | Symmetric encryption | WebCrypto `AES-GCM` 256-bit | Available in extension SW and (polyfilled) RN. |
 | Runtime validation | `zod` | All cross-context messages and all Horizon responses we depend on. |
+| TOML (Shield) | `smol-toml` | Issuers' `stellar.toml` only, parsed as data (SHIELD §6.8). Pure JS, zero deps. |
 | QR | a small pure-JS QR encoder | Pick one with zero runtime deps. |
 | Unit tests | Vitest | |
 | E2E | Playwright with a persistent Chromium context loading the built extension | |

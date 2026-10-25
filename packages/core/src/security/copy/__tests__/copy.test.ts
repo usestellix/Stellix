@@ -14,8 +14,6 @@ const PENDING: readonly RuleId[] = [
   "FOREIGN_SOURCE_OP",
   "UNNAMED_OUTFLOW",
   "CLAIMABLE_TO_OTHER",
-  "TRUST_UNVERIFIED",
-  "TRUST_CLAWBACK",
   "SPONSORSHIP_CHANGE",
   "NO_MAX_TIME",
   "HIGH_FEE",
@@ -44,6 +42,17 @@ const SAMPLE_EVIDENCE: Partial<Record<RuleId, Record<string, string>>> = {
     bestAmount: "20",
     lossAmount: "19.9999999",
     lossPercent: "99.99",
+  },
+  TRUST_UNVERIFIED: {
+    opNumber: "1",
+    assetCode: "SRT",
+    issuer: "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN",
+    verification: "The issuer account has no home domain, so no website vouches for this asset.",
+  },
+  TRUST_CLAWBACK: {
+    opNumber: "1",
+    assetCode: "SRT",
+    issuer: "GCXWSVROJKVC7R5QODVRA3C4MLN4USLBQKK5H4GLJQ7KS7KTBREZQ7NN",
   },
   UNSUPPORTED_OP: { opNumber: "2", opType: "invokeHostFunction" },
 };

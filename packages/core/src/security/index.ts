@@ -54,6 +54,14 @@ export { REPORT_TTL_MS, reportExpiresAt } from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
 export { isUnavailable, pairKey, unavailableFrom } from "./lookups.js";
+export {
+  TOML_CACHE_TTL_MS,
+  TOML_MAX_BYTES,
+  TOML_TIMEOUT_MS,
+  createTomlFetcher,
+  fetchableHomeDomain,
+  type TomlFetcherDeps,
+} from "./intel/toml.js";
 export type * from "./decode/operation-types.js";
 export {
   resolveSources,
