@@ -28,6 +28,17 @@ Stellix holds keys that control real money. This document defines what we defend
 | T11 | Weak randomness | Bad entropy for mnemonic/IV/salt | Only `crypto.getRandomValues`; never `Math.random` for anything security-relevant |
 | T12 | Horizon serving false data | Compromised or malicious Horizon | Signatures don't depend on Horizon; balances could be misreported. Mitigation: default to SDF Horizon over HTTPS; custom Horizon is an advanced setting with a warning. A lying Horizon can't steal funds, only mislead the display. |
 
+### 2.1 Shield threats (post-MVP, `docs/SHIELD.md`)
+
+These apply from the Shield phase that adds the surface: S1 for pasted requests and the Send flow, S2 for dapp requests, S3 for simulation.
+
+| # | Threat | Vector | Primary defense |
+|---|---|---|---|
+| T13 | dapp summary spoofing | A dapp describes its request in friendly terms ("Claim reward") or sends text styled like Stellix's, while the XDR does something else | Everything Stellix presents as its analysis is decoded from the request itself (invariant 17). Dapp-supplied text is labelled as coming from the site. Outflows to addresses the dapp didn't present raise `UNNAMED_OUTFLOW`. Dangerous account changes (`ACCT_SIGNER_CHANGE`, `ACCT_MASTER_WEIGHT`) are blocked without override, whatever the dapp says. |
+| T14 | Simulation manipulation | A malicious or compromised RPC returns a false simulation; a contract behaves differently at submission than in simulation (state- or time-dependent); the RPC is unreachable | Simulation is evidence, never authorization (invariant 15). `getNetwork` passphrase check; zod-validated responses. A failed, unavailable or malformed simulation raises `SIM_FAILED` / `SIM_UNAVAILABLE` and is never shown as safe (invariant 18). Checks that don't need simulation, such as the auth-tree check (`AUTH_TREE_UNNAMED`), are decoded from the request itself. |
+| T15 | Hostile `stellar.toml` | An issuer's domain serves a huge, slow or malformed file, or lists an asset it doesn't control; the fetch tells the domain the user's IP | `https://<home_domain>/.well-known/stellar.toml` only; 5 s timeout, 100 KB cap, parsed as data only, cached 1 h (SHIELD §6.8). A fetch failure makes `TRUST_UNVERIFIED` unavailable, not passed. A toml can only confirm the issuer's own claim; the copy says "listed by <domain>", never "legitimate". The destination is listed in `PRIVACY.md` (invariant 21). |
+| T16 | Report replay | An analysis report for one request is reused to sign a different or modified request, after it expired, or after the rule set changed | `assertSignable` recomputes the digest (SHIELD §5) and checks the network, `ruleSetVersion` and `expiresAt` before every signature. Reports are produced and kept in the SW; a report from the UI or a dapp is never accepted. Tests mutate every byte of a prepared transaction after analysis (S1 exit). |
+
 Out of scope: a fully compromised OS or browser (keyloggers, malicious browser builds). No browser wallet defends against that; hardware wallets (post-MVP) do.
 
 ## 3. Secret-handling rules
@@ -80,6 +91,7 @@ At SW startup: `chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CO
 2. Prepared transactions expire at their `maxTime`. Confirming an expired one → `PREPARED_TX_EXPIRED`; the UI rebuilds.
 3. Network passphrase assertion before signing (STELLAR_PRIMER §5.4).
 4. Multisig / non-default thresholds on the source account → block sending (STELLAR_PRIMER §5.5).
+5. **Shield (post-MVP):** analysis produces evidence only. The single enforcement point is `assertSignable` in the SW signing handler, called before every signature in addition to rules 1–4 (CLAUDE.md invariants 15–22, SHIELD §4–§5).
 
 ## 6. UX-level protections
 

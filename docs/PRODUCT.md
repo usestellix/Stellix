@@ -18,7 +18,8 @@ The MVP user is someone who wants to **send and receive XLM** under their own cu
 |---|---|---|
 | MVP | Chrome MV3 extension (Firefox build via WXT as a secondary target) | Bundled, store-reviewed code; much smaller attack surface than a hosted web app. See `decisions/0001-extension-not-hosted-web.md`. |
 | Later | Mobile app (Expo / React Native) for App Store + Play Store | Payments users live on phones. Reuses `packages/core` unchanged. See `MOBILE_MIGRATION.md`. |
-| Later | dapp provider (SEP-43) in the extension | Lets Stellar dapps request signatures. Out of MVP scope. |
+| After the MVP | Stellix Shield, S1 (classic analysis in Send, Analyze screen) | Shows what a transaction does before it's signed. See §4.9 and `SHIELD.md`. |
+| Later | dapp provider (SEP-43) in the extension, as Shield S2/S3 | Lets Stellar dapps request signatures, with every request analyzed first. Out of MVP scope. |
 
 ## 4. MVP feature list
 
@@ -71,13 +72,23 @@ The MVP user is someone who wants to **send and receive XLM** under their own cu
 - Reveal recovery phrase, change password, reset wallet.
 - About: version, build hash, link to source.
 
+### 4.9 Stellix Shield (after the MVP)
+
+Not part of the MVP; built in phases S1–S4 (`ROADMAP.md`, `SHIELD.md`). Shield decodes, simulates and analyzes every transaction or authorization before Stellix signs it, on the device.
+
+- **Send (Mode A, S1):** the Review screen lists Shield's findings for the transaction Stellix built. Findings can require an explicit or typed confirmation, or block the signature.
+- **Analyze (Mode C, S1):** paste a transaction XDR, an auth-entry XDR (S3) or a `web+stellar:tx` URI and see a plain-language report: every operation, what Shield found, and what it couldn't check. Nothing is signed. Requests Stellix would refuse show "Stellix would block this".
+- **dapp requests (Mode B, S2 classic, S3 Soroban, S4 mainnet):** a site asks Stellix to sign through SEP-43; Shield analyzes the request before the approval window shows it.
+- Every finding has a rule ID, a severity and plain-language text. The UI never calls a request "safe".
+
 ## 5. Product principles
 
 1. **Correctness over features.** A wallet that does four things perfectly beats one that does twelve things approximately.
 2. **Show the truth about money.** Never show a balance the user can't actually spend without also showing what's reserved and why.
 3. **Prevent the expensive mistakes.** Missing exchange memos, sending to wrong networks, and sending entire balances are the top real-world losses. The UI is designed around stopping them.
 4. **No silent failures.** Every error is mapped to a sentence the user understands plus what they can do next.
-5. **Nothing phones home.** No analytics, no tracking, no Stellix server in the MVP. Network calls go to the configured Horizon (and Friendbot on testnet) only.
+5. **Nothing phones home.** No analytics, no tracking, no Stellix server in the MVP. Network calls go to the configured Horizon (and Friendbot on testnet) only. Shield adds only the configured Stellar RPC, an asset issuer's own `stellar.toml`, and a signed threat list, each listed in `PRIVACY.md` before the phase that needs it ships.
+6. **Say what was checked, never "safe".** Shield's report shows what it checked, what it found and what it couldn't check. A check that couldn't run is shown as such, never as a pass. Blocks that protect the account (for example a dapp adding a signer) can't be overridden.
 
 ## 6. Success criteria for MVP
 

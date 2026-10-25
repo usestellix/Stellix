@@ -72,6 +72,43 @@ Milestones are ordered by dependency. Each has exit criteria; a milestone is don
 
 ---
 
+## Stellix Shield — S1 to S4
+
+Pre-signing analysis that decodes, simulates, analyzes and gates every transaction or authorization Stellix is asked to sign, on the device (`docs/SHIELD.md`, ADR 0010). It replaces the earlier post-MVP "dapp provider" and "Soroban" items. Each phase follows the M0–M5 process: research, plan, approval, then small verified steps on a branch.
+
+### S1 — Classic analysis, Modes A and C
+
+- `core/security`: decoding for every classic op type, fee bumps and preconditions; the SHIELD §6.1 rules, thresholds, policy, report and `assertSignable`.
+- Mode A: analysis inside `PREPARE_PAYMENT`, `assertSignable` inside `CONFIRM_PAYMENT`, findings on the Review screen.
+- Mode C: the Analyze screen (paste XDR or a `web+stellar:tx` URI) and `SHIELD_ANALYZE`. Advisory only; nothing is signed.
+- Classic adversarial corpus (SHIELD §10.2).
+
+**Exit:** every classic op type decodes to plain language (fixtures captured from testnet for each); every §6.1 rule has positive and negative fixtures; the classic corpus passes; mutating any byte of a prepared transaction after analysis fails `assertSignable`; no new manifest permissions.
+
+### S2 — Injected provider (classic)
+
+- Content script (relay only), injected SEP-43 provider, per-origin grants, approval popup window, one request queue per origin, SEP-53 `signMessage`. `signAuthEntry` answers "not supported yet" until S3.
+- **Gate before code:** an ADR for the permissions (content-script matches, host access, how the approval window opens), listing what each one exposes.
+- Not in S2 (from the earlier "dapp provider" item, each needing its own plan): a Freighter-compatible shim and a Stellar Wallets Kit module.
+
+**Exit:** provider tests (origin validation, malformed and oversized payloads, wrong network, concurrent requests) pass; every classic corpus case behaves the same in Mode B.
+
+### S3 — Soroban
+
+- Stellar RPC client (`simulateTransaction`, `getLedgerEntries`, `getLatestLedger`, `getNetwork` with a passphrase check), Soroban op decoding, contract spec reading, SEP-41 decoding, balance diffs from simulated events, auth-entry decoding, the SHIELD §6.2 rules, `signAuthEntry` in the provider.
+- Research first: the current event format (unified / CAP-67 events), the Stellar Asset Contract interface, reading `contractspecv0` via `getLedgerEntries`, and ledger-to-time conversion for expiry display.
+- Not in S3 (from the earlier "Soroban" item): contract token balances on Home. They depend on the **Assets** item below.
+
+**Exit:** simulated diffs match post-submit balances on testnet; the Soroban corpus passes; `AUTH_TREE_UNNAMED` can't be overridden.
+
+### S4 — Mainnet for dapp requests
+
+- Mainnet RPC provider (ADR, same constraints as ADR 0009: no secret key, CORS for extension origins), signed threat lists (format, signing-key custody, verification, expiry), external security review of Shield and the provider, release.
+
+**Exit:** review findings resolved or risk-accepted in writing; mainnet dapp signing enabled behind the existing `MAINNET_ENABLED` flag.
+
+---
+
 ## Post-MVP (unordered; each starts with an ADR)
 
 - **Assets**: trustlines, USDC and other classic assets, asset list, `changeTrust`.
@@ -79,8 +116,6 @@ Milestones are ordered by dependency. Each has exit criteria; a milestone is don
 - **Federation** (SEP-2) and address book.
 - **Import `S...` secret key** (vault plaintext `type: "secretKey"`).
 - **BIP39 passphrase** support.
-- **dapp provider**: content script + injected SEP-43 API, Freighter-compatible shim, Stellar Wallets Kit module, per-origin permissions, raw-XDR signing with full operation rendering.
-- **Soroban**: contract token balances, `signAuthEntry`, simulation previews, contract spec decoding for readable calls.
 - **Anchors**: SEP-10 auth, SEP-24 deposit/withdraw, SEP-38 quotes, SEP-31.
 - **Ledger** hardware wallet via WebHID.
 - **Incoming payment notifications** (alarm-driven polling).

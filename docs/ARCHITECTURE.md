@@ -6,6 +6,7 @@
 ┌───────────────────────────────────────────────────────────────┐
 │                       packages/core                           │
 │  keys · vault · stellar · tx · network · history · uri · errors│
+│  security (Shield, post-MVP: decode · rules · policy)          │
 │  Pure TypeScript. No chrome.*, no DOM, no React, no Node.     │
 │  Talks to the platform only through interfaces (platform.ts). │
 └───────────────▲───────────────────────────────▲───────────────┘
@@ -133,6 +134,16 @@ No message is handled until SW startup work (access level, migrations) has finis
 
 `ONBOARD_GENERATE` and `REVEAL_PHRASE` must reject unless `sender.url` is the onboarding page URL.
 
+### Shield request types (S1, `SHIELD.md` §8)
+
+| Type | Payload | Returns | Notes |
+|---|---|---|---|
+| `SHIELD_ANALYZE` | `{ input: string; network }`: a transaction XDR or a `web+stellar:tx` URI | `AnalysisReport` (public data only) | Mode C. Never signs and creates nothing that can be signed. Input is size-limited: too large → `SHIELD_INPUT_TOO_LARGE`, undecodable → `SHIELD_INPUT_INVALID`. Allowed pages and whether it needs the wallet unlocked are set in its S1 plan. |
+| `PREPARE_PAYMENT` | unchanged | adds `report` to the result | Mode A: runs `analyze` on the built transaction. |
+| `CONFIRM_PAYMENT` | unchanged | unchanged | Calls `assertSignable` before signing: `SHIELD_DIGEST_MISMATCH`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure. |
+
+Provider request types (SEP-43, S2/S3) come with their own ADR; they arrive from a content script, so the sender rules above get an origin-grant check for them.
+
 Read-only Horizon queries (balance, history, fee stats) **may run in the popup directly** via core's network module — they involve only public data. Anything that touches a secret goes through the SW.
 
 ## 6. Key flows
@@ -185,6 +196,31 @@ Full details: `TRANSACTIONS.md`.
 - On alarm: if `now - lastActivityAt > autoLockMinutes`, lock (clear session keys, delete prepared txs, clear alarm).
 - On SW startup (`runtime.onStartup` and top-level execution): if `sessionKey` exists, re-check the timeout immediately and ensure the alarm exists.
 - Popup sends a lightweight `GET_STATUS` on open; it does **not** count as activity (otherwise merely glancing at the popup would keep the wallet unlocked forever). Explicit user actions do.
+
+### 6.4 Shield pipeline (post-MVP)
+
+Every request Stellix is asked to sign, or to analyze, goes through one pipeline in `packages/core/src/security` (`SHIELD.md` §3):
+
+```
+Mode A (Send flow) ─┐
+Mode B (dapp, S2) ──┼──▶ SW router (sender, origin grant, network, zod schema)
+Mode C (pasted) ────┘              │
+                                   ▼
+            packages/core/src/security
+            decode ─▶ simulate ─▶ rules ─▶ policy   ◀── reads: Horizon, Stellar RPC (S3),
+                                   │                      signed threat lists (S4), issuer stellar.toml
+                                   ▼
+                     approval UI (popup / review screen)
+                                   │ user approves
+                                   ▼
+            signing handler: assertSignable() ─▶ sign ─▶ submit or return to dapp
+```
+
+- The pipeline produces an `AnalysisReport`: **evidence only**. `evaluate` turns it into a `PolicyDecision` (`ready`, `review` or `blocked`).
+- The SW signing handler is the single enforcement point. `assertSignable` recomputes the request's digest (for a transaction, its hash) and checks the network, rule-set version, expiry and decision before any signature.
+- Mode A composes with ADR 0003: the prepared transaction's hash is the digest, so the review, the analysis and the signature all cover the same object.
+- Mode C stops at the report. Nothing pasted is ever signed.
+- Rules are pure functions. The clock and network data reach them through `ShieldDeps` and `RuleContext`, so the core stays platform-free (ADR 0002).
 
 ## 7. Error model
 
