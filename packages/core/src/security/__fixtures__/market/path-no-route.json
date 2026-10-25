@@ -1,0 +1,13 @@
+{
+  "name": "path-no-route",
+  "description": "Path finding for 10 XLM → NOPATH, an asset with no market: no records.",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-25T15:58:03.772Z",
+  "lookups": {
+    "paths": {
+      "path": "paths/strict-send?source_asset_type=native&source_amount=10.0000000&destination_assets=NOPATH%3AGDI4HZCT2UQN5CZZILHSQJKCRR2GXRJDIGVTOGYVMZKXMEQX3TKX5UBS",
+      "status": 200,
+      "body": { "_embedded": { "records": [] } }
+    }
+  }
+}

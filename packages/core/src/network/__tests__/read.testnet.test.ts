@@ -97,3 +97,12 @@ describe("testnet: order book", () => {
     expect(book).toMatchObject({ bids: [], asks: [] });
   });
 });
+
+describe("testnet: path finding", () => {
+  it("finds no route to a never-traded asset, both ways", async () => {
+    const [issuer] = await derivePublicKeys(generateMnemonic(), [0]);
+    const none = { type: "credit", code: "NONE", issuer: issuer! } as const;
+    expect(await horizon.getStrictSendPaths({ type: "native" }, 10_000_000n, none)).toEqual([]);
+    expect(await horizon.getStrictReceivePaths({ type: "native" }, none, 10_000_000n)).toEqual([]);
+  });
+});

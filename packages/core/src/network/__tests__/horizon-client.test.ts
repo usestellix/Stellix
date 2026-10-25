@@ -6,6 +6,7 @@ import {
   ledgerPageSchema,
   nativeBalanceOf,
   orderBookSchema,
+  pathsPageSchema,
   problemSchema,
   rootSchema,
 } from "../horizon-schemas.js";
@@ -235,5 +236,67 @@ describe("getOrderBook", () => {
       createHorizonClient(BASE, fetch, { sleep: noSleep }).getOrderBook(XLM, MKT),
     );
     expect(err).toMatchObject({ code: "NETWORK_ERROR", retryable: true });
+  });
+});
+
+describe("path finding", () => {
+  const paths = MARKET_FIXTURES.filter((f) => f.name.startsWith("path-"));
+
+  it.each(paths.map((f) => [f.name, f]))("%s: the captured response parses", (_name, f) => {
+    expect(pathsPageSchema.safeParse(lookup(f, "paths").body).success).toBe(true);
+  });
+
+  it("strict send requests the captured path and returns its records", async () => {
+    const f = marketFixture("path-send-near-zero-min");
+    const l = lookup(f, "paths");
+    const fetch = scriptedFetch([json(l.status, l.body)]);
+    const issuer = new URLSearchParams(l.path.split("?")[1])
+      .get("destination_assets")!
+      .split(":")[1]!;
+    const records = await createHorizonClient(BASE, fetch, { sleep: noSleep }).getStrictSendPaths(
+      { type: "native" },
+      100_000_000n,
+      { type: "credit", code: "MKT", issuer },
+    );
+    expect(fetch.calls[0]!.url).toBe(`${BASE}/${l.path}`);
+    expect(records.map((r) => r.destination_amount)).toEqual(["20.0000000"]);
+  });
+
+  it("strict receive requests the captured path and returns its records", async () => {
+    const f = marketFixture("path-receive-10pct-max");
+    const l = lookup(f, "paths");
+    const fetch = scriptedFetch([json(l.status, l.body)]);
+    const issuer = new URLSearchParams(l.path.split("?")[1]).get("destination_asset_issuer")!;
+    const records = await createHorizonClient(BASE, fetch, {
+      sleep: noSleep,
+    }).getStrictReceivePaths(
+      { type: "native" },
+      { type: "credit", code: "MKT", issuer },
+      100_000_000n,
+    );
+    expect(fetch.calls[0]!.url).toBe(`${BASE}/${l.path}`);
+    expect(records.map((r) => r.source_amount)).toEqual(["5.0000000"]);
+  });
+
+  it("no route (captured) is an empty list, not an error", () => {
+    expect(
+      pathsPageSchema.parse(lookup(marketFixture("path-no-route"), "paths").body)._embedded.records,
+    ).toEqual([]);
+  });
+
+  it("an amount that isn't 7-decimal → HORIZON_BAD_RESPONSE", async () => {
+    const body = structuredClone(lookup(marketFixture("path-send-1pct-min"), "paths").body) as {
+      _embedded: { records: { destination_amount: string }[] };
+    };
+    body._embedded.records[0]!.destination_amount = "20";
+    const fetch = scriptedFetch([json(200, body)]);
+    const err = await codeOf(
+      createHorizonClient(BASE, fetch, { sleep: noSleep }).getStrictSendPaths(
+        { type: "native" },
+        1n,
+        { type: "native" },
+      ),
+    );
+    expect(err?.code).toBe("HORIZON_BAD_RESPONSE");
   });
 });
