@@ -1,0 +1,40 @@
+name: Task (maintainers)
+description: A scoped piece of work for a contributor or maintainer
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Contributors: comment on an existing `help wanted` issue to be assigned; see CONTRIBUTING.md.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Link the exact doc sections (e.g. docs/SHIELD.md §6.1).
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to create/change
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Tests that must exist and pass.
+    validations:
+      required: true
+  - type: textarea
+    id: depends
+    attributes:
+      label: Depends on
+      placeholder: "#12, #14"
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope
