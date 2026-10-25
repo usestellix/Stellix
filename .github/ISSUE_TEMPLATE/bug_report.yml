@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in Stellix doesn't work as documented (not a security vulnerability)
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Security vulnerabilities go through **Report a vulnerability** on the Security tab, not here.
+        Never paste a recovery phrase, password or secret key into an issue.
+  - type: input
+    id: version
+    attributes:
+      label: Version and build
+      description: Settings → About shows the version and build commit.
+      placeholder: "0.1.0 · 9ac1c1d…"
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network
+      options: [Testnet, Mainnet]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. …\n2. …"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, transaction hashes (public), browser version
