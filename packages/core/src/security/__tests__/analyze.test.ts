@@ -1,33 +1,10 @@
-/// <reference types="vite/client" />
 import { describe, expect, it } from "vitest";
 import { FakeHorizonClient } from "../../testing/fake-horizon.js";
+import { FIXTURES, fixture } from "../__fixtures__/load.js";
 import { analyze } from "../index.js";
 import { REPORT_TTL_MS, reportExpiresAt } from "../report.js";
 import { RULE_SET_VERSION } from "../rules/index.js";
 import type { ShieldDeps, ShieldRequest } from "../types.js";
-
-interface OpFixture {
-  name: string;
-  opTypes: string[];
-  envelopeType: "envelopeTypeTx" | "envelopeTypeTxFeeBump";
-  networkPassphrase: string;
-  hash: string;
-  envelopeXdr: string;
-}
-
-// Captured from testnet by scripts/capture-shield-fixtures.mjs (TESTING §1).
-const FIXTURES = Object.values(
-  import.meta.glob<OpFixture>(["../__fixtures__/ops/*.json", "!**/_index.json"], {
-    eager: true,
-    import: "default",
-  }),
-);
-
-function fixture(name: string): OpFixture {
-  const f = FIXTURES.find((x) => x.name === name);
-  if (f === undefined) throw new Error(`no fixture ${name}`);
-  return f;
-}
 
 // Mid-capture time: the fixtures' maxTime is in the future, so the TTL decides expiry.
 const NOW = Date.parse("2026-10-25T11:00:00Z");

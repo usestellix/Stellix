@@ -5,7 +5,17 @@ import { RULE_IDS, type Finding, type Rule, type RuleContext, type RuleId } from
 
 const ctx: RuleContext = {
   request: { kind: "transaction", xdr: "", network: "testnet", origin: { type: "pasted" } },
-  decoded: { kind: "transaction", envelopeType: "tx", operations: [], maxTime: null },
+  decoded: {
+    kind: "transaction",
+    envelopeType: "tx",
+    source: "GUSER",
+    feeStroops: 100n,
+    sequence: 1n,
+    memo: { type: "none" },
+    operations: [],
+    maxTime: null,
+    feeBump: null,
+  },
   network: "testnet",
   origin: { type: "pasted" },
   userAccount: "GUSER",

@@ -1,5 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
+import type { DecodedOperation } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
 // messaging to the UI, so no field may ever carry secret material.
@@ -84,23 +85,48 @@ export interface CheckUnavailable {
   reason: UnavailableReason;
 }
 
-/**
- * Placeholder until the decoder issues give each operation its own variant (SHIELD §9 S1).
- * `opType` is the XDR OperationType name, e.g. "payment", "revokeSponsorship".
- */
-export interface UndecodedOperation {
-  kind: "undecoded";
-  opType: string;
+/** Bytes that are usually text (memo text, data names). Untrusted: never Stellix's own words. */
+export interface DecodedText {
+  /** The bytes as UTF-8, or null when they aren't valid UTF-8. */
+  text: string | null;
+  hex: string;
 }
-export type DecodedOperation = UndecodedOperation;
 
+export type DecodedMemo =
+  | { type: "none" }
+  | ({ type: "text" } & DecodedText)
+  | { type: "id"; id: bigint }
+  | { type: "hash"; hex: string }
+  | { type: "return"; hex: string };
+
+export interface DecodedFeeBump {
+  /** G… or M…; pays the fee. */
+  feeSource: string;
+  /** The outer fee: the most the fee source can be charged for the whole transaction. */
+  maxFeeStroops: bigint;
+  /** Hash of the inner transaction under the request's network. */
+  innerHashHex: string;
+}
+
+/**
+ * A transaction envelope (SHIELD §3.1 decode/envelope.ts). For a fee bump, every field except
+ * `feeBump` describes the inner transaction: its source is the ops' default source and its
+ * fee bid is the inner one (§6.6).
+ */
 export interface DecodedTransaction {
   kind: "transaction";
   envelopeType: "tx" | "txFeeBump";
-  /** For a fee bump, the inner transaction's operations. */
+  /** G… or M…. */
+  source: string;
+  /** Fee bid of the (inner) transaction. */
+  feeStroops: bigint;
+  sequence: bigint;
+  memo: DecodedMemo;
   operations: readonly DecodedOperation[];
   /** Upper time bound in seconds; null when absent (no time bounds, or maxTime 0). */
   maxTime: bigint | null;
+  /** Present exactly when envelopeType is "txFeeBump". */
+  feeBump: DecodedFeeBump | null;
 }
 export type DecodedRequest = DecodedTransaction; // auth entries (S3), messages (S2)
 

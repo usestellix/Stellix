@@ -43,6 +43,8 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
   });
 }
 
+export { RULE_COPY, fillTemplate, findingCopy, type RuleCopy } from "./copy/index.js";
+export { describeClaimant, describePredicate } from "./copy/predicate.js";
 export {
   RULE_POLICY,
   SEVERITY_FLOOR,
@@ -56,4 +58,5 @@ export { compareSeverity, maxSeverity } from "./policy/severity.js";
 export { REPORT_TTL_MS, reportExpiresAt } from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
+export type * from "./decode/operation-types.js";
 export * from "./types.js";
