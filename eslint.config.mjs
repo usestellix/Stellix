@@ -68,6 +68,7 @@ export default defineConfig(
     ignores: [
       "**/node_modules/**",
       "**/.output/**",
+      "**/.output-screenshots/**",
       "**/.wxt/**",
       "**/test-results/**",
       "**/playwright-report/**",

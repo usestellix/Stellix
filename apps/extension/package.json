@@ -15,7 +15,8 @@
     "test:testnet": "echo 'No testnet tests in apps/extension'",
     "test:e2e": "wxt build && playwright test --grep-invert @mainnet",
     "test:e2e:mainnet": "STELLIX_MAINNET_ENABLED=true wxt build && STELLIX_MAINNET_ENABLED=true playwright test --grep @mainnet",
-    "store:assets": "wxt build && playwright test -c store/playwright.config.ts"
+    "store:assets": "wxt build && playwright test -c store/playwright.config.ts",
+    "screenshots:findings": "vite build -c screenshots/findings/vite.config.ts && playwright test -c screenshots/playwright.config.ts"
   },
   "dependencies": {
     "@stellix/core": "workspace:*",

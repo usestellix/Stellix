@@ -13,6 +13,7 @@
     "build",
     "branding",
     "store",
+    "screenshots",
     "wxt.config.ts",
     "vitest.config.ts",
     "playwright.config.ts"
