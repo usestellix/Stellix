@@ -36,6 +36,7 @@ import { migrate } from "../storage/migrations.js";
 import type { AutoLock } from "./autolock.js";
 import type { InflightResolver } from "./inflight.js";
 import { createSerialQueue } from "./serial-queue.js";
+import { modeAShieldDeps } from "./shield.js";
 
 // Thin handlers: each calls a core service (MOBILE_MIGRATION §4.3), plus the shell's lifecycle
 // work (alarms, tabs). Everything except GET_STATUS runs through one serial queue.
@@ -75,12 +76,16 @@ export function createHandlers(deps: HandlerDeps): Handlers {
   const opts2 = deps;
   const makeClient = deps.horizonFor ?? ((url: string) => createHorizonClient(url, platform));
 
-  /** Send-service deps with the current overrides (each network gets its effective Horizon). */
+  /**
+   * Send-service deps with the current overrides (each network gets its effective Horizon), plus
+   * Shield's (Mode A: PREPARE analyzes, CONFIRM calls assertSignable).
+   */
   const sendDeps = async (): Promise<SendDeps> => {
     const settings = await readSettings(platform.persistent);
     const deps: SendDeps = {
       horizonFor: (network: NetworkId) =>
         makeClient(horizonUrlFor(network, settings.horizonOverrides)),
+      ...modeAShieldDeps(),
     };
     if (opts2.sleep !== undefined) deps.sleep = opts2.sleep;
     return deps;

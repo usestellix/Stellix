@@ -150,7 +150,7 @@ A non-custodial wallet gives each user their own `G...` address, so **receiving 
 
 Accounts that require memos signal it by setting a data entry `config.memo_required` = `"1"`. Horizon returns account data values **base64-encoded**, so the value appears as `"MQ=="`.
 
-Stellix rule: during `PREPARE_PAYMENT`, if the destination account's `data["config.memo_required"]` decodes to `"1"` and no memo was provided and the destination is not an `M...` address, reject with `MEMO_REQUIRED`. Muxed destinations satisfy the requirement because the ID is in the address.
+Stellix rule: if the transaction has no memo, every `payment`, path payment and `accountMerge` to a `G...` destination whose `data["config.memo_required"]` decodes to `"1"` is blocked with `MEMO_REQUIRED`. Muxed destinations satisfy the requirement because the ID is in the address. A destination that doesn't exist requires no memo. Shield's `MEMO_REQUIRED` rule enforces this on the built transaction during `PREPARE_PAYMENT`, and `assertSignable` again before signing (SHIELD §6.1).
 
 Spec: https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0029.md
 

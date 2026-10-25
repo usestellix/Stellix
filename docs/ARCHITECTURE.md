@@ -59,7 +59,7 @@ Access level must be `TRUSTED_CONTEXTS` (the default; set it explicitly at SW st
 | `lastActivityAt` | epoch ms | Lock |
 | `pendingOnboarding` | `{ mnemonic, verifyPositions, createdAt }` during create flow only | Onboarding completes, is abandoned (>30 min), or lock |
 | `unlockThrottle` | `{ failures, lockedUntil }`: after 5 consecutive wrong passwords (unlock, reveal, change password), every attempt is refused for 30 s with `UNLOCK_THROTTLED`. Enforced in the SW. | Successful password check, browser exit, reset. **Not** on lock. |
-| `preparedTx:<id>` | `{ xdr, networkId, summary, expiresAt, accountIndex }` | Confirmed, cancelled, expired, lock |
+| `preparedTx:<id>` | `{ xdr, networkId, summary, expiresAt, accountIndex, report }` (`report`: Shield's analysis of `xdr`, without its decoded request) | Confirmed, cancelled, expired, lock |
 | `inflight:<hash>` | `{ hash, signedXdr, network, summary, status, outcome, … }` (ADR 0007). The signed XDR is dropped once the outcome is known. | Reset, `DISMISS_OUTCOME`, 30 min after finishing. **Not** on lock. |
 | `sw:*` | SW caches: `sw:fee:<network>` (last fee, for the 5-minute fallback), `sw:baseReserve:<network>` | Browser exit, reset |
 | `ui:*` | Written **directly by the popup** (a trusted extension page). Public data only: `ui:baseReserve:<network>`, `ui:lastBalance:<network>:<G>` (last balance + "as of" time), `ui:fundedSeen:<network>:<G>` (for the "testnet was reset" notice). | Browser exit, reset. Not on lock (public data). |
@@ -121,7 +121,7 @@ No message is handled until SW startup work (access level, migrations) has finis
 | `ADD_ACCOUNT` | `{ label? }` | `AccountMeta` | Yes |
 | `RENAME_ACCOUNT` | `{ index, label }` | — | No |
 | `SET_ACTIVE_ACCOUNT` | `{ index }` | — | No |
-| `PREPARE_PAYMENT` | `{ destination, amount, memo? }` | `{ preparedId, summary, expiresAt }`. `TX_IN_FLIGHT` while the account has an unresolved tx. | Yes |
+| `PREPARE_PAYMENT` | `{ destination, amount, memo? }` | `{ preparedId, summary, expiresAt, report }` (`report`: Shield's `ReportView`). `TX_IN_FLIGHT` while the account has an unresolved tx. | Yes |
 | `CONFIRM_PAYMENT` | `{ preparedId }` | `SubmitOutcome`, possibly `{ status: "pending", hash }` after ~20 s (ADR 0007) | Yes |
 | `CANCEL_PAYMENT` | `{ preparedId }` | — | No |
 | `DISMISS_OUTCOME` | `{ hash }` | — (removes a finished outcome after the popup has shown it) | No |
@@ -139,8 +139,8 @@ No message is handled until SW startup work (access level, migrations) has finis
 | Type | Payload | Returns | Notes |
 |---|---|---|---|
 | `SHIELD_ANALYZE` | `{ input: string; network }`: a transaction XDR or a `web+stellar:tx` URI | `AnalysisReport` (public data only) | Mode C. Never signs and creates nothing that can be signed. Input is size-limited: too large → `SHIELD_INPUT_TOO_LARGE`, undecodable → `SHIELD_INPUT_INVALID`. Allowed pages and whether it needs the wallet unlocked are set in its S1 plan. |
-| `PREPARE_PAYMENT` | unchanged | adds `report` to the result | Mode A: runs `analyze` on the built transaction. |
-| `CONFIRM_PAYMENT` | unchanged | unchanged | Calls `assertSignable` before signing: `NETWORK_MISMATCH`, `SHIELD_DIGEST_MISMATCH`, `SHIELD_INPUT_INVALID`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure (SHIELD §4 lists the order). |
+| `PREPARE_PAYMENT` | unchanged | adds `report` to the result: a `ReportView` (digest, network, rule-set version, findings, checks that couldn't run, display-only decision, times; no decoded request) | Mode A: runs `analyze` on the built transaction and stores the full report beside the prepared tx. Blocked → `MEMO_REQUIRED`, `NETWORK_ERROR` (memo check couldn't run) or `SHIELD_BLOCKED`. |
+| `CONFIRM_PAYMENT` | unchanged (no report, no confirmation) | unchanged | Calls `assertSignable` on the stored tx and stored report before signing, with no confirmation until #36 shows findings: `NETWORK_MISMATCH`, `SHIELD_DIGEST_MISMATCH`, `SHIELD_INPUT_INVALID`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure (SHIELD §4 lists the order). |
 
 Provider request types (SEP-43, S2/S3) come with their own ADR; they arrive from a content script, so the sender rules above get an origin-grant check for them.
 
@@ -172,14 +172,15 @@ Popup                               Service worker                         Horiz
   │                                  │ load source account ─────────────────▶ GET /accounts/{src}
   │                                  │ resolve destination ─────────────────▶ GET /accounts/{dest}
   │                                  │   404 → createAccount path, else payment
-  │                                  │   SEP-29 memo_required check
   │                                  │ fee ─────────────────────────────────▶ GET /fee_stats
   │                                  │ build tx (timebounds 180s), summary FROM built tx
-  │                                  │ store preparedTx:<id> in session (expires = maxTime)
-  │◀── {preparedId, summary} ────────│
+  │                                  │ Shield analyze (Mode A; SEP-29 is MEMO_REQUIRED)
+  │                                  │ store preparedTx:<id> + report in session (expires = maxTime)
+  │◀── {preparedId, summary, report} │
   │  [user reviews summary]
   │ CONFIRM_PAYMENT{preparedId} ────▶│
   │                                  │ load preparedTx, check not expired, network matches
+  │                                  │ assertSignable(stored tx, stored report)
   │                                  │ decrypt vault with session key → mnemonic → keypair(index)
   │                                  │ sign, zero buffers
   │                                  │ submit ──────────────────────────────▶ POST /transactions

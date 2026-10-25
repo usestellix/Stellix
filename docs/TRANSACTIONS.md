@@ -59,7 +59,7 @@ Executed in order. Any failure returns a mapped error and nothing is stored.
    - Base account = destination if `G`, else decoded base of `M`.
    - `GET /accounts/{base}`: 200 → exists; 404 → doesn't exist; other → `NETWORK_ERROR` (retryable).
    - Decide op per STELLAR_PRIMER §2 decision table. `M` + not exists → `MUXED_DESTINATION_UNFUNDED`.
-   - If exists: check SEP-29 (`data["config.memo_required"]` base64-decodes to `"1"`). If required and no memo and destination is `G` → `MEMO_REQUIRED`.
+   - SEP-29 isn't checked here: Shield's `MEMO_REQUIRED` rule checks the built transaction (step 9).
 5. **Fee**: `GET /fee_stats` → fee policy in STELLAR_PRIMER §5.2. On failure, use `last known` fee for this network if under 5 minutes old, else 100 × 10 = 1,000 stroops and mark `feeEstimated: true` in the summary.
 6. **Balance checks** (all bigint stroops):
    - `available = balance − minimumBalance − sellingLiabilities` (STELLAR_PRIMER §4).
@@ -90,8 +90,9 @@ Executed in order. Any failure returns a mapped error and nothing is stored.
      feeEstimated: boolean;
    };
    ```
-9. **Store** `preparedTx:<uuid>` = `{ xdr: tx.toXDR(), networkId, summary, expiresAt, accountIndex }` in session storage.
-10. Return `{ preparedId, summary, expiresAt }`.
+9. **Analyze** (Shield Mode A, SHIELD §2, §5): `analyze` runs on the built transaction with origin `stellix`. It reuses the source and destination records from steps 3–4, so it adds no Horizon request, and it has no `stellar.toml` source (`NO_TOML`): Stellix builds no `changeTrust`. If `evaluate` blocks: a `MEMO_REQUIRED` finding (SEP-29: destination `G`, no memo, `data["config.memo_required"]` base64-decodes to `"1"`) → `MEMO_REQUIRED`; a memo check that couldn't run → `NETWORK_ERROR` (retryable); any other block → `SHIELD_BLOCKED`. Nothing is stored.
+10. **Store** `preparedTx:<uuid>` = `{ xdr: tx.toXDR(), networkId, summary, expiresAt, accountIndex, report }` in session storage. `report` is the analysis without its decoded request (bigints can't be stored), which is decoded again from `xdr` at confirm.
+11. Return `{ preparedId, summary, expiresAt, report }`, where `report` is a `ReportView`: public data, no decoded request. Its `decision` is for display only; confirm re-evaluates the stored report.
 
 `firstTimeDestination`: true if the destination doesn't appear in the account's last 200 history records (fetched lazily; if that fetch fails, default to `true`).
 
@@ -100,7 +101,7 @@ Executed in order. Any failure returns a mapped error and nothing is stored.
 1. Require unlocked. Steps 2–7 run inside the SW serial queue.
 2. Load `preparedTx:<id>`. Missing → `PREPARED_TX_NOT_FOUND`. **Delete it immediately**, before signing: a second confirm for the same id can never sign again. Then, if `now ≥ expiresAt − 10s` (safety margin) → `PREPARED_TX_EXPIRED`.
 3. Rehydrate: `TransactionBuilder.fromXDR(xdr, passphrase)`. Assert `networkId` equals the current network; else `NETWORK_MISMATCH`.
-4. Re-run the summary assertions on the rehydrated tx (defense in depth).
+4. **Shield**: `assertSignable` on the stored `xdr` and the stored `report` (SHIELD §4 lists its checks and errors). A prepared tx without a report → `SHIELD_REPORT_EXPIRED`. Until the Review screen shows findings (#36), no confirmation is recorded, so a `review` decision fails with `SHIELD_CONFIRMATION_REQUIRED`; only `ready` signs. Then re-run the summary assertions on the rehydrated tx (defense in depth).
 5. Derive keypair for `accountIndex` (KEY_MANAGEMENT §6), assert `keypair.publicKey() === tx.source`, sign, zero secrets.
 6. Compute `hash = tx.hash().toString("hex")` before submitting. Persist `{ hash, maxTime }` in session as `inflight:<hash>` (so a SW restart mid-submit can still resolve it).
 7. Submit (§5).
@@ -120,6 +121,8 @@ Use Horizon's **async** submit: `POST /transactions_async` with form body `tx=<b
 `CONFIRM_PAYMENT` waits up to ~20 s for a definitive outcome, then returns `{ status: "pending", hash }`. Resolution continues in the SW: on startup, on a 30 s `resolve` alarm, and while the popup polls `GET_STATUS`.
 
 `PREPARE_PAYMENT` refuses with `TX_IN_FLIGHT` while the active account has an unresolved transaction.
+
+Resubmitting the same signed XDR isn't signing: it doesn't run `assertSignable` again. Shield gates signatures, and the signature was checked when it was made.
 
 ### Resolving (`core/tx/resolve.ts`)
 

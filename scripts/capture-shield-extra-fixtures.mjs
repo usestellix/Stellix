@@ -8,11 +8,21 @@
 //   offers          order books + offers at a known distance from the best bid (OFFER_BAD_PRICE)
 //   paths           path-finding results + path payments with known loss bounds (PATH_LOW_MIN)
 //   trust           issuer accounts + their stellar.toml + changeTrust (TRUST_UNVERIFIED, _CLAWBACK)
+//   memo            a SEP-29 memo-required account + payments, path payments and a merge to it (MEMO_REQUIRED)
 //
 // Market fixtures (`__fixtures__/market/<name>.json`) pair the Horizon responses a rule's gather
 // step reads with the user's transaction, both captured on testnet: the lookups first (what
 // analysis would see before signing), then the transaction is submitted.
-import { Asset, Keypair, Operation, TransactionBuilder, xdr } from "@stellar/stellar-sdk/base";
+import {
+  Account,
+  Asset,
+  Keypair,
+  Memo,
+  MuxedAccount,
+  Operation,
+  TransactionBuilder,
+  xdr,
+} from "@stellar/stellar-sdk/base";
 import { mkdirSync, readFileSync } from "node:fs";
 import {
   HORIZON,
@@ -28,7 +38,7 @@ import {
 } from "./lib/shield-capture.mjs";
 
 const MARKET_DIR = "packages/core/src/security/__fixtures__/market";
-const GROUPS = ["preconditions", "offers", "paths", "trust"];
+const GROUPS = ["preconditions", "offers", "paths", "trust", "memo"];
 const groups = process.argv.slice(2);
 if (groups.length === 0 || groups.some((g) => !GROUPS.includes(g))) {
   throw new Error(`usage: capture-shield-extra-fixtures.mjs <${GROUPS.join("|")}>…`);
@@ -489,6 +499,123 @@ if (groups.includes("trust")) {
       await txFrom(user, [Operation.changeTrust({ asset })]),
       user,
     );
+  }
+}
+
+if (groups.includes("memo")) {
+  mkdirSync(MARKET_DIR, { recursive: true });
+  const user = Keypair.random();
+  const required = Keypair.random(); // sets config.memo_required (SEP-29)
+  const plain = Keypair.random(); // no data entries
+  const merged = Keypair.random(); // the user of the accountMerge case
+  process.stdout.write("Funding accounts via Friendbot…\n");
+  for (const kp of [user, required, plain, merged]) await fund(kp);
+  await submit(
+    await txFrom(required, [Operation.manageData({ name: "config.memo_required", value: "1" })]),
+    [required],
+  );
+
+  const XLM = Asset.native();
+  const pay = (/** @type {string} */ destination) =>
+    Operation.payment({ destination, asset: XLM, amount: "1" });
+  const destinationLookup = (/** @type {Keypair} */ kp) => ({
+    destination: `accounts/${kp.publicKey()}`,
+  });
+  const requiredMuxed = new MuxedAccount(new Account(required.publicKey(), "0"), "42").accountId();
+  /** @type {[string, string, Record<string, string>, () => Promise<import("@stellar/stellar-sdk/base").Transaction>, Keypair][]} */
+  const cases = [
+    [
+      "memo-payment-none",
+      "payment to an account with config.memo_required = 1, no memo.",
+      destinationLookup(required),
+      () => txFrom(user, [pay(required.publicKey())]),
+      user,
+    ],
+    [
+      "memo-payment-text",
+      "payment to an account with config.memo_required = 1, with a text memo.",
+      destinationLookup(required),
+      () => txFrom(user, [pay(required.publicKey())], { memo: Memo.text("invoice 7") }),
+      user,
+    ],
+    [
+      "memo-payment-muxed",
+      "payment to an M address of an account with config.memo_required = 1, no memo.",
+      destinationLookup(required),
+      () => txFrom(user, [pay(requiredMuxed)]),
+      user,
+    ],
+    [
+      "memo-payment-not-required",
+      "payment to an account with no config.memo_required entry, no memo.",
+      destinationLookup(plain),
+      () => txFrom(user, [pay(plain.publicKey())]),
+      user,
+    ],
+    [
+      "memo-second-op",
+      "Two payments, no memo: the first to an account without the entry, the second to one with config.memo_required = 1.",
+      { ...destinationLookup(required), other: `accounts/${plain.publicKey()}` },
+      () => txFrom(user, [pay(plain.publicKey()), pay(required.publicKey())]),
+      user,
+    ],
+    [
+      "memo-path-send-none",
+      "pathPaymentStrictSend XLM → XLM to an account with config.memo_required = 1, no memo.",
+      destinationLookup(required),
+      () =>
+        txFrom(user, [
+          Operation.pathPaymentStrictSend({
+            sendAsset: XLM,
+            sendAmount: "1",
+            destination: required.publicKey(),
+            destAsset: XLM,
+            destMin: "1",
+          }),
+        ]),
+      user,
+    ],
+    [
+      "memo-path-receive-none",
+      "pathPaymentStrictReceive XLM → XLM to an account with config.memo_required = 1, no memo.",
+      destinationLookup(required),
+      () =>
+        txFrom(user, [
+          Operation.pathPaymentStrictReceive({
+            sendAsset: XLM,
+            sendMax: "1",
+            destination: required.publicKey(),
+            destAsset: XLM,
+            destAmount: "1",
+          }),
+        ]),
+      user,
+    ],
+    [
+      "memo-create-account",
+      "createAccount for a new account, no memo: not an operation SEP-29 checks.",
+      {},
+      () =>
+        txFrom(user, [
+          Operation.createAccount({
+            destination: Keypair.random().publicKey(),
+            startingBalance: "1",
+          }),
+        ]),
+      user,
+    ],
+    // Last: it removes `merged`.
+    [
+      "memo-merge-none",
+      "accountMerge into an account with config.memo_required = 1, no memo.",
+      destinationLookup(required),
+      () => txFrom(merged, [Operation.accountMerge({ destination: required.publicKey() })]),
+      merged,
+    ],
+  ];
+  // Built one at a time: each needs the sequence number left by the one before.
+  for (const [name, description, lookups, build, signer] of cases) {
+    await captureMarket(name, description, lookups, await build(), signer);
   }
 }
 

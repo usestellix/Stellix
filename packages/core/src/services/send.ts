@@ -5,8 +5,20 @@ import { deriveKeypair, mnemonicToSeed } from "../keys/derive.js";
 import { getBaseReserveStroops } from "../network/base-reserve.js";
 import { NETWORKS, type NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
-import type { PaymentRecord } from "../network/horizon-schemas.js";
+import type { AccountRecord, PaymentRecord } from "../network/horizon-schemas.js";
 import type { Platform } from "../platform.js";
+import { assertSignable } from "../security/assert-signable.js";
+import { decodeTransactionEnvelope } from "../security/decode/index.js";
+import { analyze } from "../security/index.js";
+import { NO_TOML } from "../security/intel/no-toml.js";
+import {
+  fromStoredReport,
+  reportView,
+  toStoredReport,
+  type ReportView,
+  type StoredReport,
+} from "../security/report.js";
+import type { AnalysisReport, Origin, PolicyDecision, TomlFetcher } from "../security/types.js";
 import { readSettings } from "../settings.js";
 import { isMultisig, summarizeAccount } from "../stellar/account-summary.js";
 import { isMuxedAddress } from "../stellar/address.js";
@@ -23,7 +35,6 @@ import { fallbackFee, feeFromStats, type FeeChoice } from "../tx/fee.js";
 import { decodeResultXdr } from "../tx/result-codes.js";
 import { resolveTransaction } from "../tx/resolve.js";
 import { selectOperation } from "../tx/select-op.js";
-import { requiresMemo } from "../tx/sep29.js";
 import { assertSameSummary, summarizeTransaction, type PaymentSummary } from "../tx/summary.js";
 import { validatePayment, type PaymentInput } from "../tx/validate.js";
 import { openVaultWithKey } from "../vault/vault.js";
@@ -35,13 +46,20 @@ import { requireUnlocked } from "./session.js";
 //   read-and-delete exclusive.
 // - PREPARE refuses while the account has an unresolved in-flight tx (TX_IN_FLIGHT).
 // - Only the SAME signed XDR is ever resubmitted; a rebuilt tx is a new review.
+// Shield Mode A (SHIELD §2, §5): PREPARE analyzes the built tx and stores the report beside it;
+// CONFIRM calls assertSignable on the stored tx and stored report before signing. Reports never
+// arrive in a message. Resubmitting an already-signed tx is not signing and isn't re-checked.
 
 export type SendPlatform = Pick<Platform, "persistent" | "session" | "now">;
 
 export interface SendDeps {
   horizonFor: (network: NetworkId) => HorizonClient;
   sleep?: (ms: number) => Promise<void>;
+  /** Shield's stellar.toml source. Absent: NO_TOML (Mode A builds no changeTrust). */
+  toml?: TomlFetcher;
 }
+
+const STELLIX: Origin = { type: "stellix" };
 
 const CONFIRM_SAFETY_MS = 10_000;
 const RESUBMIT_MIN_INTERVAL_MS = 2_000;
@@ -66,6 +84,8 @@ interface PreparedTx {
   summary: PaymentSummary;
   expiresAt: number;
   accountIndex: number;
+  /** Shield's report on `xdr`, made by this SW at PREPARE. Absent on one stored before Shield. */
+  report?: StoredReport;
 }
 
 type InflightStatus = "submitting" | "resolving" | "done";
@@ -106,7 +126,12 @@ export async function preparePayment(
   platform: SendPlatform,
   deps: SendDeps,
   input: PaymentInput,
-): Promise<{ preparedId: string; summary: PaymentSummary; expiresAt: number }> {
+): Promise<{
+  preparedId: string;
+  summary: PaymentSummary;
+  expiresAt: number;
+  report: ReportView;
+}> {
   (await requireUnlocked(platform)).fill(0);
   const settings = await readSettings(platform.persistent);
   const network = settings.network;
@@ -133,14 +158,7 @@ export async function preparePayment(
 
   const destRecord = await horizon.getAccount(payment.destinationBase);
   const kind = selectOperation(payment.muxed, destRecord !== null);
-  if (
-    destRecord !== null &&
-    !payment.muxed &&
-    payment.memo.type === "none" &&
-    requiresMemo(destRecord)
-  ) {
-    throw new StellixError("MEMO_REQUIRED", "Destination requires a memo (SEP-29)");
-  }
+  // SEP-29 is Shield's MEMO_REQUIRED rule, checked on the built tx below (blockedAtPrepare).
 
   const fee = await chooseFee(platform, horizon, network);
   const reserve = await getBaseReserveStroops(network, horizon, {
@@ -185,16 +203,35 @@ export async function preparePayment(
     feeEstimated: fee.estimated,
   });
 
+  const xdr = tx.toXdr();
+  // Analysis reads the account records the summary was built from: no second lookup to fail.
+  const known = new Map<string, AccountRecord | null>([
+    [source.publicKey, sourceRecord],
+    [payment.destinationBase, destRecord],
+  ]);
+  const report = await analyze(
+    { kind: "transaction", xdr, network, origin: STELLIX },
+    {
+      horizon: withKnownAccounts(horizon, known),
+      toml: deps.toml ?? NO_TOML,
+      userAccount: source.publicKey,
+      now: platform.now,
+    },
+  );
+  const view = reportView(report);
+  if (view.decision.state === "blocked") throw blockedAtPrepare(report, view.decision);
+
   const preparedId = randomId();
   const prepared: PreparedTx = {
-    xdr: tx.toXdr(),
+    xdr,
     network,
     summary,
     expiresAt: summary.expiresAt,
     accountIndex: source.index,
+    report: toStoredReport(report),
   };
   await platform.session.set(preparedKey(preparedId), prepared);
-  return { preparedId, summary, expiresAt: summary.expiresAt };
+  return { preparedId, summary, expiresAt: summary.expiresAt, report: view };
 }
 
 /** CANCEL_PAYMENT. No unlock needed: it only discards an unsigned prepared tx. */
@@ -228,6 +265,20 @@ export async function submitPrepared(
     // re-check asserts it matches what was reviewed.
     const passphrase = NETWORKS[settings.network].passphrase;
     const tx = rehydrateTransaction(prepared.xdr, passphrase);
+    // Shield (invariant 15): the stored tx against the report this SW stored with it. Until the
+    // Review screen shows findings (#36), no confirmation is recorded: a review fails closed.
+    if (prepared.report === undefined) {
+      throw new StellixError("SHIELD_REPORT_EXPIRED", "No analysis for this transaction");
+    }
+    assertSignable(
+      { kind: "transaction", xdr: prepared.xdr, network: settings.network, origin: STELLIX },
+      fromStoredReport(
+        prepared.report,
+        decodeTransactionEnvelope(prepared.xdr, settings.network).decoded,
+      ),
+      null,
+      platform.now(),
+    );
     assertSameSummary(
       prepared.summary,
       summarizeTransaction(tx, {
@@ -401,6 +452,53 @@ export async function dismissOutcome(platform: SendPlatform, hash: string): Prom
 }
 
 // ---------- internals ----------
+
+/**
+ * The error PREPARE throws for a blocked payment. MEMO_REQUIRED keeps M3's code and copy; a
+ * memo check that couldn't run failed its lookup, which M3 reports as NETWORK_ERROR. Exported
+ * for tests.
+ */
+export function blockedAtPrepare(
+  report: AnalysisReport,
+  decision: Extract<PolicyDecision, { state: "blocked" }>,
+): StellixError {
+  if (report.findings.some((f) => f.ruleId === "MEMO_REQUIRED")) {
+    return new StellixError("MEMO_REQUIRED", "Destination requires a memo (SEP-29)");
+  }
+  if (
+    decision.ruleIds.length === 1 &&
+    decision.ruleIds[0] === "MEMO_REQUIRED" &&
+    report.checksUnavailable.some((c) => c.ruleId === "MEMO_REQUIRED")
+  ) {
+    return new StellixError("NETWORK_ERROR", "Couldn't check whether a memo is required", true);
+  }
+  return new StellixError(
+    "SHIELD_BLOCKED",
+    `Shield blocks this payment: ${decision.ruleIds.join(", ")}`,
+  );
+}
+
+/** `horizon`, answering getAccount for `known` ids from the records already fetched. */
+function withKnownAccounts(
+  horizon: HorizonClient,
+  known: ReadonlyMap<string, AccountRecord | null>,
+): HorizonClient {
+  return {
+    getRoot: () => horizon.getRoot(),
+    getLatestLedger: () => horizon.getLatestLedger(),
+    getAccount: (id) =>
+      known.has(id) ? Promise.resolve(known.get(id) ?? null) : horizon.getAccount(id),
+    getFeeStats: () => horizon.getFeeStats(),
+    submitTransactionAsync: (envelopeXdr) => horizon.submitTransactionAsync(envelopeXdr),
+    getTransaction: (hash) => horizon.getTransaction(hash),
+    getPayments: (id, limit) => horizon.getPayments(id, limit),
+    getHistoryPage: (id, cursor) => horizon.getHistoryPage(id, cursor),
+    getOperationEffects: (operationId) => horizon.getOperationEffects(operationId),
+    getOrderBook: (selling, buying) => horizon.getOrderBook(selling, buying),
+    getStrictSendPaths: (...args) => horizon.getStrictSendPaths(...args),
+    getStrictReceivePaths: (...args) => horizon.getStrictReceivePaths(...args),
+  };
+}
 
 async function submitOnce(
   platform: SendPlatform,

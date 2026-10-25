@@ -192,6 +192,69 @@ describe("result schemas", () => {
     expect(REQUESTS.REVEAL_PHRASE.result.safeParse({ words: [], extra: 1 }).success).toBe(false);
   });
 
+  describe("PREPARE_PAYMENT report (SHIELD §8: public view only)", () => {
+    const summary = {
+      kind: "payment",
+      source: "GSRC",
+      destination: "GDST",
+      destinationBase: "GDST",
+      amountStroops: "20000000",
+      feeStroops: "100",
+      totalStroops: "20000100",
+      memo: { type: "none" },
+      network: "testnet",
+      expiresAt: 1_000,
+      firstTimeDestination: true,
+      feeEstimated: false,
+    };
+    const report = {
+      digest: "ab".repeat(32),
+      network: "testnet",
+      ruleSetVersion: "6",
+      findings: [
+        {
+          ruleId: "MEMO_REQUIRED",
+          severity: "high",
+          confidence: "high",
+          opIndex: 0,
+          evidence: { opNumber: "1", destination: "GDST" },
+        },
+      ],
+      checksUnavailable: [{ ruleId: "TRUST_UNVERIFIED", reason: "no_source" }],
+      decision: { state: "blocked", ruleIds: ["MEMO_REQUIRED"], overridable: false },
+      createdAt: 500,
+      expiresAt: 1_000,
+    };
+    const result = { preparedId: "0".repeat(32), summary, expiresAt: 1_000, report };
+    const parse = (r: unknown) => REQUESTS.PREPARE_PAYMENT.result.safeParse(r).success;
+
+    it("accepts a report view", () => {
+      expect(parse(result)).toBe(true);
+      expect(parse({ ...result, report: { ...report, decision: { state: "ready" } } })).toBe(true);
+    });
+
+    it.each([
+      ["a decoded request", { decoded: { kind: "transaction" } }],
+      ["an origin", { origin: { type: "stellix" } }],
+      ["an unknown rule ID", { checksUnavailable: [{ ruleId: "NOPE", reason: "internal" }] }],
+      ["a non-hex digest", { digest: "xyz" }],
+      ["an overridable block", { decision: { state: "blocked", ruleIds: [], overridable: true } }],
+    ])("rejects a report with %s", (_label, patch) => {
+      expect(parse({ ...result, report: { ...report, ...patch } })).toBe(false);
+    });
+
+    it("a report is required", () => {
+      expect(parse({ preparedId: result.preparedId, summary, expiresAt: 1_000 })).toBe(false);
+    });
+
+    it("no request payload accepts a report", () => {
+      for (const type of REQUEST_TYPES) {
+        const payload = REQUESTS[type].payload;
+        expect(payload.safeParse({ report }).success, type).toBe(false);
+      }
+    });
+  });
+
   it("void results accept a missing data key in the response envelope", () => {
     expect(responseSchema.safeParse({ id: ID, ok: true }).success).toBe(true);
   });

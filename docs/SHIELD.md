@@ -226,7 +226,7 @@ Severity = highest finding wins. Never average. Hard blocks are independent of s
 | `SPONSORSHIP_CHANGE` | Begin/end/revoke sponsorship affecting the user's entries | medium | Review, explain reserve impact |
 | `NO_MAX_TIME` | `maxTime` absent (0) or beyond threshold | medium | Review |
 | `HIGH_FEE` | Fee bid, or fee-bump max fee, above threshold | medium | Review, show max cost |
-| `MEMO_REQUIRED` | Existing SEP-29 check | high | Blocked (existing behaviour) |
+| `MEMO_REQUIRED` | SEP-29: no memo, and a `payment`, path payment or `accountMerge` to a `G…` account whose `config.memo_required` is `"1"` (`M…` exempt; any op source). Replaced M3's inline check in #24 | high | Blocked (existing behaviour) |
 | `UNSUPPORTED_OP` | An op type the decoder doesn't render | high | Review, typed; never silently shown |
 
 ### 6.2 Soroban — S3
@@ -328,11 +328,16 @@ How `evaluate` decides (`policy/policy.ts`; settled in #13):
 | Type | Payload | Returns | Phase | Notes |
 |---|---|---|---|---|
 | `SHIELD_ANALYZE` | `{ input: string; network }` (XDR or `web+stellar:tx` URI) | `AnalysisReport` (public data) | S1 | Mode C. Never signs. Size-limited input. |
-| `PREPARE_PAYMENT` | unchanged | adds `report` to the result | S1 | Mode A runs `analyze` on the built tx |
-| `CONFIRM_PAYMENT` | unchanged | unchanged | S1 | calls `assertSignable` before signing |
+| `PREPARE_PAYMENT` | unchanged | adds `report` to the result | S1 | Mode A runs `analyze` on the built tx and stores the report beside the prepared tx. `report` is a `ReportView`: no decoded request; `decision` is display-only |
+| `CONFIRM_PAYMENT` | unchanged | unchanged | S1 | calls `assertSignable` on the stored tx and stored report before signing; confirmation `null` until #36 renders findings |
 | Provider request types | SEP-43 methods | per SEP-43 | S2/S3 | separate ADR; content-script origin |
 
 New error codes (add to CONVENTIONS §4 and `errorCopy`): `SHIELD_DIGEST_MISMATCH`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED`, `SHIELD_CONFIRMATION_REQUIRED`, `SHIELD_INPUT_INVALID`, `SHIELD_INPUT_TOO_LARGE`.
+
+Mode A (#24; `services/send.ts`, wired by `background/shield.ts`):
+- The full report is stored in session storage beside the prepared tx (`StoredReport`: without the decoded request, which holds bigints; it's decoded again from the stored XDR at confirm). Reports never travel toward the SW in a message; the UI gets a `ReportView` (`report.ts`), whose `decision` is display-only.
+- Analysis reuses the account records `PREPARE_PAYMENT` already fetched, and has no `stellar.toml` source (`NO_TOML`: every lookup unavailable, `no_source`). Stellix's own flows build no `changeTrust`, so a Stellix payment has no unavailable checks.
+- `CONFIRM_PAYMENT` passes confirmation `null` until the Review screen renders findings (#36), so `review` fails closed; #36 records `{ kind: "click" }` (and a typed phrase if needed) in the same PR that shows them.
 
 ---
 
