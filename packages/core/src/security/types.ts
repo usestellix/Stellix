@@ -162,6 +162,8 @@ export interface AnalysisReport {
   /** Hex; SHIELD §5. For a transaction, its hash (fee bump: the fee-bump hash). */
   digest: string;
   network: NetworkId;
+  /** Who asked: a report for one origin is never accepted for a request from another. */
+  origin: Origin;
   ruleSetVersion: string;
   decoded: DecodedRequest;
   simulation: SimulationStatus;

@@ -133,7 +133,8 @@ export interface ShieldDeps {
 
 export function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<AnalysisReport>;
 export function evaluate(report: AnalysisReport, policy: Policy): PolicyDecision;
-export function assertSignable(req: ShieldRequest, report: AnalysisReport, decision: PolicyDecision, now: number): void; // throws StellixError
+export type Confirmation = { kind: "click" } | { kind: "typed"; phrase: string };
+export function assertSignable(req: ShieldRequest, report: AnalysisReport, confirmation: Confirmation | null, now: number): void; // throws StellixError
 ```
 
 ```ts
@@ -150,6 +151,7 @@ export interface Finding {
 export interface AnalysisReport {
   digest: string;                      // hex; see §5
   network: NetworkId;
+  origin: Origin;                      // a report is only valid for the origin it was made for
   ruleSetVersion: string;
   decoded: DecodedRequest;
   simulation: SimulationResult | { status: "not_applicable" } | { status: "unavailable"; reason: string };
@@ -166,6 +168,25 @@ export type PolicyDecision =
 ```
 
 `assertSignable` throws unless **all** hold: recomputed digest equals `report.digest`; network matches; `report.ruleSetVersion` equals the current constant; `now < report.expiresAt`; decision is `ready`, or `review` with the required confirmation recorded. A report produced anywhere else is never accepted.
+
+It takes no decision from its caller: it re-runs `evaluate` on the report, so a caller can't pass `ready`. The `confirmation` is what the user did on the review screen, as the SW recorded it. A typed confirmation satisfies a click review; a click never satisfies a typed one, and the typed phrase must match `typedPhrase` exactly (`assertSignable.ts`, settled in #12). Checks run in this order and the first failure wins:
+
+| Check | Error |
+|---|---|
+| Request kind is a transaction | `SHIELD_INPUT_INVALID` |
+| Origin isn't `pasted` (Mode C is never signable) | `SHIELD_BLOCKED` |
+| `req.network` equals `report.network` | `NETWORK_MISMATCH` |
+| `req.origin` equals `report.origin` (dapp: same URL) | `SHIELD_DIGEST_MISMATCH` |
+| The envelope decodes and is canonically encoded | `SHIELD_INPUT_INVALID` |
+| Recomputed digest equals `report.digest` | `SHIELD_DIGEST_MISMATCH` |
+| `report.ruleSetVersion` is current | `SHIELD_REPORT_EXPIRED` |
+| `now < report.expiresAt` (NaN counts as expired) | `SHIELD_REPORT_EXPIRED` |
+| Re-evaluated decision isn't `blocked` | `SHIELD_BLOCKED` |
+| A `review` decision has the confirmation it requires | `SHIELD_CONFIRMATION_REQUIRED` |
+
+Canonical encoding: the SDK rejects non-canonical XDR (trailing bytes, non-zero padding) but accepts lenient base64 (whitespace, missing padding, URL-safe characters). Decoding requires the exact canonical base64, so one transaction has exactly one accepted spelling. A UI that accepts pasted input should trim whitespace before sending it.
+
+Signatures aren't part of a transaction's digest (§5): changing only the signatures of an already signed envelope leaves its report valid, because what gets signed is unchanged. Mode A signs unsigned prepared transactions, in which every byte is covered (tested by mutating each byte).
 
 ---
 
