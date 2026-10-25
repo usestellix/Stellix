@@ -43,6 +43,16 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
   });
 }
 
+export {
+  RULE_POLICY,
+  SEVERITY_FLOOR,
+  TYPED_CONFIRMATION_PHRASE,
+  evaluate,
+  ruleOutcome,
+  type Policy,
+  type PolicyOutcome,
+} from "./policy/policy.js";
+export { compareSeverity, maxSeverity } from "./policy/severity.js";
 export { REPORT_TTL_MS, reportExpiresAt } from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
