@@ -28,14 +28,19 @@ export interface DecodedSources {
   ops: readonly OpSource[];
 }
 
+/** An M… address's underlying G…; any other address unchanged. */
+function baseAccount(address: string): string {
+  return address.startsWith("M") ? extractBaseAddress(address) : address;
+}
+
 function resolve(address: string, userAccount: string): ResolvedSource {
-  const account = extractBaseAddress(address);
+  const account = baseAccount(address);
   return { address, account, isUser: account === userAccount };
 }
 
 /** `userAccount` is the active G… (an M… is reduced to its base account, too). */
 export function resolveSources(decoded: DecodedTransaction, userAccount: string): DecodedSources {
-  const user = extractBaseAddress(userAccount);
+  const user = baseAccount(userAccount);
   const tx = resolve(decoded.source, user);
   return {
     tx,
