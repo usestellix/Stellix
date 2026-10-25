@@ -17,6 +17,13 @@ import {
   decodeManageSellOffer,
 } from "./ops-dex.js";
 import { decodeBeginSponsoring, decodeRevokeSponsorship } from "./ops-sponsorship.js";
+import {
+  decodeAllowTrust,
+  decodeChangeTrust,
+  decodeClawback,
+  decodeClawbackClaimableBalance,
+  decodeSetTrustLineFlags,
+} from "./ops-trust.js";
 import { muxedAddress } from "./xdr-values.js";
 
 // Every classic op → DecodedOperation (SHIELD §3.1). Op types without a decoder yet stay
@@ -52,6 +59,16 @@ export function decodeOperation(op: xdr.Operation): DecodedOperation {
       return decodeManageData(body.manageDataOp, source);
     case "bumpSequence":
       return decodeBumpSequence(body.bumpSequenceOp, source);
+    case "changeTrust":
+      return decodeChangeTrust(body.changeTrustOp, source);
+    case "allowTrust":
+      return decodeAllowTrust(body.allowTrustOp, source);
+    case "setTrustLineFlags":
+      return decodeSetTrustLineFlags(body.setTrustLineFlagsOp, source);
+    case "clawback":
+      return decodeClawback(body.clawbackOp, source);
+    case "clawbackClaimableBalance":
+      return decodeClawbackClaimableBalance(body.clawbackClaimableBalanceOp, source);
     case "createClaimableBalance":
       return decodeCreateClaimableBalance(body.createClaimableBalanceOp, source);
     case "claimClaimableBalance":

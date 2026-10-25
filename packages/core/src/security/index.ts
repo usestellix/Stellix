@@ -61,4 +61,5 @@ export { REPORT_TTL_MS, reportExpiresAt } from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
 export type * from "./decode/operation-types.js";
+export { ACCOUNT_FLAGS, TRUSTLINE_FLAGS } from "./decode/value-types.js";
 export * from "./types.js";

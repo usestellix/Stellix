@@ -10,6 +10,17 @@ export type DecodedTrustLineAsset =
   /** `liquidityPoolId` is the pool's L… StrKey. */
   | { type: "poolShare"; liquidityPoolId: string };
 
+/** A pool-share trustline as changeTrust writes it: the pool's parameters and derived ID. */
+export interface DecodedPoolShare {
+  type: "poolShare";
+  /** L… StrKey: sha256 of the pool parameters, the ID the pool's ops use. */
+  liquidityPoolId: string;
+  assetA: DecodedAsset;
+  assetB: DecodedAsset;
+  /** The pool's fee in basis points (30 for every pool today). */
+  feeBps: number;
+}
+
 /**
  * An exact rational price (n/d), as written; never converted to a float. The decoder doesn't
  * reject non-positive values (stellar-core does), so a rule must not divide by `d` unchecked.
@@ -27,6 +38,14 @@ export const ACCOUNT_FLAGS = {
   authClawbackEnabled: 0x8,
 } as const;
 export type AccountFlag = keyof typeof ACCOUNT_FLAGS;
+
+/** Trustline flags (XDR TrustLineFlags). */
+export const TRUSTLINE_FLAGS = {
+  authorized: 0x1,
+  authorizedToMaintainLiabilities: 0x2,
+  trustlineClawbackEnabled: 0x4,
+} as const;
+export type TrustLineFlag = keyof typeof TRUSTLINE_FLAGS;
 
 /** A flag bitmask: the named flags it sets, and any bits no flag defines (shown, never hidden). */
 export interface DecodedFlags<F extends string> {

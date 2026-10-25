@@ -1,8 +1,10 @@
-import { SignerKey, type xdr } from "@stellar/stellar-sdk/base";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { SignerKey, StrKey, type xdr } from "@stellar/stellar-sdk/base";
 import { assertNever } from "../../assert-never.js";
 import type {
   DecodedAsset,
   DecodedFlags,
+  DecodedPoolShare,
   DecodedPrice,
   DecodedSignerKey,
   DecodedTrustLineAsset,
@@ -28,7 +30,7 @@ function assetCode(bytes: Uint8Array, minChars: number): string {
 
 type CreditAsset = xdr.AssetCreditAlphanum4 | xdr.AssetCreditAlphanum12;
 
-function creditAsset(asset: CreditAsset | xdr.TrustLineAsset): DecodedAsset {
+function creditAsset(asset: CreditAsset | xdr.TrustLineAsset | xdr.ChangeTrustAsset): DecodedAsset {
   if (asset.type === "assetTypeCreditAlphanum4") {
     const { assetCode: code, issuer } = asset.alphaNum4;
     return { type: "credit", code: assetCode(code.value, 1), issuer: accountAddress(issuer) };
@@ -44,12 +46,45 @@ export function decodeAsset(asset: xdr.Asset): DecodedAsset {
   return asset.type === "assetTypeNative" ? { type: "native" } : creditAsset(asset);
 }
 
+/** allowTrust names only the code; the issuer is the op's source. */
+export function decodeAssetCode(code: xdr.AssetCode): string {
+  return code.type === "assetTypeCreditAlphanum4"
+    ? assetCode(code.assetCode4.value, 1)
+    : assetCode(code.assetCode12.value, 5);
+}
+
 export function decodeTrustLineAsset(asset: xdr.TrustLineAsset): DecodedTrustLineAsset {
   switch (asset.type) {
     case "assetTypeNative":
       return { type: "native" };
     case "assetTypePoolShare":
       return { type: "poolShare", liquidityPoolId: liquidityPoolAddress(asset.liquidityPoolId) };
+    case "assetTypeCreditAlphanum4":
+    case "assetTypeCreditAlphanum12":
+      return creditAsset(asset);
+    default:
+      return assertNever(asset);
+  }
+}
+
+/** changeTrust's line: an asset, or a pool given by its parameters (CAP-38). */
+export function decodeChangeTrustAsset(
+  asset: xdr.ChangeTrustAsset,
+): DecodedAsset | DecodedPoolShare {
+  switch (asset.type) {
+    case "assetTypeNative":
+      return { type: "native" };
+    case "assetTypePoolShare": {
+      const params = asset.liquidityPool.constantProduct;
+      return {
+        type: "poolShare",
+        // A pool's ID is the sha256 of its parameters, as the pool's own ops reference it.
+        liquidityPoolId: StrKey.encodeLiquidityPool(sha256(asset.liquidityPool.toXdr())),
+        assetA: decodeAsset(params.assetA),
+        assetB: decodeAsset(params.assetB),
+        feeBps: params.fee,
+      };
+    }
     case "assetTypeCreditAlphanum4":
     case "assetTypeCreditAlphanum12":
       return creditAsset(asset);

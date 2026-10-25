@@ -4,9 +4,11 @@ import type {
   DecodedAsset,
   DecodedClaimant,
   DecodedFlags,
+  DecodedPoolShare,
   DecodedPrice,
   DecodedSignerKey,
   SponsoredEntry,
+  TrustLineFlag,
 } from "./value-types.js";
 
 export type * from "./value-types.js";
@@ -174,6 +176,53 @@ export interface BumpSequenceOperation extends OperationBase {
   bumpTo: bigint;
 }
 
+// Trust and issuer
+
+export interface ChangeTrustOperation extends OperationBase {
+  kind: "changeTrust";
+  opType: "changeTrust";
+  line: DecodedAsset | DecodedPoolShare;
+  /** 0 removes the trustline. */
+  limitStroops: bigint;
+}
+
+/** Deprecated by setTrustLineFlags, still valid. The asset's issuer is the op's source. */
+export interface AllowTrustOperation extends OperationBase {
+  kind: "allowTrust";
+  opType: "allowTrust";
+  /** G…. */
+  trustor: string;
+  assetCode: string;
+  /** The authorization flags the trustline ends up with; the other authorization flag is cleared. */
+  authorize: DecodedFlags<TrustLineFlag>;
+}
+
+export interface SetTrustLineFlagsOperation extends OperationBase {
+  kind: "setTrustLineFlags";
+  opType: "setTrustLineFlags";
+  /** G…. */
+  trustor: string;
+  asset: DecodedAsset;
+  clearFlags: DecodedFlags<TrustLineFlag>;
+  setFlags: DecodedFlags<TrustLineFlag>;
+}
+
+export interface ClawbackOperation extends OperationBase {
+  kind: "clawback";
+  opType: "clawback";
+  /** G… or M…: the account the asset is taken back from. */
+  from: string;
+  asset: DecodedAsset;
+  amountStroops: bigint;
+}
+
+export interface ClawbackClaimableBalanceOperation extends OperationBase {
+  kind: "clawbackClaimableBalance";
+  opType: "clawbackClaimableBalance";
+  /** B…. */
+  balanceId: string;
+}
+
 // Claimable balances and sponsorship
 
 export interface CreateClaimableBalanceOperation extends OperationBase {
@@ -224,6 +273,11 @@ export type DecodedOperation =
   | SetOptionsOperation
   | ManageDataOperation
   | BumpSequenceOperation
+  | ChangeTrustOperation
+  | AllowTrustOperation
+  | SetTrustLineFlagsOperation
+  | ClawbackOperation
+  | ClawbackClaimableBalanceOperation
   | CreateClaimableBalanceOperation
   | ClaimClaimableBalanceOperation
   | BeginSponsoringFutureReservesOperation
