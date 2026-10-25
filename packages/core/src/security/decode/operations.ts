@@ -7,6 +7,7 @@ import {
   decodePathPaymentStrictSend,
   decodePayment,
 } from "./ops-payment.js";
+import { decodeBumpSequence, decodeManageData, decodeSetOptions } from "./ops-account.js";
 import { decodeClaimClaimableBalance, decodeCreateClaimableBalance } from "./ops-claimable.js";
 import {
   decodeCreatePassiveSellOffer,
@@ -45,6 +46,12 @@ export function decodeOperation(op: xdr.Operation): DecodedOperation {
       return decodeLiquidityPoolDeposit(body.liquidityPoolDepositOp, source);
     case "liquidityPoolWithdraw":
       return decodeLiquidityPoolWithdraw(body.liquidityPoolWithdrawOp, source);
+    case "setOptions":
+      return decodeSetOptions(body.setOptionsOp, source);
+    case "manageData":
+      return decodeManageData(body.manageDataOp, source);
+    case "bumpSequence":
+      return decodeBumpSequence(body.bumpSequenceOp, source);
     case "createClaimableBalance":
       return decodeCreateClaimableBalance(body.createClaimableBalanceOp, source);
     case "claimClaimableBalance":

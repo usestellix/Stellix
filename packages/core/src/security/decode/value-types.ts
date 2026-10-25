@@ -19,6 +19,21 @@ export interface DecodedPrice {
   d: bigint;
 }
 
+/** Account flags (XDR AccountFlags). */
+export const ACCOUNT_FLAGS = {
+  authRequired: 0x1,
+  authRevocable: 0x2,
+  authImmutable: 0x4,
+  authClawbackEnabled: 0x8,
+} as const;
+export type AccountFlag = keyof typeof ACCOUNT_FLAGS;
+
+/** A flag bitmask: the named flags it sets, and any bits no flag defines (shown, never hidden). */
+export interface DecodedFlags<F extends string> {
+  flags: readonly F[];
+  unknownBits: number;
+}
+
 /** `key` is the signer's StrKey: G… ed25519, T… pre-auth tx, X… hash(x), P… signed payload. */
 export interface DecodedSignerKey {
   type: "ed25519" | "preAuthTx" | "hashX" | "signedPayload";

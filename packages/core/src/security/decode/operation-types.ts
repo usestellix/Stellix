@@ -1,4 +1,13 @@
-import type { DecodedAsset, DecodedClaimant, DecodedPrice, SponsoredEntry } from "./value-types.js";
+import type { DecodedText } from "../types.js";
+import type {
+  AccountFlag,
+  DecodedAsset,
+  DecodedClaimant,
+  DecodedFlags,
+  DecodedPrice,
+  DecodedSignerKey,
+  SponsoredEntry,
+} from "./value-types.js";
 
 export type * from "./value-types.js";
 
@@ -132,6 +141,39 @@ export interface LiquidityPoolWithdrawOperation extends OperationBase {
   minAmountBStroops: bigint;
 }
 
+// Account configuration
+
+/** Every field is optional in XDR; null means "left unchanged". */
+export interface SetOptionsOperation extends OperationBase {
+  kind: "setOptions";
+  opType: "setOptions";
+  /** G…. */
+  inflationDest: string | null;
+  clearFlags: DecodedFlags<AccountFlag> | null;
+  setFlags: DecodedFlags<AccountFlag> | null;
+  masterWeight: number | null;
+  lowThreshold: number | null;
+  medThreshold: number | null;
+  highThreshold: number | null;
+  homeDomain: DecodedText | null;
+  /** Adds the signer, changes its weight, or removes it (weight 0). */
+  signer: { key: DecodedSignerKey; weight: number } | null;
+}
+
+export interface ManageDataOperation extends OperationBase {
+  kind: "manageData";
+  opType: "manageData";
+  dataName: DecodedText;
+  /** Null deletes the entry. */
+  dataValue: DecodedText | null;
+}
+
+export interface BumpSequenceOperation extends OperationBase {
+  kind: "bumpSequence";
+  opType: "bumpSequence";
+  bumpTo: bigint;
+}
+
 // Claimable balances and sponsorship
 
 export interface CreateClaimableBalanceOperation extends OperationBase {
@@ -179,6 +221,9 @@ export type DecodedOperation =
   | CreatePassiveSellOfferOperation
   | LiquidityPoolDepositOperation
   | LiquidityPoolWithdrawOperation
+  | SetOptionsOperation
+  | ManageDataOperation
+  | BumpSequenceOperation
   | CreateClaimableBalanceOperation
   | ClaimClaimableBalanceOperation
   | BeginSponsoringFutureReservesOperation

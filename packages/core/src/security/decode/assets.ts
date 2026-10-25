@@ -2,6 +2,7 @@ import { SignerKey, type xdr } from "@stellar/stellar-sdk/base";
 import { assertNever } from "../../assert-never.js";
 import type {
   DecodedAsset,
+  DecodedFlags,
   DecodedPrice,
   DecodedSignerKey,
   DecodedTrustLineAsset,
@@ -59,6 +60,16 @@ export function decodeTrustLineAsset(asset: xdr.TrustLineAsset): DecodedTrustLin
 
 export function decodePrice(price: xdr.Price): DecodedPrice {
   return { n: BigInt(price.n), d: BigInt(price.d) };
+}
+
+/** Splits a bitmask into the names in `defs`; bits no name defines are kept in unknownBits. */
+export function decodeFlags<F extends string>(
+  bits: number,
+  defs: Readonly<Record<F, number>>,
+): DecodedFlags<F> {
+  const flags = (Object.keys(defs) as F[]).filter((name) => (bits & defs[name]) !== 0);
+  const known = flags.reduce((acc, name) => acc | defs[name], 0);
+  return { flags, unknownBits: (bits & ~known) >>> 0 };
 }
 
 const SIGNER_KEY_TYPES = {
