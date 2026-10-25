@@ -27,6 +27,14 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "{worsePercent}% worse. If the offer is filled at its own price, you could get up to " +
       "{lossAmount} {lossAsset} less than at the best bid.",
   },
+  PATH_LOW_MIN: {
+    title: "Path payment with a loose limit",
+    body:
+      "Operation {opNumber} converts {sendAsset} to {destAsset}. Its {limitKind} is " +
+      "{limitAmount} {limitAsset}, but the best route Horizon found is {bestAmount} " +
+      "{limitAsset}. If the price moves before it runs, you could lose up to {lossAmount} " +
+      "{limitAsset} ({lossPercent}%) compared with that route.",
+  },
   UNSUPPORTED_OP: {
     title: "Operation Stellix can't read",
     body:

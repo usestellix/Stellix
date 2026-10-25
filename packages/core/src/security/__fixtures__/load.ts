@@ -52,12 +52,21 @@ export interface MarketFixture {
   name: string;
   description: string;
   networkPassphrase: string;
-  userAccount: string;
   /** Keyed by what they are (e.g. `orderBook`); `path` is relative to the Horizon root. */
   lookups: Record<string, { path: string; status: number; body: unknown }>;
-  hash: string;
-  envelopeXdr: string;
-  transaction: { status: number; body: HorizonTransactionBody };
+  /** Absent in a lookups-only fixture (a case whose transaction would fail on chain). */
+  userAccount?: string;
+  hash?: string;
+  envelopeXdr?: string;
+  transaction?: { status: number; body: HorizonTransactionBody };
+}
+
+/** A market fixture's captured transaction and its user. */
+export function marketTx(f: MarketFixture): { envelopeXdr: string; userAccount: string } {
+  if (f.envelopeXdr === undefined || f.userAccount === undefined) {
+    throw new Error(`${f.name} has no transaction`);
+  }
+  return { envelopeXdr: f.envelopeXdr, userAccount: f.userAccount };
 }
 
 export const MARKET_FIXTURES: readonly MarketFixture[] = Object.values(

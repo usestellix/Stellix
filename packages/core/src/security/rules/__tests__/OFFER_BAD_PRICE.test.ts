@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { StellixError } from "../../../errors.js";
 import { orderBookSchema } from "../../../network/horizon-schemas.js";
 import { FakeHorizonClient } from "../../../testing/fake-horizon.js";
-import { fixture, lookup, marketFixture, type MarketFixture } from "../../__fixtures__/load.js";
+import {
+  fixture,
+  lookup,
+  marketFixture,
+  marketTx,
+  type MarketFixture,
+} from "../../__fixtures__/load.js";
 import { findingCopy } from "../../copy/index.js";
 import { decodeTransactionEnvelope } from "../../decode/envelope.js";
 import { analyze } from "../../index.js";
@@ -16,8 +22,8 @@ const NOW = Date.parse("2026-10-25T11:00:00Z");
 
 function setup(f: MarketFixture, book: unknown = lookup(f, "orderBook").body) {
   const horizon = new FakeHorizonClient();
-  const decoded = decodeTransactionEnvelope(f.envelopeXdr, "testnet").decoded;
-  for (const offer of checkedOffers(decoded, f.userAccount)) {
+  const decoded = decodeTransactionEnvelope(marketTx(f).envelopeXdr, "testnet").decoded;
+  for (const offer of checkedOffers(decoded, marketTx(f).userAccount)) {
     horizon.orderBooks.set(
       FakeHorizonClient.orderBookKey(offer.selling, offer.buying),
       book instanceof StellixError ? book : orderBookSchema.parse(book),
@@ -26,7 +32,7 @@ function setup(f: MarketFixture, book: unknown = lookup(f, "orderBook").body) {
   const deps: ShieldDeps = {
     horizon,
     toml: { fetchToml: () => Promise.reject(new Error("no toml in this test")) },
-    userAccount: f.userAccount,
+    userAccount: marketTx(f).userAccount,
     now: () => NOW,
   };
   return { horizon, deps };
@@ -35,7 +41,12 @@ function setup(f: MarketFixture, book: unknown = lookup(f, "orderBook").body) {
 async function run(f: MarketFixture, book?: unknown, userAccount?: string) {
   const { horizon, deps } = setup(f, book);
   const report = await analyze(
-    { kind: "transaction", xdr: f.envelopeXdr, network: "testnet", origin: { type: "pasted" } },
+    {
+      kind: "transaction",
+      xdr: marketTx(f).envelopeXdr,
+      network: "testnet",
+      origin: { type: "pasted" },
+    },
     userAccount === undefined ? deps : { ...deps, userAccount },
   );
   return {
@@ -128,11 +139,11 @@ describe("OFFER_BAD_PRICE", () => {
 
   it("a buy offer's price is inverted to buying per selling", () => {
     const f = marketFixture("offer-buy-10pct-below");
-    const decoded = decodeTransactionEnvelope(f.envelopeXdr, "testnet").decoded;
+    const decoded = decodeTransactionEnvelope(marketTx(f).envelopeXdr, "testnet").decoded;
     expect(decoded.operations[0]).toMatchObject({
       kind: "manageBuyOffer",
       price: { n: 5n, d: 9n },
     });
-    expect(checkedOffers(decoded, f.userAccount)[0]?.sellPrice).toEqual({ n: 9n, d: 5n });
+    expect(checkedOffers(decoded, marketTx(f).userAccount)[0]?.sellPrice).toEqual({ n: 9n, d: 5n });
   });
 });
