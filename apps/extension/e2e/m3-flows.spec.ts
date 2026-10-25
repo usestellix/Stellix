@@ -166,25 +166,27 @@ test("insufficient balance offers Send max", async ({ context, extensionId }) =>
   await expect(popup.getByRole("button", { name: /Send max \(9,998\.99/ })).toBeVisible();
 });
 
-test("a network switch between review and confirm is refused, then Review again", async ({
-  context,
-  extensionId,
-}) => {
-  test.setTimeout(120_000);
-  const popup = await fundedWallet(context, extensionId);
-  await fillSend(popup, Keypair.random().publicKey(), "2");
-  await popup.getByRole("button", { name: "Continue" }).click();
-  await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "send-review", {
-    timeout: 30_000,
-  });
-  const other = await openPopup(context, extensionId);
-  expect(
-    await sendFrom(other, "SET_SETTINGS", { network: "mainnet", acknowledgedRealFunds: true }),
-  ).toMatchObject({ ok: true });
-  await popup.getByRole("button", { name: "Confirm and send" }).click();
-  await expect(popup.getByRole("alert")).toHaveText(/network changed/i);
-  await expect(popup.getByRole("button", { name: "Review again" })).toBeVisible();
-});
+// @mainnet: needs a second network to switch to (`pnpm test:e2e:mainnet`).
+test(
+  "a network switch between review and confirm is refused, then Review again",
+  { tag: "@mainnet" },
+  async ({ context, extensionId }) => {
+    test.setTimeout(120_000);
+    const popup = await fundedWallet(context, extensionId);
+    await fillSend(popup, Keypair.random().publicKey(), "2");
+    await popup.getByRole("button", { name: "Continue" }).click();
+    await expect(popup.getByTestId("popup")).toHaveAttribute("data-screen", "send-review", {
+      timeout: 30_000,
+    });
+    const other = await openPopup(context, extensionId);
+    expect(
+      await sendFrom(other, "SET_SETTINGS", { network: "mainnet", acknowledgedRealFunds: true }),
+    ).toMatchObject({ ok: true });
+    await popup.getByRole("button", { name: "Confirm and send" }).click();
+    await expect(popup.getByRole("alert")).toHaveText(/network changed/i);
+    await expect(popup.getByRole("button", { name: "Review again" })).toBeVisible();
+  },
+);
 
 test("M3 exit: killing the SW right after Confirm still ends in a definitive outcome", async ({
   context,

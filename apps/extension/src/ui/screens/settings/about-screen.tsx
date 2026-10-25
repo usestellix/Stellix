@@ -1,5 +1,6 @@
 import type { NetworkId } from "@stellix/core";
 import { browser } from "wxt/browser";
+import { MAINNET_ENABLED } from "../../../build-flags.js";
 import { ExternalIcon } from "../../components/icons.js";
 import { SubScreen } from "../../components/sub-screen.js";
 
@@ -13,6 +14,7 @@ export function AboutScreen({ network, onBack }: { network: NetworkId; onBack: (
   const rows: [string, string][] = [
     ["Version", version],
     ["Build", __STELLIX_COMMIT__.slice(0, 12)],
+    ["Networks", MAINNET_ENABLED ? "Testnet, Mainnet" : "Testnet only"],
   ];
   return (
     <SubScreen title="About" network={network} onBack={onBack} testId="settings-about">

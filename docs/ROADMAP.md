@@ -66,7 +66,9 @@ Milestones are ordered by dependency. Each has exit criteria; a milestone is don
 
 - Mainnet Horizon provider chosen and documented: operator, history retention, rate limits, privacy terms (ADR 0006).
 
-**Exit:** public testnet-default release on the Chrome Web Store; mainnet Horizon provider chosen and documented (ADR 0006).
+- `MAINNET_ENABLED` build flag (ADR 0008): the first public release is testnet-only.
+
+**Exit:** public **testnet-only** release (0.1.0) on the Chrome Web Store. Mainnet ships in a later release, after the external review and the mainnet Horizon provider choice (ADR 0006, ADR 0009).
 
 ---
 

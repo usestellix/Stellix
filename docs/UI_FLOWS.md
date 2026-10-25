@@ -124,7 +124,7 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 - Network switch prompt: "Scan for accounts on this network" when the list was built on another network.
 
 ## 9. Settings (popup, some actions open full tab)
-- Network: Testnet / Mainnet. Switching to Mainnet shows a confirmation dialog with checkbox "I understand this uses real XLM".
+- Network: Testnet / Mainnet. Switching to Mainnet shows a confirmation dialog with checkbox "I understand this uses real XLM". Only in mainnet-enabled builds (ADR 0008); a testnet-only build has no Network row, and About shows "Networks: Testnet only".
 - Advanced → Custom Horizon URL per network (validated per NETWORK §1).
 - Auto-lock: 5 / 15 / 30 / 60 minutes.
 - Security: Reveal recovery phrase (opens tab, password), Change password.

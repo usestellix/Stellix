@@ -1,5 +1,6 @@
 import type { HistoryItem, WalletStatus } from "@stellix/core";
 import { useEffect, useMemo, useState } from "react";
+import { MAINNET_ENABLED } from "../../build-flags.js";
 import { request } from "../../messaging/client.js";
 import { Button } from "../components/button.js";
 import { ErrorText } from "../components/error-text.js";
@@ -222,13 +223,14 @@ function UnlockedApp({
     case "settings-page":
       switch (route.page) {
         case "network":
-          return (
+          // Constant-folded: a testnet-only build drops the screen and its mainnet copy (ADR 0008).
+          return MAINNET_ENABLED ? (
             <NetworkSettings
               settings={settings}
               onBack={toSettings}
               onChanged={onSettingsChanged}
             />
-          );
+          ) : null;
         case "horizon":
           return (
             <HorizonSettings

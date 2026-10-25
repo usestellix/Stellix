@@ -70,7 +70,7 @@ const context = await chromium.launchPersistentContext(userDataDir, {
 });
 ```
 
-Get the extension ID from the service worker URL, then open `chrome-extension://<id>/popup.html` and `onboarding.html` as pages. Fixtures live in `apps/extension/e2e/fixtures.ts`. `pnpm test:e2e` builds first and tests `.output/chrome-mv3`. Set `STELLIX_EXTENSION_DIR` to test another build (e.g. the `wxt` dev build; the manifest-permission test skips there, see ADR 0004).
+Get the extension ID from the service worker URL, then open `chrome-extension://<id>/popup.html` and `onboarding.html` as pages. Fixtures live in `apps/extension/e2e/fixtures.ts`. `pnpm test:e2e` builds first and tests `.output/chrome-mv3`. That default build is testnet-only (ADR 0008), so specs tagged `@mainnet` are excluded there and run with `pnpm test:e2e:mainnet`, which builds with `STELLIX_MAINNET_ENABLED=true` (CI job `e2e-mainnet`). `e2e/testnet-only.spec.ts` covers the default build: no Network row, About says "Testnet only", and the SW refuses mainnet even acknowledged. Set `STELLIX_EXTENSION_DIR` to test another build (e.g. the `wxt` dev build; the manifest-permission test skips there, see ADR 0004).
 
 To terminate the SW, use CDP `ServiceWorker.stopAllWorkers` from a page session. Playwright emits no new `serviceworker` event when an extension worker restarts, so watch `ServiceWorker.workerVersionUpdated` running status to prove the stop and the restart.
 
@@ -111,6 +111,12 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
   - the SW-enforced unlock throttle, checked from a fresh popup
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`
   - `RESET_WALLET` wiping storage and reopening onboarding without the `tabs` permission
+
+### Release-related checks
+
+- `reproducible` CI job: two runners build the zip, and their `SHA256SUMS` must be identical (SECURITY §9.3).
+- `scripts/verify-store-package.mjs`: checked against a real store package (uBlock Origin Lite vs its GitHub release: passes) and a tampered release (fails, listing every difference). See `docs/VERIFY_RELEASE.md`.
+- `pnpm --filter @stellix/extension store:assets` regenerates the store graphics from the built extension on live testnet. It's a separate Playwright config, not part of `pnpm test:e2e`.
 
 ## 4. Manual QA checklist (before each release)
 

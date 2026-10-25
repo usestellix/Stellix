@@ -18,6 +18,11 @@ export interface SettingsPatch {
 export interface SettingsDeps {
   /** Validates and normalizes an override (passphrase probe). Injected so core stays testable. */
   validateHorizonOverride: (url: string, network: NetworkId) => Promise<string>;
+  /**
+   * Networks this build offers (ADR 0008: a testnet-only build leaves mainnet out). The shell
+   * decides; core never reads build flags.
+   */
+  enabledNetworks: readonly NetworkId[];
 }
 
 export async function updateSettings(
@@ -25,6 +30,14 @@ export async function updateSettings(
   patch: SettingsPatch,
   deps: SettingsDeps,
 ): Promise<Settings> {
+  for (const network of [patch.network, patch.horizonOverride?.network]) {
+    if (network !== undefined && !deps.enabledNetworks.includes(network)) {
+      throw new StellixError(
+        "INVALID_REQUEST",
+        `Network ${network} is not available in this build`,
+      );
+    }
+  }
   if (patch.network === "mainnet" && patch.acknowledgedRealFunds !== true) {
     throw new StellixError(
       "INVALID_REQUEST",

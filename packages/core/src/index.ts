@@ -134,6 +134,7 @@ export {
   AUTO_LOCK_MINUTES,
   DEFAULT_SETTINGS,
   readSettings,
+  restrictSettingsToNetworks,
   type AutoLockMinutes,
   type Settings,
 } from "./settings.js";

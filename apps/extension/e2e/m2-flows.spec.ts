@@ -123,43 +123,45 @@ test("accounts: add, rename, switch", async ({ context, extensionId }) => {
   await expect(popup.getByTestId("account-label")).toHaveText("Savings");
 });
 
-test("flow 7: mainnet switch needs confirmation; the SW also refuses it without acknowledgement", async ({
-  context,
-  extensionId,
-}) => {
-  await createWalletViaUi(context, extensionId);
-  const popup = await popupAt(context, extensionId, "home");
+// @mainnet: runs only against a STELLIX_MAINNET_ENABLED=true build (`pnpm test:e2e:mainnet`).
+test(
+  "flow 7: mainnet switch needs confirmation; the SW also refuses it without acknowledgement",
+  { tag: "@mainnet" },
+  async ({ context, extensionId }) => {
+    await createWalletViaUi(context, extensionId);
+    const popup = await popupAt(context, extensionId, "home");
 
-  expect(await sendFrom(popup, "SET_SETTINGS", { network: "mainnet" })).toMatchObject({
-    ok: false,
-    error: { code: "INVALID_REQUEST" },
-  });
+    expect(await sendFrom(popup, "SET_SETTINGS", { network: "mainnet" })).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_REQUEST" },
+    });
 
-  await openSettings(popup, "Network");
-  const dialog = popup.getByTestId("mainnet-dialog");
-  await popup.getByRole("radio", { name: /Mainnet/ }).click();
-  await expect(dialog).toBeVisible();
-  const confirm = dialog.getByRole("button", { name: "Switch", exact: true });
-  await expect(confirm).toBeDisabled();
-  await dialog.getByRole("button", { name: "Cancel" }).click();
-  await expect(dialog).toBeHidden();
-  await expect(popup.getByTestId("network-badge")).toHaveText(/^testnet$/i);
+    await openSettings(popup, "Network");
+    const dialog = popup.getByTestId("mainnet-dialog");
+    await popup.getByRole("radio", { name: /Mainnet/ }).click();
+    await expect(dialog).toBeVisible();
+    const confirm = dialog.getByRole("button", { name: "Switch", exact: true });
+    await expect(confirm).toBeDisabled();
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(popup.getByTestId("network-badge")).toHaveText(/^testnet$/i);
 
-  await popup.getByRole("radio", { name: /Mainnet/ }).click();
-  await dialog.getByRole("checkbox", { name: "I understand this uses real XLM" }).check();
-  await confirm.click();
-  await expect(dialog).toBeHidden();
-  await expect(popup.getByTestId("network-badge")).toHaveText(/^mainnet$/i);
+    await popup.getByRole("radio", { name: /Mainnet/ }).click();
+    await dialog.getByRole("checkbox", { name: "I understand this uses real XLM" }).check();
+    await confirm.click();
+    await expect(dialog).toBeHidden();
+    await expect(popup.getByTestId("network-badge")).toHaveText(/^mainnet$/i);
 
-  await popup.getByRole("button", { name: "Back" }).click();
-  await popup.getByRole("button", { name: "Back" }).click();
-  await expect(popup.getByTestId("network-badge")).toHaveText(/^mainnet$/i);
-  // A fresh key is unfunded on mainnet, and there is no Friendbot there. No transactions in E2E.
-  await expect(popup.getByTestId("balance-card")).toHaveAttribute("data-state", "unfunded", {
-    timeout: 30_000,
-  });
-  await expect(popup.getByRole("button", { name: "Fund with Friendbot" })).toHaveCount(0);
-});
+    await popup.getByRole("button", { name: "Back" }).click();
+    await popup.getByRole("button", { name: "Back" }).click();
+    await expect(popup.getByTestId("network-badge")).toHaveText(/^mainnet$/i);
+    // A fresh key is unfunded on mainnet, and there is no Friendbot there. No transactions in E2E.
+    await expect(popup.getByTestId("balance-card")).toHaveAttribute("data-state", "unfunded", {
+      timeout: 30_000,
+    });
+    await expect(popup.getByRole("button", { name: "Fund with Friendbot" })).toHaveCount(0);
+  },
+);
 
 test("settings: auto-lock timer, custom Horizon, about", async ({ context, extensionId }) => {
   test.setTimeout(90_000);

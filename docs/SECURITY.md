@@ -111,13 +111,17 @@ At SW startup: `chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CO
 
 ## 9. Build & release
 
-1. Releases are built **only in CI** from a tagged commit. No local builds get uploaded.
-2. CI produces the store zip and publishes its SHA-256 plus the commit hash in the GitHub release notes.
-3. Builds must be reproducible: same commit + lockfile → same zip hash. Pin Node and pnpm versions in CI (`.nvmrc`, `packageManager` field).
-4. Chrome Web Store developer account and the GitHub org use hardware security keys for 2FA. At least two maintainers can publish; publishing credentials are scoped to CI.
+1. Releases are built **only in CI** from a tagged commit (`.github/workflows/release.yml`). No local build is ever uploaded: the maintainer rebuilds locally only to *check* that the CI zip matches.
+2. CI produces the store zip, `SHA256SUMS` (the zip and every file in it) and the commit hash, attached to a **draft** GitHub release. The steps are in `.github/RELEASE.md`.
+3. Builds must be reproducible: same commit + lockfile → same zip hash. Pin Node and pnpm versions in CI (`.nvmrc`, `packageManager` field). CI proves it on every push: two independent runners build the zip, and the `reproducible` job fails if their `SHA256SUMS` differ (`scripts/release-hashes.mjs`: the zip's hash plus one per file). Verified locally on 2026-10-17: identical hashes across separate runs and checkout paths.
+4. Publishing setup (as it actually is for 0.1.0; revisit when maintainers join):
+   - **Publisher:** "Stellix Labs" on the Chrome Web Store, with one member in the Admin role. That Google account uses two hardware security keys for 2-Step Verification, one in daily use and one spare stored separately. The store requires 2SV to publish. The GitHub org uses hardware-key 2FA too.
+   - **Verified CRX uploads** are on: the store rejects any upload not signed with our RSA key. The private key is kept offline, never in a Google account or in CI, with a separate encrypted backup. Custody and recovery are in `docs/INCIDENT_RESPONSE.md`. A replacement key from store support can take up to a week.
+   - **CI builds but holds no publishing credentials.** No store API service account, no OAuth token, no signing key. Uploading is a manual, signed step, so compromising CI or the Google account alone can't ship a build.
+   - TODO (owner): name the Admin account owner and the trader/non-trader declaration.
 5. About screen shows version + commit hash so users can compare with the release.
-6. Release checklist (in `.github/RELEASE.md` when created): changelog, permission diff check (manifest permissions unchanged unless ADR'd), dependency diff review, E2E pass, manual smoke test on testnet.
+6. Release checklist: `.github/RELEASE.md` (changelog, permission diff, dependency diff review, E2E pass, manual testnet smoke test, hash verification, signing and upload).
 
-## 10. Incident response (placeholder)
+## 10. Incident response
 
-Before mainnet launch, document: how users report issues, how to publish an emergency update, and how to communicate if a malicious build ever ships (store takedown, advisory telling users to move funds to a new phrase).
+See `docs/INCIDENT_RESPONSE.md`. It covers what we can and can't do (no server, no kill switch); store rollback, emergency update, unpublish and takedown; playbooks for a malicious build, secret-exposing bugs and fund-affecting bugs; communication channels; and custody and recovery of publishing credentials and the upload-signing key.

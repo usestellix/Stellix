@@ -40,3 +40,28 @@ export async function readSettings(store: KeyValueStore): Promise<Settings> {
     autoLockMinutes: pick("autoLockMinutes"),
   };
 }
+
+/**
+ * Startup normalization for builds that leave networks out (ADR 0008): a stored network this
+ * build doesn't offer (e.g. mainnet chosen in an earlier build) falls back to the first enabled
+ * one, and overrides for disabled networks are dropped. Returns true when it wrote.
+ */
+export async function restrictSettingsToNetworks(
+  store: KeyValueStore,
+  enabled: readonly NetworkId[],
+): Promise<boolean> {
+  const [fallback] = enabled;
+  if (fallback === undefined) throw new Error("restrictSettingsToNetworks: no enabled network");
+  const current = await readSettings(store);
+  const overrides = Object.fromEntries(
+    Object.entries(current.horizonOverrides).filter(([n]) => enabled.includes(n as NetworkId)),
+  ) as Settings["horizonOverrides"];
+  const network = enabled.includes(current.network) ? current.network : fallback;
+  const changed =
+    network !== current.network ||
+    Object.keys(overrides).length !== Object.keys(current.horizonOverrides).length;
+  if (changed) {
+    await store.set(PERSISTENT_KEYS.settings, { ...current, network, horizonOverrides: overrides });
+  }
+  return changed;
+}

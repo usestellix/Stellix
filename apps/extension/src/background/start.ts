@@ -3,11 +3,13 @@ import {
   createLogger,
   horizonUrlFor,
   readSettings,
+  restrictSettingsToNetworks,
   type Logger,
   type NetworkId,
   type SendDeps,
 } from "@stellix/core";
 import { browser } from "wxt/browser";
+import { ENABLED_NETWORKS } from "../build-flags.js";
 import { createMessageListener } from "../messaging/router.js";
 import { migrate } from "../storage/migrations.js";
 import { createAutoLock, type AutoLock } from "./autolock.js";
@@ -48,6 +50,7 @@ export function startBackground(): void {
         platform,
         autoLock,
         devBuild: import.meta.env.DEV,
+        enabledNetworks: ENABLED_NETWORKS,
         inflight,
         openOnboarding: async () => {
           await browser.tabs.create({ url: browser.runtime.getURL("/onboarding.html") });
@@ -71,6 +74,8 @@ async function initialize(
     // SECURITY §4.4: explicit even though it's the default.
     await browser.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
     await migrate(persistent);
+    // ADR 0008: a mainnet choice from an earlier (mainnet-enabled) build falls back to testnet.
+    await restrictSettingsToNetworks(persistent, ENABLED_NETWORKS);
     await autoLock.onStartup();
     // TRANSACTIONS §5: resume resolving anything a killed worker left in flight.
     void inflight.resume().catch(() => undefined);

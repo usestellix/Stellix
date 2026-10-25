@@ -177,5 +177,5 @@ On startup and when the network changes, `getLatestLedger()` → `base_reserve_i
 ## 8. Privacy notes
 
 - All requests go directly from the user's browser to the configured Horizon. Stellix has no proxy.
-- Horizon operators can see the requesting IP and the account IDs queried. Mention in the privacy section of the store listing and the About screen.
+- Horizon operators can see the requesting IP and the account IDs queried. This is stated in `PRIVACY.md` (which names the operator), the store listing and privacy tab (`docs/store/`), and the About screen. The service worker also contacts Horizon in the background while a submitted payment is confirming (ADR 0007), including while locked.
 - No third-party requests besides Horizon, Friendbot (testnet), and explorer links the user clicks.
