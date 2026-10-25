@@ -1,5 +1,12 @@
 import type { xdr } from "@stellar/stellar-sdk/base";
 import type { DecodedOperation } from "./operation-types.js";
+import {
+  decodeAccountMerge,
+  decodeCreateAccount,
+  decodePathPaymentStrictReceive,
+  decodePathPaymentStrictSend,
+  decodePayment,
+} from "./ops-payment.js";
 import { decodeClaimClaimableBalance, decodeCreateClaimableBalance } from "./ops-claimable.js";
 import { decodeBeginSponsoring, decodeRevokeSponsorship } from "./ops-sponsorship.js";
 import { muxedAddress } from "./xdr-values.js";
@@ -11,6 +18,16 @@ export function decodeOperation(op: xdr.Operation): DecodedOperation {
   const source = op.sourceAccount === null ? null : muxedAddress(op.sourceAccount);
   const body = op.body;
   switch (body.type) {
+    case "createAccount":
+      return decodeCreateAccount(body.createAccountOp, source);
+    case "payment":
+      return decodePayment(body.paymentOp, source);
+    case "pathPaymentStrictReceive":
+      return decodePathPaymentStrictReceive(body.pathPaymentStrictReceiveOp, source);
+    case "pathPaymentStrictSend":
+      return decodePathPaymentStrictSend(body.pathPaymentStrictSendOp, source);
+    case "accountMerge":
+      return decodeAccountMerge(body.destination, source);
     case "createClaimableBalance":
       return decodeCreateClaimableBalance(body.createClaimableBalanceOp, source);
     case "claimClaimableBalance":

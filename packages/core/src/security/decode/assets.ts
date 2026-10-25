@@ -1,7 +1,9 @@
 import { SignerKey, type xdr } from "@stellar/stellar-sdk/base";
 import { assertNever } from "../../assert-never.js";
-import type { DecodedAsset, DecodedSignerKey, DecodedTrustLineAsset } from "./operation-types.js";
+import type { DecodedAsset, DecodedSignerKey, DecodedTrustLineAsset } from "./value-types.js";
 import { accountAddress, invalidInput, liquidityPoolAddress } from "./xdr-values.js";
+
+// Assets, prices, flags and signer keys, shared by the op decoders.
 
 /**
  * stellar-core's isAssetValid: ASCII letters and digits, zero bytes only as trailing padding,
