@@ -8,6 +8,7 @@ import type {
   Finding,
   Origin,
   PolicyDecision,
+  Presented,
   SimulationStatus,
 } from "./types.js";
 
@@ -26,6 +27,7 @@ export interface ReportInput {
   digest: string;
   network: NetworkId;
   origin: Origin;
+  presented: Presented;
   decoded: DecodedRequest;
   simulation: SimulationStatus;
   findings: readonly Finding[];
@@ -53,6 +55,7 @@ export function toStoredReport(report: AnalysisReport): StoredReport {
     digest: report.digest,
     network: report.network,
     origin: report.origin,
+    presented: report.presented,
     ruleSetVersion: report.ruleSetVersion,
     simulation: report.simulation,
     findings: report.findings,

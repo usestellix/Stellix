@@ -21,7 +21,13 @@ function deps(): ShieldDeps {
 }
 
 function txRequest(xdr: string): ShieldRequest {
-  return { kind: "transaction", xdr, network: "testnet", origin: { type: "pasted" } };
+  return {
+    kind: "transaction",
+    xdr,
+    network: "testnet",
+    origin: { type: "pasted" },
+    presented: { destinations: [] },
+  };
 }
 
 describe("analyze", () => {

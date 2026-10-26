@@ -41,7 +41,13 @@ async function run(
     now: () => NOW,
   };
   const report = await analyze(
-    { kind: "transaction", xdr: envelopeXdr, network: "testnet", origin: { type: "pasted" } },
+    {
+      kind: "transaction",
+      xdr: envelopeXdr,
+      network: "testnet",
+      origin: { type: "pasted" },
+      presented: { destinations: [] },
+    },
     deps,
   );
   return {

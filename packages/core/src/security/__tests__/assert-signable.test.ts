@@ -41,8 +41,12 @@ const deps: ShieldDeps = {
   now: () => NOW,
 };
 
-function request(xdr = PAYMENT, origin: Origin = STELLIX): ShieldRequest {
-  return { kind: "transaction", xdr, network: "testnet", origin };
+function request(
+  xdr = PAYMENT,
+  origin: Origin = STELLIX,
+  destinations: readonly string[] = [],
+): ShieldRequest {
+  return { kind: "transaction", xdr, network: "testnet", origin, presented: { destinations } };
 }
 
 async function reportFor(req: ShieldRequest = request()): Promise<AnalysisReport> {
@@ -125,6 +129,26 @@ describe("assertSignable: one test per failure branch", () => {
     expect(rejection(request(), report, null, NOW)).toBe("SHIELD_DIGEST_MISMATCH");
     const other = request(PAYMENT, { type: "dapp", url: "https://other.example" });
     expect(rejection(other, report, null, NOW)).toBe("SHIELD_DIGEST_MISMATCH");
+  });
+
+  it("rejects a report made for other presented destinations", async () => {
+    const report = await reportFor(request(PAYMENT, STELLIX, ["GA"]));
+    expect(rejection(request(PAYMENT, STELLIX, []), report, null, NOW)).toBe(
+      "SHIELD_DIGEST_MISMATCH",
+    );
+    expect(rejection(request(PAYMENT, STELLIX, ["GB"]), report, null, NOW)).toBe(
+      "SHIELD_DIGEST_MISMATCH",
+    );
+    expect(rejection(request(PAYMENT, STELLIX, ["GA", "GB"]), report, null, NOW)).toBe(
+      "SHIELD_DIGEST_MISMATCH",
+    );
+  });
+
+  it("accepts the same presented destinations in another order", async () => {
+    const report = await reportFor(request(PAYMENT, STELLIX, ["GA", "GB"]));
+    expect(() => {
+      assertSignable(request(PAYMENT, STELLIX, ["GB", "GA"]), report, null, NOW);
+    }).not.toThrow();
   });
 
   it("rejects a report for a different transaction", async () => {

@@ -80,6 +80,8 @@ export function accountRecord(
 export interface AnalyzeOptions {
   userAccount?: string;
   origin?: Origin;
+  /** Destinations the requester presented; default none (Mode C). */
+  presented?: readonly string[];
   horizon?: FakeHorizonClient;
 }
 
@@ -96,6 +98,7 @@ export function analyzeTx(xdrBase64: string, opts: AnalyzeOptions = {}) {
       xdr: xdrBase64,
       network: "testnet",
       origin: opts.origin ?? { type: "pasted" },
+      presented: { destinations: opts.presented ?? [] },
     },
     deps,
   );

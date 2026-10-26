@@ -74,6 +74,7 @@ function report(findings: Finding[], checksUnavailable: CheckUnavailable[] = [])
     digest: "00",
     network: "testnet",
     origin: { type: "dapp", url: "https://example.com" },
+    presented: { destinations: [] },
     ruleSetVersion: "1",
     decoded: {
       kind: "transaction",

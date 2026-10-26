@@ -19,7 +19,13 @@ const deps: ShieldDeps = {
 
 function analyzeXdr(xdrBase64: string) {
   return analyze(
-    { kind: "transaction", xdr: xdrBase64, network: "testnet", origin: { type: "pasted" } },
+    {
+      kind: "transaction",
+      xdr: xdrBase64,
+      network: "testnet",
+      origin: { type: "pasted" },
+      presented: { destinations: [] },
+    },
     deps,
   );
 }

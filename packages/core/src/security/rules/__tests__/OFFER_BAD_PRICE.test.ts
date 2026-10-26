@@ -46,6 +46,7 @@ async function run(f: MarketFixture, book?: unknown, userAccount?: string) {
       xdr: marketTx(f).envelopeXdr,
       network: "testnet",
       origin: { type: "pasted" },
+      presented: { destinations: [] },
     },
     userAccount === undefined ? deps : { ...deps, userAccount },
   );

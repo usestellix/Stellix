@@ -113,9 +113,13 @@ apps/extension/src/
 
 ```ts
 export type ShieldRequest =
-  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin }
+  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin; presented: Presented }
   | { kind: "authEntry";   xdr: string; network: NetworkId; origin: Origin }   // S3
   | { kind: "message";     message: string; network: NetworkId; origin: Origin }; // S2, SEP-53
+
+// What the requester showed the user as recipients (#28): Mode A, the Send form's destination;
+// Mode C, nothing; Mode B (S2), the dapp's stated destinations. UNNAMED_OUTFLOW compares with it.
+export interface Presented { destinations: readonly string[] }
 
 export type Origin =
   | { type: "stellix" }                 // Mode A
@@ -152,6 +156,7 @@ export interface AnalysisReport {
   digest: string;                      // hex; see §5
   network: NetworkId;
   origin: Origin;                      // a report is only valid for the origin it was made for
+  presented: Presented;                // …and for the destinations that were presented
   ruleSetVersion: string;
   decoded: DecodedRequest;
   simulation: SimulationResult | { status: "not_applicable" } | { status: "unavailable"; reason: string };
@@ -177,6 +182,7 @@ It takes no decision from its caller: it re-runs `evaluate` on the report, so a 
 | Origin isn't `pasted` (Mode C is never signable) | `SHIELD_BLOCKED` |
 | `req.network` equals `report.network` | `NETWORK_MISMATCH` |
 | `req.origin` equals `report.origin` (dapp: same URL) | `SHIELD_DIGEST_MISMATCH` |
+| `req.presented` has the same destinations as `report.presented` (any order) | `SHIELD_DIGEST_MISMATCH` |
 | The envelope decodes and is canonically encoded | `SHIELD_INPUT_INVALID` |
 | Recomputed digest equals `report.digest` | `SHIELD_DIGEST_MISMATCH` |
 | `report.ruleSetVersion` is current | `SHIELD_REPORT_EXPIRED` |
@@ -217,7 +223,7 @@ Severity = highest finding wins. Never average. Hard blocks are independent of s
 | `ACCT_MASTER_WEIGHT` | `setOptions` lowering master weight or raising thresholds such that the master key alone can no longer authorize. Settled in #26: the tx's `setOptions` ops on the user's account, applied in order to the account as Horizon has it, take the master key from authorizing everything (weight > 0 and ≥ max(low, med, high)) to not; an account already multisig gets no finding. The account is read only when such an op is present | critical | Blocked, not overridable |
 | `ACCT_MERGE` | `accountMerge` with the user as effective source | critical | Blocked unless Origin is `stellix` |
 | `FOREIGN_SOURCE_OP` | An op whose effective source is the user inside a transaction whose source is another account (fee bump: the inner transaction's source; a fee source alone isn't a foreign op) | high | Review, typed |
-| `UNNAMED_OUTFLOW` | Assets leave the user to an address not presented by the requester (Mode B: compared with the dapp's stated destinations if given; otherwise every outflow is listed explicitly) | high | Review, typed |
+| `UNNAMED_OUTFLOW` | Assets leave the user to an address not presented by the requester (Mode B: compared with the dapp's stated destinations if given; otherwise every outflow is listed explicitly). Settled in #28: `request.presented`, exact address match; Mode A presents the Send destination, Mode C nothing. Payments, path payments (sendMax for strict-receive), merges, createAccount and each claimable-balance claimant count; offers and pool deposits are listed (`listOutflows`) but never flagged | high | Review, typed |
 | `OFFER_BAD_PRICE` | `manageSellOffer` / `manageBuyOffer` / `createPassiveSellOffer` priced worse than the order-book reference by more than the threshold | high | Review, show computed loss |
 | `PATH_LOW_MIN` | Path payment whose `destMin` / `sendMax` implies loss beyond threshold vs Horizon's best path | high | Review, show computed loss |
 | `CLAIMABLE_TO_OTHER` | `createClaimableBalance` from the user claimable only by others | medium | Review |

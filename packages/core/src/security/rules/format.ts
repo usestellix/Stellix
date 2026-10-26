@@ -1,4 +1,5 @@
 import { STROOPS_PER_XLM, formatXlm } from "../../stellar/amount.js";
+import type { DecodedAsset } from "../decode/value-types.js";
 
 // Number formatting for finding evidence. Exact bigint arithmetic, truncated (never rounded up),
 // trailing zeros dropped. Evidence is display text; rules compare the exact values.
@@ -13,4 +14,9 @@ export function formatRatio(n: bigint, d: bigint, decimals = 7): string {
   const unit = 10n ** BigInt(decimals);
   const scaled = (n * unit) / d;
   return formatStroops(scaled * (STROOPS_PER_XLM / unit));
+}
+
+/** "XLM", or "CODE (ISSUER)" with the issuer in full: a look-alike code can't hide its issuer. */
+export function formatAssetWithIssuer(asset: DecodedAsset): string {
+  return asset.type === "native" ? "XLM" : `${asset.code} (${asset.issuer})`;
 }

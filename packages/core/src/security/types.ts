@@ -11,8 +11,18 @@ export type Origin =
   | { type: "pasted" } // Mode C
   | { type: "dapp"; url: string }; // Mode B (S2)
 
+/**
+ * What the requester showed the user before asking, which UNNAMED_OUTFLOW compares outflows
+ * with. Mode A: the Send form's destination. Mode C: nothing. Bound to the report: a request
+ * with other presented destinations never signs on it (assertSignable).
+ */
+export interface Presented {
+  /** Exact addresses (G… or M…) the user was shown as recipients. */
+  destinations: readonly string[];
+}
+
 export type ShieldRequest =
-  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin }
+  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin; presented: Presented }
   | { kind: "authEntry"; xdr: string; network: NetworkId; origin: Origin } // S3
   | { kind: "message"; message: string; network: NetworkId; origin: Origin }; // S2, SEP-53
 
@@ -224,6 +234,8 @@ export interface AnalysisReport {
   network: NetworkId;
   /** Who asked: a report for one origin is never accepted for a request from another. */
   origin: Origin;
+  /** What the requester presented; a request presenting anything else never signs on it. */
+  presented: Presented;
   ruleSetVersion: string;
   decoded: DecodedRequest;
   simulation: SimulationStatus;

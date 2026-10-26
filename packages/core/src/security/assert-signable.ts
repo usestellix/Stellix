@@ -2,7 +2,7 @@ import { StellixError } from "../errors.js";
 import { decodeTransactionEnvelope } from "./decode/index.js";
 import { evaluate } from "./policy/policy.js";
 import { RULE_SET_VERSION } from "./rules/index.js";
-import type { AnalysisReport, Origin, ShieldRequest } from "./types.js";
+import type { AnalysisReport, Origin, Presented, ShieldRequest } from "./types.js";
 
 // The single enforcement point (SHIELD §4, invariant 15). The SW signing handler calls this
 // immediately before signing; nothing else decides whether to sign. It trusts no decision it is
@@ -22,10 +22,17 @@ function sameOrigin(a: Origin, b: Origin): boolean {
   return a.type === b.type;
 }
 
+/** The same destinations, in any order. */
+function samePresented(a: Presented, b: Presented | undefined): boolean {
+  if (b === undefined) return false;
+  const set = new Set(a.destinations);
+  return set.size === new Set(b.destinations).size && b.destinations.every((d) => set.has(d));
+}
+
 /**
  * Throws a StellixError unless `req` may be signed now on the strength of `report`. Checks run
  * in a fixed order; the first failure wins:
- * pasted origin → SHIELD_BLOCKED; network → NETWORK_MISMATCH; origin or digest →
+ * pasted origin → SHIELD_BLOCKED; network → NETWORK_MISMATCH; origin, presented or digest →
  * SHIELD_DIGEST_MISMATCH (undecodable → SHIELD_INPUT_INVALID); rule-set version or expiry →
  * SHIELD_REPORT_EXPIRED; decision blocked → SHIELD_BLOCKED; review without the required
  * confirmation → SHIELD_CONFIRMATION_REQUIRED.
@@ -42,6 +49,9 @@ export function assertSignable(
   if (req.network !== report.network) fail("NETWORK_MISMATCH", "Report is for another network");
   if (!sameOrigin(req.origin, report.origin)) {
     fail("SHIELD_DIGEST_MISMATCH", "Report is for another origin");
+  }
+  if (!samePresented(req.presented, report.presented)) {
+    fail("SHIELD_DIGEST_MISMATCH", "Report is for other presented destinations");
   }
   const { hashHex } = decodeTransactionEnvelope(req.xdr, req.network);
   if (hashHex !== report.digest) fail("SHIELD_DIGEST_MISMATCH", "Request changed after analysis");

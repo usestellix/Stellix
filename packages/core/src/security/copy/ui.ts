@@ -87,4 +87,5 @@ export const EVIDENCE_LABELS: Readonly<Record<string, string>> = {
   masterWeightAfter: "Your key's weight after",
   highestThresholdAfter: "Highest threshold after",
   txSource: "Transaction source",
+  amount: "Amount",
 };

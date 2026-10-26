@@ -41,6 +41,13 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "This transaction belongs to {txSource}, but operation {opNumber} ({opType}) runs on your " +
       "account {account}. Signing authorizes that operation on your account.",
   },
+  UNNAMED_OUTFLOW: {
+    title: "Sends to an address you weren't shown",
+    body:
+      "Operation {opNumber} ({opType}) sends {amount} to {destination}. You weren't shown this " +
+      "address as a recipient before being asked to sign. Only continue if you meant to send " +
+      "to it.",
+  },
   MEMO_REQUIRED: {
     title: "Memo required",
     body:

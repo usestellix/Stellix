@@ -268,6 +268,7 @@ export {
   type PolicyDecision,
   type RuleCopy,
   type PolicyOutcome,
+  type Presented,
   type Rule,
   type RuleContext,
   type RuleData,
