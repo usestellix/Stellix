@@ -1,6 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
-import type { OrderBook, PathRecord } from "../network/horizon-schemas.js";
+import type { AccountRecord, OrderBook, PathRecord } from "../network/horizon-schemas.js";
 import type { DecodedOperation, DecodedSignerKey } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
@@ -182,6 +182,11 @@ export interface RuleData {
    * An account that doesn't exist requires none.
    */
   memoRequired: ReadonlyMap<string, boolean | RuleUnavailable>;
+  /**
+   * ACCT_MASTER_WEIGHT: the user's account as Horizon has it, fetched only when a setOptions on
+   * it changes the master weight or a threshold. null: the account doesn't exist.
+   */
+  userAccount?: AccountRecord | null | RuleUnavailable;
 }
 
 export interface IssuerInfo {

@@ -213,8 +213,8 @@ Severity = highest finding wins. Never average. Hard blocks are independent of s
 
 | Rule ID | Detects | Severity | Policy |
 |---|---|---|---|
-| `ACCT_SIGNER_CHANGE` | `setOptions` on the user's account adding/changing a signer | critical | Mode B: **blocked, not overridable**. Mode A: n/a (Stellix never builds it). Mode C: report only. |
-| `ACCT_MASTER_WEIGHT` | `setOptions` lowering master weight or raising thresholds such that the master key alone can no longer authorize | critical | Blocked, not overridable |
+| `ACCT_SIGNER_CHANGE` | `setOptions` on the user's account (effective source, muxed included) adding a signer or changing its weight; a removal (weight 0) isn't reported (#26) | critical | Mode B: **blocked, not overridable**. Mode A: n/a (Stellix never builds it). Mode C: report only. |
+| `ACCT_MASTER_WEIGHT` | `setOptions` lowering master weight or raising thresholds such that the master key alone can no longer authorize. Settled in #26: the tx's `setOptions` ops on the user's account, applied in order to the account as Horizon has it, take the master key from authorizing everything (weight > 0 and ≥ max(low, med, high)) to not; an account already multisig gets no finding. The account is read only when such an op is present | critical | Blocked, not overridable |
 | `ACCT_MERGE` | `accountMerge` with the user as effective source | critical | Blocked unless Origin is `stellix` |
 | `FOREIGN_SOURCE_OP` | An op whose effective source is the user inside a transaction whose source is another account | high | Review, typed |
 | `UNNAMED_OUTFLOW` | Assets leave the user to an address not presented by the requester (Mode B: compared with the dapp's stated destinations if given; otherwise every outflow is listed explicitly) | high | Review, typed |

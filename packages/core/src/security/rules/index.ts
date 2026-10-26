@@ -1,4 +1,6 @@
 import type { CheckUnavailable, Finding, Rule, RuleContext, RuleUnavailable } from "../types.js";
+import { ACCT_MASTER_WEIGHT } from "./ACCT_MASTER_WEIGHT.js";
+import { ACCT_SIGNER_CHANGE } from "./ACCT_SIGNER_CHANGE.js";
 import { MEMO_REQUIRED } from "./MEMO_REQUIRED.js";
 import { OFFER_BAD_PRICE } from "./OFFER_BAD_PRICE.js";
 import { PATH_LOW_MIN } from "./PATH_LOW_MIN.js";
@@ -10,10 +12,12 @@ import { UNSUPPORTED_OP } from "./UNSUPPORTED_OP.js";
  * Version of the rule set and thresholds. A report from another version is never signable
  * (SHIELD §4), so bump this whenever a rule, its order or a threshold changes.
  */
-export const RULE_SET_VERSION = "6";
+export const RULE_SET_VERSION = "7";
 
 /** The registry, in evaluation order. Rule issues append here. */
 export const RULES: readonly Rule[] = [
+  ACCT_SIGNER_CHANGE,
+  ACCT_MASTER_WEIGHT,
   OFFER_BAD_PRICE,
   PATH_LOW_MIN,
   TRUST_UNVERIFIED,

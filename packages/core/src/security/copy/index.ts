@@ -13,6 +13,22 @@ export interface RuleCopy {
 
 /** Each rule issue adds its entry here together with the rule. */
 export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
+  ACCT_SIGNER_CHANGE: {
+    title: "New signer on your account",
+    body:
+      "Operation {opNumber} gives {signerKey} a signing weight of {weight} on your account " +
+      "{account}. A signer with enough weight can move your funds and change your account " +
+      "without your recovery phrase.",
+  },
+  ACCT_MASTER_WEIGHT: {
+    title: "Your key could lose control of your account",
+    body:
+      "After operation {opNumber}, your own key on account {account} has a weight of " +
+      "{masterWeightAfter} (it was {masterWeightBefore}), and the highest threshold is " +
+      "{highestThresholdAfter}. Your key alone could no longer authorize every operation on " +
+      "the account. A weight of 0 turns your key off entirely, and you might not be able to " +
+      "undo this.",
+  },
   MEMO_REQUIRED: {
     title: "Memo required",
     body:

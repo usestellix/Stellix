@@ -80,4 +80,10 @@ export const EVIDENCE_LABELS: Readonly<Record<string, string>> = {
   assetCode: "Asset",
   issuer: "Issuer",
   verification: "Verification",
+  account: "Account",
+  signerKey: "Signer",
+  weight: "Weight",
+  masterWeightBefore: "Your key's weight before",
+  masterWeightAfter: "Your key's weight after",
+  highestThresholdAfter: "Highest threshold after",
 };

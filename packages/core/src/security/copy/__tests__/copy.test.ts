@@ -8,8 +8,6 @@ import { RULE_COPY, fillTemplate, findingCopy, placeholders } from "../index.js"
  * and removes its ID here; delete the list once it's empty. A registered rule is never pending.
  */
 const PENDING: readonly RuleId[] = [
-  "ACCT_SIGNER_CHANGE",
-  "ACCT_MASTER_WEIGHT",
   "ACCT_MERGE",
   "FOREIGN_SOURCE_OP",
   "UNNAMED_OUTFLOW",
@@ -21,6 +19,19 @@ const PENDING: readonly RuleId[] = [
 
 /** Evidence that fills every placeholder of a rule's copy. */
 const SAMPLE_EVIDENCE: Partial<Record<RuleId, Record<string, string>>> = {
+  ACCT_SIGNER_CHANGE: {
+    opNumber: "2",
+    account: "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+    signerKey: "GBUBOPHZEGSYI3ORSOOK2UZMIVES7YZXZOFBFRX2ZGBL44DYFOE4RE3S",
+    weight: "1",
+  },
+  ACCT_MASTER_WEIGHT: {
+    opNumber: "1",
+    account: "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+    masterWeightBefore: "1",
+    masterWeightAfter: "0",
+    highestThresholdAfter: "0",
+  },
   MEMO_REQUIRED: { destination: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD" },
   OFFER_BAD_PRICE: {
     opNumber: "1",
