@@ -29,6 +29,18 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "the account. A weight of 0 turns your key off entirely, and you might not be able to " +
       "undo this.",
   },
+  ACCT_MERGE: {
+    title: "Closes your account",
+    body:
+      "Operation {opNumber} merges your account {account} into {destination}: your account is " +
+      "closed and its whole XLM balance goes to that address. This can't be undone.",
+  },
+  FOREIGN_SOURCE_OP: {
+    title: "Uses your account in someone else's transaction",
+    body:
+      "This transaction belongs to {txSource}, but operation {opNumber} ({opType}) runs on your " +
+      "account {account}. Signing authorizes that operation on your account.",
+  },
   MEMO_REQUIRED: {
     title: "Memo required",
     body:
