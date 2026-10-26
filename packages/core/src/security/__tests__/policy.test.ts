@@ -22,6 +22,9 @@ import {
   type Severity,
 } from "../types.js";
 
+// The exhaustive cases evaluate every subset of the rule set (2^15 reports each).
+const EXHAUSTIVE = { timeout: 30_000 };
+
 // Severities from the SHIELD §6.1 catalogue: what each rule emits.
 const CATALOGUE_SEVERITY: Record<RuleId, Severity> = {
   ACCT_SIGNER_CHANGE: "critical",
@@ -244,7 +247,7 @@ describe("evaluate: unavailable checks (invariant 18)", () => {
   });
 });
 
-describe("evaluate: exhaustive over every subset of rules × mode", () => {
+describe("evaluate: exhaustive over every subset of rules × mode", EXHAUSTIVE, () => {
   const SUBSETS = 1 << RULE_IDS.length;
 
   function check(fired: RuleId[], missing: RuleId[], policy: Policy) {
