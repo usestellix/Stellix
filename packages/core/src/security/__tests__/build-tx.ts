@@ -6,7 +6,7 @@ import {
   TransactionBuilder,
   type xdr,
 } from "@stellar/stellar-sdk/base";
-import { accountSchema, type AccountRecord } from "../../network/horizon-schemas.js";
+import { accountSchema, ledgerSchema, type AccountRecord } from "../../network/horizon-schemas.js";
 import { FakeHorizonClient } from "../../testing/fake-horizon.js";
 import { analyze } from "../index.js";
 import type { Origin, ShieldDeps } from "../types.js";
@@ -102,4 +102,16 @@ export function analyzeTx(xdrBase64: string, opts: AnalyzeOptions = {}) {
     },
     deps,
   );
+}
+
+/** A fake Horizon whose latest ledger has this base reserve (testnet's is 0.5 XLM). */
+export function horizonWithBaseReserve(stroops = 5_000_000): FakeHorizonClient {
+  const horizon = new FakeHorizonClient();
+  horizon.ledger = ledgerSchema.parse({
+    sequence: 1,
+    base_reserve_in_stroops: stroops,
+    base_fee_in_stroops: 100,
+    closed_at: "2026-10-25T11:00:00Z",
+  });
+  return horizon;
 }

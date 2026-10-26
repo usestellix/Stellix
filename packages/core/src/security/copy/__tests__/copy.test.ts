@@ -7,12 +7,7 @@ import { RULE_COPY, fillTemplate, findingCopy, placeholders } from "../index.js"
  * Rule IDs whose rule issues (#26–#33) haven't landed yet. Each of those issues adds its copy
  * and removes its ID here; delete the list once it's empty. A registered rule is never pending.
  */
-const PENDING: readonly RuleId[] = [
-  "CLAIMABLE_TO_OTHER",
-  "SPONSORSHIP_CHANGE",
-  "NO_MAX_TIME",
-  "HIGH_FEE",
-];
+const PENDING: readonly RuleId[] = ["NO_MAX_TIME", "HIGH_FEE"];
 
 /** Evidence that fills every placeholder of a rule's copy. */
 const SAMPLE_EVIDENCE: Partial<Record<RuleId, Record<string, string>>> = {
@@ -45,6 +40,18 @@ const SAMPLE_EVIDENCE: Partial<Record<RuleId, Record<string, string>>> = {
     opType: "payment",
     amount: "25 XLM",
     destination: "GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM",
+  },
+  CLAIMABLE_TO_OTHER: {
+    opNumber: "1",
+    amount: "5 XLM",
+    claimants: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD",
+  },
+  SPONSORSHIP_CHANGE: {
+    opNumber: "1",
+    entry: "new entries of GDLDBGWQOA6FFWJMXIXYEZDWIYK7BM7VHFCRYGYF67C2BRMR7JGVKID3",
+    reserveAmount: "1",
+    reserveEntries: "2",
+    payer: "your account GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
   },
   MEMO_REQUIRED: { destination: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD" },
   OFFER_BAD_PRICE: {

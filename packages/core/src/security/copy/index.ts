@@ -48,6 +48,19 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "address as a recipient before being asked to sign. Only continue if you meant to send " +
       "to it.",
   },
+  CLAIMABLE_TO_OTHER: {
+    title: "Only others can claim this",
+    body:
+      "Operation {opNumber} locks {amount} from your account in a claimable balance that only " +
+      "{claimants} can claim. You're not a claimant, so you can't take it back.",
+  },
+  SPONSORSHIP_CHANGE: {
+    title: "Changes who pays a reserve",
+    body:
+      "Operation {opNumber} changes who pays the reserve for {entry}: {reserveAmount} XLM " +
+      "({reserveEntries} × the base reserve). After it, {payer} pays it. A reserve is locked in " +
+      "the paying account until the entry is removed.",
+  },
   MEMO_REQUIRED: {
     title: "Memo required",
     body:

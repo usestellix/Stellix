@@ -88,4 +88,10 @@ export const EVIDENCE_LABELS: Readonly<Record<string, string>> = {
   highestThresholdAfter: "Highest threshold after",
   txSource: "Transaction source",
   amount: "Amount",
+  claimants: "Claimants",
+  entry: "Entry",
+  reserveEntries: "Base reserves",
+  reserveAmount: "Reserve (XLM)",
+  reserveStroops: "Reserve (stroops)",
+  payer: "Paid by",
 };

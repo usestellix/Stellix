@@ -197,6 +197,8 @@ export interface RuleData {
    * it changes the master weight or a threshold. null: the account doesn't exist.
    */
   userAccount?: AccountRecord | null | RuleUnavailable;
+  /** SPONSORSHIP_CHANGE: the latest ledger's base reserve, fetched only when it's needed. */
+  baseReserveStroops?: bigint | RuleUnavailable;
 }
 
 export interface IssuerInfo {
