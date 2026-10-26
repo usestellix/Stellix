@@ -19,7 +19,13 @@ const deps: ShieldDeps = {
 
 function analyzeXdr(xdrBase64: string) {
   return analyze(
-    { kind: "transaction", xdr: xdrBase64, network: "testnet", origin: { type: "pasted" } },
+    {
+      kind: "transaction",
+      xdr: xdrBase64,
+      network: "testnet",
+      origin: { type: "pasted" },
+      presented: { destinations: [] },
+    },
     deps,
   );
 }
@@ -73,7 +79,10 @@ describe("UNSUPPORTED_OP", () => {
   it("finds nothing in any captured classic fixture", async () => {
     for (const f of FIXTURES) {
       const report = await analyzeXdr(f.envelopeXdr);
-      expect(report.findings, f.name).toEqual([]);
+      expect(
+        report.findings.filter((x) => x.ruleId === "UNSUPPORTED_OP"),
+        f.name,
+      ).toEqual([]);
     }
   });
 });

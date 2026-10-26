@@ -3,24 +3,56 @@ import { RULES } from "../../rules/index.js";
 import { RULE_IDS, type Finding, type RuleId } from "../../types.js";
 import { RULE_COPY, fillTemplate, findingCopy, placeholders } from "../index.js";
 
-/**
- * Rule IDs whose rule issues (#26–#33) haven't landed yet. Each of those issues adds its copy
- * and removes its ID here; delete the list once it's empty. A registered rule is never pending.
- */
-const PENDING: readonly RuleId[] = [
-  "ACCT_SIGNER_CHANGE",
-  "ACCT_MASTER_WEIGHT",
-  "ACCT_MERGE",
-  "FOREIGN_SOURCE_OP",
-  "UNNAMED_OUTFLOW",
-  "CLAIMABLE_TO_OTHER",
-  "SPONSORSHIP_CHANGE",
-  "NO_MAX_TIME",
-  "HIGH_FEE",
-];
-
 /** Evidence that fills every placeholder of a rule's copy. */
 const SAMPLE_EVIDENCE: Partial<Record<RuleId, Record<string, string>>> = {
+  ACCT_SIGNER_CHANGE: {
+    opNumber: "2",
+    account: "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+    signerKey: "GBUBOPHZEGSYI3ORSOOK2UZMIVES7YZXZOFBFRX2ZGBL44DYFOE4RE3S",
+    weight: "1",
+  },
+  ACCT_MASTER_WEIGHT: {
+    opNumber: "1",
+    account: "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+    masterWeightBefore: "1",
+    masterWeightAfter: "0",
+    highestThresholdAfter: "0",
+  },
+  ACCT_MERGE: {
+    opNumber: "1",
+    account: "GDL5RCVVDNPCBFPP2SGNNXTOHVHHGKD5TZNPPQL2MRRKY4RZRIDTOZK3",
+    destination: "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+  },
+  FOREIGN_SOURCE_OP: {
+    opNumber: "2",
+    opType: "payment",
+    account: "GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+    txSource: "GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM",
+  },
+  UNNAMED_OUTFLOW: {
+    opNumber: "2",
+    opType: "payment",
+    amount: "25 XLM",
+    destination: "GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM",
+  },
+  CLAIMABLE_TO_OTHER: {
+    opNumber: "1",
+    amount: "5 XLM",
+    claimants: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD",
+  },
+  SPONSORSHIP_CHANGE: {
+    opNumber: "1",
+    entry: "new entries of GDLDBGWQOA6FFWJMXIXYEZDWIYK7BM7VHFCRYGYF67C2BRMR7JGVKID3",
+    reserveAmount: "1",
+    reserveEntries: "2",
+    payer: "your account GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+  },
+  NO_MAX_TIME: { validUntil: "no end time", maxValidity: "1 hour" },
+  HIGH_FEE: {
+    maxFee: "0.2",
+    threshold: "0.1",
+    feePayer: "your account GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ",
+  },
   MEMO_REQUIRED: { destination: "GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD" },
   OFFER_BAD_PRICE: {
     opNumber: "1",
@@ -64,12 +96,8 @@ function finding(ruleId: RuleId, evidence: Record<string, string>): Finding {
 const entries = Object.entries(RULE_COPY) as [RuleId, { title: string; body: string }][];
 
 describe("copy table", () => {
-  it.each(RULE_IDS)("%s has copy, or its rule hasn't landed yet", (id) => {
-    expect(RULE_COPY[id] !== undefined || PENDING.includes(id)).toBe(true);
-  });
-
-  it("lists no rule as pending that already has copy", () => {
-    expect(PENDING.filter((id) => RULE_COPY[id] !== undefined)).toEqual([]);
+  it.each(RULE_IDS)("%s has copy", (id) => {
+    expect(RULE_COPY[id]).toBeDefined();
   });
 
   it("has copy for every registered rule", () => {
@@ -127,6 +155,6 @@ describe("findingCopy", () => {
   });
 
   it("throws for a rule without copy", () => {
-    expect(() => findingCopy(finding("HIGH_FEE", {}))).toThrow(/HIGH_FEE/);
+    expect(() => findingCopy(finding("NOT_A_RULE" as RuleId, {}))).toThrow(/NOT_A_RULE/);
   });
 });

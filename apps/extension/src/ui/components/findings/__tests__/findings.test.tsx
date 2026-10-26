@@ -72,12 +72,6 @@ describe("sortFindings", () => {
     expect(html).not.toMatch(/safe/i);
   });
 
-  it("a rule without copy yet is titled by its check name", () => {
-    const html = renderToStaticMarkup(<FindingList findings={[f("medium", 0, "HIGH_FEE")]} />);
-    expect(html).toContain(escaped(CHECK_NAMES.HIGH_FEE));
-    expect(html).toContain(escaped(FINDINGS_UI_TEXT.missingCopyBody));
-  });
-
   it("evidence values are escaped data, never markup", () => {
     const evil: Finding = {
       ...f("high", 0),

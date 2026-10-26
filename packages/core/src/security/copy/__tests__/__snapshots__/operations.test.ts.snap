@@ -1,0 +1,300 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > accountMerge 1`] = `
+[
+  "Closes GDL5RCVVDNPCBFPP2SGNNXTOHVHHGKD5TZNPPQL2MRRKY4RZRIDTOZK3 and sends its whole XLM balance to GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > allowTrust 1`] = `
+[
+  "As issuer of CLAW, GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH sets the trustline of GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ to: authorized.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > bumpSequence 1`] = `
+[
+  "Moves the sequence number of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI forward to 23110059378606189.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > changeTrust-asset 1`] = `
+[
+  "Lets your account hold up to 1000000 of CLAW (GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH).",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > changeTrust-pool-share 1`] = `
+[
+  "Lets your account hold shares of liquidity pool LA7BNCCF2M2JOVUF6ZDZ3ZIQSOCT3AFYYM3RIX7AT4F44FGXEJAX5KJW, which pairs XLM with PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54), with no limit.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > changeTrust-remove 1`] = `
+[
+  "Removes the trustline of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to RMV (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54).",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > claimClaimableBalance 1`] = `
+[
+  "Claims the claimable balance BAACHM6Q4FMNFDDESLUU5RIIHEZQM2MGOVACXZQOZRWMWCEUQLR35H5ONI into GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > clawback 1`] = `
+[
+  "As issuer, GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH takes back 10 CLAW (GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH) from GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > clawbackClaimableBalance 1`] = `
+[
+  "As issuer, GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH takes back the claimable balance BAAEYZ74HMTJFLZSEUZFR5ZK3RJRQIIN6QCBI54ANWBR2Q2CPIU6UE2BPA.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > createAccount 1`] = `
+[
+  "Creates the account GDL5RCVVDNPCBFPP2SGNNXTOHVHHGKD5TZNPPQL2MRRKY4RZRIDTOZK3 and funds it with 2 XLM from your account.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > createClaimableBalance 1`] = `
+[
+  "Locks 5 XLM from your account in a claimable balance. GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD can claim it at any time; GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ can claim it (at least 1 hour after creation and before 2027-10-25 11:23:58 UTC) or within 1 minute of creation.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > createPassiveSellOffer 1`] = `
+[
+  "Places a passive offer to sell 10 PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54) from your account for XLM, at 2 XLM per PLN.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > feeBump 1`] = `
+[
+  "Sends 1 XLM from your account to GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > liquidityPoolDeposit 1`] = `
+[
+  "Deposits from your account into liquidity pool LA7BNCCF2M2JOVUF6ZDZ3ZIQSOCT3AFYYM3RIX7AT4F44FGXEJAX5KJW: up to 100 of its first asset and 100 of its second, at a price (first per second) between 0.5 and 2.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > liquidityPoolWithdraw 1`] = `
+[
+  "Withdraws 10 pool shares of liquidity pool LA7BNCCF2M2JOVUF6ZDZ3ZIQSOCT3AFYYM3RIX7AT4F44FGXEJAX5KJW to your account, for at least 1 of its first asset and 1 of its second.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > manageBuyOffer-create 1`] = `
+[
+  "Offers to buy 10 PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54) with XLM from GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD, at 0.5 XLM per PLN.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > manageData-delete 1`] = `
+[
+  "Deletes the data entry "stellix-fixture" from GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > manageData-set 1`] = `
+[
+  "Sets the data entry "stellix-fixture" on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to "shield".",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > manageSellOffer-create 1`] = `
+[
+  "Offers to sell 100 PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54) from your account for XLM, at 1 XLM per PLN.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > manageSellOffer-delete 1`] = `
+[
+  "Cancels offer 931473 of your account.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > manageSellOffer-update 1`] = `
+[
+  "Changes offer 931473 of your account to sell 50 PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54) for XLM, at 1.5 XLM per PLN.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > pathPaymentStrictReceive 1`] = `
+[
+  "Sends up to 5 XLM from GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD so that GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD receives exactly 1 CLAW (GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH), via PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54).",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > pathPaymentStrictSend 1`] = `
+[
+  "Sends 1 XLM from GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD to GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD, converted to PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54); GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD receives at least 0.5 PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54).",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > payment-credit 1`] = `
+[
+  "Sends 1000 CLAW (GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH) from GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH to GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > payment-muxed-destination 1`] = `
+[
+  "Sends 1.25 XLM from your account to MDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIAAAAAAAAABTZGJRSO.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > payment-muxed-sources 1`] = `
+[
+  "Sends 2 XLM from MDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIAAAAAAAAAAAAA72EC to GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > payment-native 1`] = `
+[
+  "Sends 1 XLM from your account to GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > preconditions-all 1`] = `
+[
+  "Sends 1 XLM from your account to GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > preconditions-no-max-time 1`] = `
+[
+  "Sends 1 XLM from your account to GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > preconditions-none 1`] = `
+[
+  "Sends 1 XLM from GCQIF2WB6LMDHS37J5STLPJP2KT5BXJ7OI5ELQXMXHTJ5ZM272KU6J5P to GAYJFYBFIEP2XMEYY5GIUEX7ZBZROBS3P3EL3SD6ZY6VPPQOQORRJRPL.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-account 1`] = `
+[
+  "Revokes the reserve sponsorship of the account GDLDBGWQOA6FFWJMXIXYEZDWIYK7BM7VHFCRYGYF67C2BRMR7JGVKID3, signed by your account as its sponsor.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-claimable-balance 1`] = `
+[
+  "Makes GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD pay the reserves for new entries of GB2UTPVMBMQSS64UB74V3AQVQAQWNQ225NIWCIKJ3B4XNSJB5NQJFJLJ, until it ends.",
+  "Revokes the reserve sponsorship of the claimable balance BAAKG4MH3ET3OIPNW54TKRHTCWQFGV6HS6Y4ADPWCBYLZGV3MERJFIC5LE, signed by your account as its sponsor.",
+  "Ends the sponsorship of new entries of your account.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-data 1`] = `
+[
+  "Revokes the reserve sponsorship of the data entry "sponsored" of GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, signed by your account as its sponsor.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-offer 1`] = `
+[
+  "Revokes the reserve sponsorship of offer 931478 of GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, signed by your account as its sponsor.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-pool-share-trustline 1`] = `
+[
+  "Revokes the reserve sponsorship of the pool-share trustline LA7BNCCF2M2JOVUF6ZDZ3ZIQSOCT3AFYYM3RIX7AT4F44FGXEJAX5KJW of GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, signed by your account as its sponsor.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-signer 1`] = `
+[
+  "Revokes the reserve sponsorship of the signer key GDZPAFFKMKFM2U7VHPDNZ3HLPEBFI2D7SZOCH72TIU74K2BXDQWAWYUO on GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, signed by your account as its sponsor.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > revokeSponsorship-trustline 1`] = `
+[
+  "Revokes the reserve sponsorship of the PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54) trustline of GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, signed by your account as its sponsor.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-account-fields 1`] = `
+[
+  "Sets the weight of the master key of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to 10. Sets the low threshold of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to 1. Sets the medium threshold of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to 2. Sets the high threshold of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to 3. Turns on authorization revocable on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI. Sets the home domain of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to "example.com". Sets the inflation destination of GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI to GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-clear-flags 1`] = `
+[
+  "Turns off authorization revocable on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-set-flags 1`] = `
+[
+  "Turns on authorization required, authorization revocable, clawback enabled on GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-signer-ed25519 1`] = `
+[
+  "Gives the signer key GBUBOPHZEGSYI3ORSOOK2UZMIVES7YZXZOFBFRX2ZGBL44DYFOE4RE3S a weight of 1 on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI, adding it if it's new.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-signer-pre-auth-tx 1`] = `
+[
+  "Gives the signer pre-authorized transaction TCCBONNCSWHSTFN42TREALSRXR3YABTAYYRE4MLC522PQJUXAGTIBOGM a weight of 1 on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI, adding it if it's new.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-signer-remove 1`] = `
+[
+  "Removes the signer key GBUBOPHZEGSYI3ORSOOK2UZMIVES7YZXZOFBFRX2ZGBL44DYFOE4RE3S from GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-signer-sha256-hash 1`] = `
+[
+  "Gives the signer hash XCETBYZSL56V7BT3OWDEX534TNFHSZ47BC2WND5JDMLPDNURRCQBAYRS a weight of 1 on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI, adding it if it's new.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setOptions-signer-signed-payload 1`] = `
+[
+  "Gives the signer signed payload PDE6KVQWB6JTHJ5M2S5KN2VFVRCCXEB5C65RVUGH2Z7EY5ROW5LLGAAAAALHG5DFNRWGS6BAONUGSZLMMQQGM2LYOR2XEZIAADR4K a weight of 1 on GC45EECY44M3YT5ZG4Z4HIQHAALDCGN72N6XLYOKW7UN7O54W6YABBMI, adding it if it's new.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > setTrustLineFlags 1`] = `
+[
+  "As issuer, GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH changes the CLAW (GB77DTQJGHZQSO66DAVOGHPJNIYTDHBIE2CGLDXYZEEVZZU4RAQY4WIH) trustline of GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD: turns on authorized.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > sponsorship-create-account 1`] = `
+[
+  "Makes your account pay the reserves for new entries of GDLDBGWQOA6FFWJMXIXYEZDWIYK7BM7VHFCRYGYF67C2BRMR7JGVKID3, until it ends.",
+  "Creates the account GDLDBGWQOA6FFWJMXIXYEZDWIYK7BM7VHFCRYGYF67C2BRMR7JGVKID3 and funds it with 5 XLM from your account.",
+  "Ends the sponsorship of new entries of GDLDBGWQOA6FFWJMXIXYEZDWIYK7BM7VHFCRYGYF67C2BRMR7JGVKID3.",
+]
+`;
+
+exports[`operation descriptions > matches the snapshot for every captured fixture, from the user's side > sponsorship-entries 1`] = `
+[
+  "Makes your account pay the reserves for new entries of GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, until it ends.",
+  "Lets GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM hold PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54), with no limit.",
+  "Lets GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM hold shares of liquidity pool LA7BNCCF2M2JOVUF6ZDZ3ZIQSOCT3AFYYM3RIX7AT4F44FGXEJAX5KJW, which pairs XLM with PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54), with no limit.",
+  "Sets the data entry "sponsored" on GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM to "1".",
+  "Gives the signer key GDZPAFFKMKFM2U7VHPDNZ3HLPEBFI2D7SZOCH72TIU74K2BXDQWAWYUO a weight of 1 on GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM, adding it if it's new.",
+  "Offers to sell 1 XLM from GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM for PLN (GDTXBCKMQ7N5CYELJ64XADA6F2AXKJSRLKDZSBVWQ3LI5ER6VAJZMI54), at 100 PLN per XLM.",
+  "Locks 1 XLM from GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM in a claimable balance. GDX3XHNB6XNJBRMOWOP4ZQVKL5CFMXD4MJFXFICFVGR7J2KQXMDIANZD can claim it at any time.",
+  "Ends the sponsorship of new entries of GBVUE57PFI4Z37X2R6X2IKKQ2BIQCKFFARLG2SWIBK22CKPARHUAEFEM.",
+]
+`;

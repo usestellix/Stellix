@@ -5,7 +5,13 @@ import { THRESHOLDS } from "../rules/thresholds.js";
 import { RULE_IDS, type Finding, type Rule, type RuleContext, type RuleId } from "../types.js";
 
 const ctx: RuleContext = {
-  request: { kind: "transaction", xdr: "", network: "testnet", origin: { type: "pasted" } },
+  request: {
+    kind: "transaction",
+    xdr: "",
+    network: "testnet",
+    origin: { type: "pasted" },
+    presented: { destinations: [] },
+  },
   decoded: {
     kind: "transaction",
     envelopeType: "tx",

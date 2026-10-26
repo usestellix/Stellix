@@ -1,7 +1,9 @@
 import type { OrderBook, PathRecord } from "../network/horizon-schemas.js";
 import { requiresMemo } from "../tx/sep29.js";
 import { isUnavailable, pairKey, unavailableFrom } from "./lookups.js";
+import { checkedMasterKeyOps } from "./rules/ACCT_MASTER_WEIGHT.js";
 import { checkedMemoDestinations } from "./rules/MEMO_REQUIRED.js";
+import { sponsorshipChanges } from "./rules/SPONSORSHIP_CHANGE.js";
 import { checkedOffers } from "./rules/OFFER_BAD_PRICE.js";
 import { checkedPathPayments } from "./rules/PATH_LOW_MIN.js";
 import { checkedTrustlines } from "./rules/trust.js";
@@ -65,5 +67,14 @@ export async function gather(decoded: DecodedRequest, deps: ShieldDeps): Promise
       isUnavailable(account) ? account : account !== null && requiresMemo(account),
     );
   }
-  return { orderBooks, paths, issuers, memoRequired };
+  const data: RuleData = { orderBooks, paths, issuers, memoRequired };
+  if (checkedMasterKeyOps(decoded, deps.userAccount).length > 0) {
+    data.userAccount = await lookup(() => deps.horizon.getAccount(deps.userAccount));
+  }
+  if (sponsorshipChanges(decoded, deps.userAccount).length > 0) {
+    data.baseReserveStroops = await lookup(async () =>
+      BigInt((await deps.horizon.getLatestLedger()).base_reserve_in_stroops),
+    );
+  }
+  return data;
 }

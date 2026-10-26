@@ -90,6 +90,7 @@ packages/core/src/security/
 │   └── threat-list.ts     signed list load/verify/expiry                            (S4)
 ├── report.ts              AnalysisReport, digest computation, expiry
 ├── copy/                  plain-language text keyed by rule ID (UI reads from here)
+│   └── operations.ts      one plain-language description per decoded operation (#35)
 └── index.ts               public API: analyze, evaluate, assertSignable
 ```
 
@@ -113,9 +114,13 @@ apps/extension/src/
 
 ```ts
 export type ShieldRequest =
-  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin }
+  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin; presented: Presented }
   | { kind: "authEntry";   xdr: string; network: NetworkId; origin: Origin }   // S3
   | { kind: "message";     message: string; network: NetworkId; origin: Origin }; // S2, SEP-53
+
+// What the requester showed the user as recipients (#28): Mode A, the Send form's destination;
+// Mode C, nothing; Mode B (S2), the dapp's stated destinations. UNNAMED_OUTFLOW compares with it.
+export interface Presented { destinations: readonly string[] }
 
 export type Origin =
   | { type: "stellix" }                 // Mode A
@@ -152,6 +157,7 @@ export interface AnalysisReport {
   digest: string;                      // hex; see §5
   network: NetworkId;
   origin: Origin;                      // a report is only valid for the origin it was made for
+  presented: Presented;                // …and for the destinations that were presented
   ruleSetVersion: string;
   decoded: DecodedRequest;
   simulation: SimulationResult | { status: "not_applicable" } | { status: "unavailable"; reason: string };
@@ -177,6 +183,7 @@ It takes no decision from its caller: it re-runs `evaluate` on the report, so a 
 | Origin isn't `pasted` (Mode C is never signable) | `SHIELD_BLOCKED` |
 | `req.network` equals `report.network` | `NETWORK_MISMATCH` |
 | `req.origin` equals `report.origin` (dapp: same URL) | `SHIELD_DIGEST_MISMATCH` |
+| `req.presented` has the same destinations as `report.presented` (any order) | `SHIELD_DIGEST_MISMATCH` |
 | The envelope decodes and is canonically encoded | `SHIELD_INPUT_INVALID` |
 | Recomputed digest equals `report.digest` | `SHIELD_DIGEST_MISMATCH` |
 | `report.ruleSetVersion` is current | `SHIELD_REPORT_EXPIRED` |
@@ -213,17 +220,17 @@ Severity = highest finding wins. Never average. Hard blocks are independent of s
 
 | Rule ID | Detects | Severity | Policy |
 |---|---|---|---|
-| `ACCT_SIGNER_CHANGE` | `setOptions` on the user's account adding/changing a signer | critical | Mode B: **blocked, not overridable**. Mode A: n/a (Stellix never builds it). Mode C: report only. |
-| `ACCT_MASTER_WEIGHT` | `setOptions` lowering master weight or raising thresholds such that the master key alone can no longer authorize | critical | Blocked, not overridable |
+| `ACCT_SIGNER_CHANGE` | `setOptions` on the user's account (effective source, muxed included) adding a signer or changing its weight; a removal (weight 0) isn't reported (#26) | critical | Mode B: **blocked, not overridable**. Mode A: n/a (Stellix never builds it). Mode C: report only. |
+| `ACCT_MASTER_WEIGHT` | `setOptions` lowering master weight or raising thresholds such that the master key alone can no longer authorize. Settled in #26: the tx's `setOptions` ops on the user's account, applied in order to the account as Horizon has it, take the master key from authorizing everything (weight > 0 and ≥ max(low, med, high)) to not; an account already multisig gets no finding. The account is read only when such an op is present | critical | Blocked, not overridable |
 | `ACCT_MERGE` | `accountMerge` with the user as effective source | critical | Blocked unless Origin is `stellix` |
-| `FOREIGN_SOURCE_OP` | An op whose effective source is the user inside a transaction whose source is another account | high | Review, typed |
-| `UNNAMED_OUTFLOW` | Assets leave the user to an address not presented by the requester (Mode B: compared with the dapp's stated destinations if given; otherwise every outflow is listed explicitly) | high | Review, typed |
+| `FOREIGN_SOURCE_OP` | An op whose effective source is the user inside a transaction whose source is another account (fee bump: the inner transaction's source; a fee source alone isn't a foreign op) | high | Review, typed |
+| `UNNAMED_OUTFLOW` | Assets leave the user to an address not presented by the requester (Mode B: compared with the dapp's stated destinations if given; otherwise every outflow is listed explicitly). Settled in #28: `request.presented`, exact address match; Mode A presents the Send destination, Mode C nothing. Payments, path payments (sendMax for strict-receive), merges, createAccount and each claimable-balance claimant count; offers and pool deposits are listed (`listOutflows`) but never flagged | high | Review, typed |
 | `OFFER_BAD_PRICE` | `manageSellOffer` / `manageBuyOffer` / `createPassiveSellOffer` priced worse than the order-book reference by more than the threshold | high | Review, show computed loss |
 | `PATH_LOW_MIN` | Path payment whose `destMin` / `sendMax` implies loss beyond threshold vs Horizon's best path | high | Review, show computed loss |
-| `CLAIMABLE_TO_OTHER` | `createClaimableBalance` from the user claimable only by others | medium | Review |
+| `CLAIMABLE_TO_OTHER` | `createClaimableBalance` from the user (effective source) where the user isn't a claimant | medium | Review |
 | `TRUST_UNVERIFIED` | `changeTrust` to an asset whose issuer has no `home_domain`, or whose `stellar.toml` doesn't list the asset under `CURRENCIES` with the same issuer | medium | Review |
 | `TRUST_CLAWBACK` | Issuer has `auth_clawback_enabled` | medium | Review, explain |
-| `SPONSORSHIP_CHANGE` | Begin/end/revoke sponsorship affecting the user's entries | medium | Review, explain reserve impact |
+| `SPONSORSHIP_CHANGE` | Begin/end/revoke sponsorship affecting the user's entries. Settled in #32: per begin (user as sponsor or sponsored; entries counted from what the sponsored account creates before its `end`; a sandwich creating nothing isn't reported) and per revoke (user as current sponsor or owner). Evidence: entry, base reserves (account 2, claimable balance ≥ 1, others 1) × the latest ledger's base reserve, and who pays after (the revoking account's sandwich sponsor, else the owner). Base reserve unreadable → unavailable | medium | Review, explain reserve impact |
 | `NO_MAX_TIME` | `maxTime` absent (0) or beyond threshold | medium | Review |
 | `HIGH_FEE` | Fee bid, or fee-bump max fee, above threshold | medium | Review, show max cost |
 | `MEMO_REQUIRED` | SEP-29: no memo, and a `payment`, path payment or `accountMerge` to a `G…` account whose `config.memo_required` is `"1"` (`M…` exempt; any op source). Replaced M3's inline check in #24 | high | Blocked (existing behaviour) |

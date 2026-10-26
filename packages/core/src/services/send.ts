@@ -18,7 +18,13 @@ import {
   type ReportView,
   type StoredReport,
 } from "../security/report.js";
-import type { AnalysisReport, Origin, PolicyDecision, TomlFetcher } from "../security/types.js";
+import type {
+  AnalysisReport,
+  Origin,
+  PolicyDecision,
+  Presented,
+  TomlFetcher,
+} from "../security/types.js";
 import { readSettings } from "../settings.js";
 import { isMultisig, summarizeAccount } from "../stellar/account-summary.js";
 import { isMuxedAddress } from "../stellar/address.js";
@@ -60,6 +66,11 @@ export interface SendDeps {
 }
 
 const STELLIX: Origin = { type: "stellix" };
+
+/** Mode A presents one recipient: the destination the Send form and Review screen show. */
+function presentedBy(summary: PaymentSummary): Presented {
+  return { destinations: [summary.destination] };
+}
 
 const CONFIRM_SAFETY_MS = 10_000;
 const RESUBMIT_MIN_INTERVAL_MS = 2_000;
@@ -210,7 +221,8 @@ export async function preparePayment(
     [payment.destinationBase, destRecord],
   ]);
   const report = await analyze(
-    { kind: "transaction", xdr, network, origin: STELLIX },
+    // The Send form showed exactly this destination (UNNAMED_OUTFLOW).
+    { kind: "transaction", xdr, network, origin: STELLIX, presented: presentedBy(summary) },
     {
       horizon: withKnownAccounts(horizon, known),
       toml: deps.toml ?? NO_TOML,
@@ -271,7 +283,13 @@ export async function submitPrepared(
       throw new StellixError("SHIELD_REPORT_EXPIRED", "No analysis for this transaction");
     }
     assertSignable(
-      { kind: "transaction", xdr: prepared.xdr, network: settings.network, origin: STELLIX },
+      {
+        kind: "transaction",
+        xdr: prepared.xdr,
+        network: settings.network,
+        origin: STELLIX,
+        presented: presentedBy(prepared.summary),
+      },
       fromStoredReport(
         prepared.report,
         decodeTransactionEnvelope(prepared.xdr, settings.network).decoded,

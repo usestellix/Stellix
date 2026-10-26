@@ -7,13 +7,17 @@ import { openVaultWithKey } from "../../vault/vault.js";
 import { fromBase64 } from "../../vault/encoding.js";
 import { ABANDON, FAST_SCRYPT, PASSWORD, codeOf } from "./helpers.js";
 
+// Each password check runs scrypt at the lowest work factor a vault accepts (2^15), so a test
+// with several of them can pass 5 s on a loaded runner.
+const SCRYPT_HEAVY = { timeout: 30_000 };
+
 async function wallet() {
   const p = createFakePlatform();
   await importWallet(p, { mnemonic: ABANDON, password: PASSWORD }, { scryptParams: FAST_SCRYPT });
   return p;
 }
 
-describe("revealPhrase", () => {
+describe("revealPhrase", SCRYPT_HEAVY, () => {
   it("requires the password even when unlocked", async () => {
     const p = await wallet();
     expect(await revealPhrase(p, PASSWORD)).toEqual({ words: ABANDON.split(" ") });
@@ -33,7 +37,7 @@ describe("revealPhrase", () => {
   });
 });
 
-describe("changePassword", () => {
+describe("changePassword", SCRYPT_HEAVY, () => {
   it("re-encrypts, keeps the phrase, and replaces the session key", async () => {
     const p = await wallet();
     const before = await p.persistent.get<{ kdf: { salt: string } }>("vault");
@@ -71,7 +75,7 @@ describe("changePassword", () => {
   });
 });
 
-describe("resetWallet", () => {
+describe("resetWallet", SCRYPT_HEAVY, () => {
   it("wipes both stores only with the exact confirmation", async () => {
     const p = await wallet();
     expect(await codeOf(resetWallet(p, "reset"))).toBe("INVALID_REQUEST");

@@ -42,7 +42,13 @@ async function run(f: MarketFixture, opts: Options = {}) {
     now: () => NOW,
   };
   const report = await analyze(
-    { kind: "transaction", xdr: envelopeXdr, network: "testnet", origin: { type: "stellix" } },
+    {
+      kind: "transaction",
+      xdr: envelopeXdr,
+      network: "testnet",
+      origin: { type: "stellix" },
+      presented: { destinations: [] },
+    },
     deps,
   );
   return {

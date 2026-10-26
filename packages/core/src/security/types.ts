@@ -1,6 +1,6 @@
 import type { NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
-import type { OrderBook, PathRecord } from "../network/horizon-schemas.js";
+import type { AccountRecord, OrderBook, PathRecord } from "../network/horizon-schemas.js";
 import type { DecodedOperation, DecodedSignerKey } from "./decode/operation-types.js";
 
 // Shield's core types (SHIELD.md §4). Everything here is public data: a report may cross
@@ -11,8 +11,18 @@ export type Origin =
   | { type: "pasted" } // Mode C
   | { type: "dapp"; url: string }; // Mode B (S2)
 
+/**
+ * What the requester showed the user before asking, which UNNAMED_OUTFLOW compares outflows
+ * with. Mode A: the Send form's destination. Mode C: nothing. Bound to the report: a request
+ * with other presented destinations never signs on it (assertSignable).
+ */
+export interface Presented {
+  /** Exact addresses (G… or M…) the user was shown as recipients. */
+  destinations: readonly string[];
+}
+
 export type ShieldRequest =
-  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin }
+  | { kind: "transaction"; xdr: string; network: NetworkId; origin: Origin; presented: Presented }
   | { kind: "authEntry"; xdr: string; network: NetworkId; origin: Origin } // S3
   | { kind: "message"; message: string; network: NetworkId; origin: Origin }; // S2, SEP-53
 
@@ -182,6 +192,13 @@ export interface RuleData {
    * An account that doesn't exist requires none.
    */
   memoRequired: ReadonlyMap<string, boolean | RuleUnavailable>;
+  /**
+   * ACCT_MASTER_WEIGHT: the user's account as Horizon has it, fetched only when a setOptions on
+   * it changes the master weight or a threshold. null: the account doesn't exist.
+   */
+  userAccount?: AccountRecord | null | RuleUnavailable;
+  /** SPONSORSHIP_CHANGE: the latest ledger's base reserve, fetched only when it's needed. */
+  baseReserveStroops?: bigint | RuleUnavailable;
 }
 
 export interface IssuerInfo {
@@ -219,6 +236,8 @@ export interface AnalysisReport {
   network: NetworkId;
   /** Who asked: a report for one origin is never accepted for a request from another. */
   origin: Origin;
+  /** What the requester presented; a request presenting anything else never signs on it. */
+  presented: Presented;
   ruleSetVersion: string;
   decoded: DecodedRequest;
   simulation: SimulationStatus;

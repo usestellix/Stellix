@@ -12,6 +12,10 @@ import {
 } from "../session.js";
 import { ABANDON, FAST_SCRYPT, PASSWORD, codeOf } from "./helpers.js";
 
+// Every unlock runs scrypt at the lowest work factor a vault accepts (2^15, KEY_MANAGEMENT §4.3),
+// so a test with a dozen unlocks can pass 5 s on a loaded runner.
+const SCRYPT_HEAVY = { timeout: 30_000 };
+
 async function walletPlatform() {
   const p = createFakePlatform();
   await importWallet(p, { mnemonic: ABANDON, password: PASSWORD }, { scryptParams: FAST_SCRYPT });
@@ -19,7 +23,7 @@ async function walletPlatform() {
   return p;
 }
 
-describe("unlock", () => {
+describe("unlock", SCRYPT_HEAVY, () => {
   it("writes the session key and activity time on the right password", async () => {
     const p = await walletPlatform();
     await unlock(p, PASSWORD);
@@ -39,7 +43,7 @@ describe("unlock", () => {
   });
 });
 
-describe("unlock throttle (SW-enforced)", () => {
+describe("unlock throttle (SW-enforced)", SCRYPT_HEAVY, () => {
   it("refuses every attempt for 30 s after 5 consecutive failures — even the right password", async () => {
     const p = await walletPlatform();
     for (let i = 0; i < 5; i++) expect(await codeOf(unlock(p, "wrong"))).toBe("INVALID_PASSWORD");
@@ -84,7 +88,7 @@ describe("unlock throttle (SW-enforced)", () => {
   });
 });
 
-describe("lock", () => {
+describe("lock", SCRYPT_HEAVY, () => {
   it("removes session key, activity, pending onboarding and every prepared tx", async () => {
     const p = await walletPlatform();
     await unlock(p, PASSWORD);
@@ -98,7 +102,7 @@ describe("lock", () => {
   });
 });
 
-describe("auto-lock", () => {
+describe("auto-lock", SCRYPT_HEAVY, () => {
   it("locks after the configured idle time, not before", async () => {
     const p = await walletPlatform();
     await unlock(p, PASSWORD);

@@ -13,6 +13,68 @@ export interface RuleCopy {
 
 /** Each rule issue adds its entry here together with the rule. */
 export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
+  ACCT_SIGNER_CHANGE: {
+    title: "New signer on your account",
+    body:
+      "Operation {opNumber} gives {signerKey} a signing weight of {weight} on your account " +
+      "{account}. A signer with enough weight can move your funds and change your account " +
+      "without your recovery phrase.",
+  },
+  ACCT_MASTER_WEIGHT: {
+    title: "Your key could lose control of your account",
+    body:
+      "After operation {opNumber}, your own key on account {account} has a weight of " +
+      "{masterWeightAfter} (it was {masterWeightBefore}), and the highest threshold is " +
+      "{highestThresholdAfter}. Your key alone could no longer authorize every operation on " +
+      "the account. A weight of 0 turns your key off entirely, and you might not be able to " +
+      "undo this.",
+  },
+  ACCT_MERGE: {
+    title: "Closes your account",
+    body:
+      "Operation {opNumber} merges your account {account} into {destination}: your account is " +
+      "closed and its whole XLM balance goes to that address. This can't be undone.",
+  },
+  FOREIGN_SOURCE_OP: {
+    title: "Uses your account in someone else's transaction",
+    body:
+      "This transaction belongs to {txSource}, but operation {opNumber} ({opType}) runs on your " +
+      "account {account}. Signing authorizes that operation on your account.",
+  },
+  UNNAMED_OUTFLOW: {
+    title: "Sends to an address you weren't shown",
+    body:
+      "Operation {opNumber} ({opType}) sends {amount} to {destination}. You weren't shown this " +
+      "address as a recipient before being asked to sign. Only continue if you meant to send " +
+      "to it.",
+  },
+  CLAIMABLE_TO_OTHER: {
+    title: "Only others can claim this",
+    body:
+      "Operation {opNumber} locks {amount} from your account in a claimable balance that only " +
+      "{claimants} can claim. You're not a claimant, so you can't take it back.",
+  },
+  SPONSORSHIP_CHANGE: {
+    title: "Changes who pays a reserve",
+    body:
+      "Operation {opNumber} changes who pays the reserve for {entry}: {reserveAmount} XLM " +
+      "({reserveEntries} × the base reserve). After it, {payer} pays it. A reserve is locked in " +
+      "the paying account until the entry is removed.",
+  },
+  NO_MAX_TIME: {
+    title: "Stays valid for a long time",
+    body:
+      "This transaction can be submitted until {validUntil}. Shield expects a transaction to " +
+      "expire within {maxValidity}. Once signed, anyone holding it can submit it at any point " +
+      "until then, including when you no longer expect it.",
+  },
+  HIGH_FEE: {
+    title: "High fee",
+    body:
+      "This transaction lets {feePayer} be charged up to {maxFee} XLM in fees, more than the " +
+      "{threshold} XLM Shield expects. The network usually charges far less, but it can charge " +
+      "up to this amount.",
+  },
   MEMO_REQUIRED: {
     title: "Memo required",
     body:

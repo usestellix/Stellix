@@ -29,6 +29,7 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
     digest: hashHex,
     network: req.network,
     origin: req.origin,
+    presented: req.presented,
     decoded,
     simulation: { status: "not_applicable" },
     findings,
@@ -39,6 +40,12 @@ export async function analyze(req: ShieldRequest, deps: ShieldDeps): Promise<Ana
 
 export { assertSignable, type Confirmation } from "./assert-signable.js";
 export { RULE_COPY, fillTemplate, findingCopy, type RuleCopy } from "./copy/index.js";
+export {
+  DESCRIBERS,
+  describeOperation,
+  operationSentences,
+  type OperationSentence,
+} from "./copy/operations.js";
 export { describeClaimant, describePredicate } from "./copy/predicate.js";
 export {
   CHECK_NAMES,
@@ -68,6 +75,7 @@ export {
 } from "./report.js";
 export { RULES, RULE_SET_VERSION, runRules, type RuleRun } from "./rules/index.js";
 export { THRESHOLDS } from "./rules/thresholds.js";
+export { listOutflows, type Outflow } from "./rules/UNNAMED_OUTFLOW.js";
 export { isUnavailable, pairKey, unavailableFrom } from "./lookups.js";
 export { NO_TOML } from "./intel/no-toml.js";
 export {
