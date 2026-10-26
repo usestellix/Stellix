@@ -90,6 +90,7 @@ packages/core/src/security/
 │   └── threat-list.ts     signed list load/verify/expiry                            (S4)
 ├── report.ts              AnalysisReport, digest computation, expiry
 ├── copy/                  plain-language text keyed by rule ID (UI reads from here)
+│   └── operations.ts      one plain-language description per decoded operation (#35)
 └── index.ts               public API: analyze, evaluate, assertSignable
 ```
 

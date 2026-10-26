@@ -4,7 +4,8 @@ import type { SponsoredEntry } from "../decode/value-types.js";
 import { resolveSources } from "../decode/sources.js";
 import { isUnavailable } from "../lookups.js";
 import type { DecodedRequest, Finding, Rule } from "../types.js";
-import { formatAssetWithIssuer, formatStroops } from "./format.js";
+import { entryText } from "../copy/values.js";
+import { formatStroops } from "./format.js";
 
 // Sponsorship (CAP-33): between beginSponsoringFutureReserves(S) by P and S's matching
 // endSponsoringFutureReserves, P pays the reserves of entries S creates. revokeSponsorship moves
@@ -62,27 +63,6 @@ function entryOwner(entry: SponsoredEntry): string | null {
     case "claimableBalance":
     case "liquidityPool":
       return null;
-  }
-}
-
-function entryText(entry: SponsoredEntry): string {
-  switch (entry.type) {
-    case "account":
-      return `the account ${entry.accountId}`;
-    case "trustline":
-      return entry.asset.type === "poolShare"
-        ? `the pool-share trustline ${entry.asset.liquidityPoolId} of ${entry.accountId}`
-        : `the ${formatAssetWithIssuer(entry.asset)} trustline of ${entry.accountId}`;
-    case "offer":
-      return `offer ${entry.offerId.toString()} of ${entry.sellerId}`;
-    case "data":
-      return `the data entry "${entry.dataName.text ?? `0x${entry.dataName.hex}`}" of ${entry.accountId}`;
-    case "signer":
-      return `the signer ${entry.signerKey.key} on ${entry.accountId}`;
-    case "claimableBalance":
-      return `the claimable balance ${entry.balanceId}`;
-    case "liquidityPool":
-      return `the liquidity pool ${entry.liquidityPoolId}`;
   }
 }
 
