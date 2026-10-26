@@ -94,4 +94,10 @@ export const EVIDENCE_LABELS: Readonly<Record<string, string>> = {
   reserveAmount: "Reserve (XLM)",
   reserveStroops: "Reserve (stroops)",
   payer: "Paid by",
+  validUntil: "Valid until",
+  maxValidity: "Expected validity",
+  maxFee: "Maximum fee (XLM)",
+  maxFeeStroops: "Maximum fee (stroops)",
+  threshold: "Threshold (XLM)",
+  feePayer: "Fee paid by",
 };

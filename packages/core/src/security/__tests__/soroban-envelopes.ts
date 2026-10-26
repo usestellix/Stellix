@@ -1,12 +1,5 @@
-import {
-  Account,
-  Asset,
-  Networks,
-  Operation,
-  StrKey,
-  TransactionBuilder,
-  type xdr,
-} from "@stellar/stellar-sdk/base";
+import { Asset, Operation, StrKey, type xdr } from "@stellar/stellar-sdk/base";
+import { buildTx } from "./build-tx.js";
 
 // Envelopes with Soroban ops and inflation, built with the SDK: Shield S1 only has to report
 // them as unsupported, and testnet no longer accepts inflation, so no fixture can be captured.
@@ -29,12 +22,7 @@ export const UNSUPPORTED_OPS: Record<string, () => xdr.Operation> = {
 export const payment = () =>
   Operation.payment({ destination: PEER, asset: Asset.native(), amount: "1" });
 
-/** A testnet envelope with these ops, in order. */
+/** A testnet envelope with these ops, in order, valid for 180 s from the tests' NOW. */
 export function envelopeWith(...ops: xdr.Operation[]): string {
-  const builder = new TransactionBuilder(new Account(SOURCE, "1"), {
-    fee: "100",
-    networkPassphrase: Networks.TESTNET,
-  }).setTimeout(180);
-  for (const op of ops) builder.addOperation(op);
-  return builder.build().toEnvelope().toXdr("base64");
+  return buildTx(ops);
 }

@@ -61,6 +61,20 @@ export const RULE_COPY: Readonly<Partial<Record<RuleId, RuleCopy>>> = {
       "({reserveEntries} × the base reserve). After it, {payer} pays it. A reserve is locked in " +
       "the paying account until the entry is removed.",
   },
+  NO_MAX_TIME: {
+    title: "Stays valid for a long time",
+    body:
+      "This transaction can be submitted until {validUntil}. Shield expects a transaction to " +
+      "expire within {maxValidity}. Once signed, anyone holding it can submit it at any point " +
+      "until then, including when you no longer expect it.",
+  },
+  HIGH_FEE: {
+    title: "High fee",
+    body:
+      "This transaction lets {feePayer} be charged up to {maxFee} XLM in fees, more than the " +
+      "{threshold} XLM Shield expects. The network usually charges far less, but it can charge " +
+      "up to this amount.",
+  },
   MEMO_REQUIRED: {
     title: "Memo required",
     body:

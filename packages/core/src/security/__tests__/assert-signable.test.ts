@@ -20,7 +20,8 @@ import type {
 } from "../types.js";
 
 const TESTNET = paymentFixture.networkPassphrase;
-const NOW = 1_000_000;
+// Mid-capture: the fixtures expire within the hour, so NO_MAX_TIME stays quiet.
+const NOW = Date.parse("2026-10-25T11:00:00Z");
 const STELLIX: Origin = { type: "stellix" };
 const DAPP: Origin = { type: "dapp", url: "https://dapp.example" };
 
