@@ -40,6 +40,12 @@ jobs:
   e2e:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    # Playwright's image ships Chromium and its system libraries, so no apt step: installing
+    # them with `--with-deps` from the Azure Ubuntu mirror ran past the job timeout. Pinned by
+    # digest (SECURITY §8); its tag must match @playwright/test in apps/extension/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+      options: --ipc=host
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,7 +57,6 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @stellix/extension exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -65,6 +70,12 @@ jobs:
   e2e-mainnet:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    # Playwright's image ships Chromium and its system libraries, so no apt step: installing
+    # them with `--with-deps` from the Azure Ubuntu mirror ran past the job timeout. Pinned by
+    # digest (SECURITY §8); its tag must match @playwright/test in apps/extension/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+      options: --ipc=host
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -76,7 +87,6 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @stellix/extension exec playwright install --with-deps chromium
       - run: pnpm test:e2e:mainnet
       - run: node scripts/check-bundle.mjs
         env:
