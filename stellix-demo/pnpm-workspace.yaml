@@ -1,0 +1,17 @@
+# The site is its own pnpm root, so it never joins the extension's workspace and can be
+# moved out of this repository unchanged.
+packages:
+  - "."
+
+# No dependency version younger than 14 days (in minutes). Applies to transitive dependencies too.
+minimumReleaseAge: 20160
+
+# Exact versions only.
+saveExact: true
+
+# Dependency build scripts are denied unless reviewed and listed here.
+strictDepBuilds: true
+allowBuilds:
+  # From eslint-config-next's import resolver. Its postinstall only downloads a fallback
+  # binary when the prebuilt optional package for the platform is missing. Denied.
+  unrs-resolver: false
