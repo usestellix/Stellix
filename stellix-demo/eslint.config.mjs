@@ -6,6 +6,7 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    files: ["src/**/*.{ts,tsx}"],
     rules: {
       // No logging in a static marketing site (and nothing that could leak into a build log).
       "no-console": "error",

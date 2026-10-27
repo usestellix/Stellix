@@ -14,7 +14,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check:copy": "node scripts/check-copy.mjs"
   },
   "dependencies": {
     "next": "16.4.0",
