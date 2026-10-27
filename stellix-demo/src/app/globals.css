@@ -4,6 +4,7 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -16,5 +17,70 @@
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Anything pressable: scales down on press (feedback), colors ease on hover. Tailwind's
+     hover: variant already applies only on devices that can hover. */
+  .press {
+    transition:
+      transform var(--d-press) var(--ease-out),
+      background-color var(--d-hover) ease,
+      color var(--d-hover) ease,
+      box-shadow var(--d-hover) ease;
+  }
+  .press:active {
+    transform: scale(var(--press-scale));
+  }
+
+  /* Mobile menu (native popover). Enters from just above, from the trigger's side; exits
+     faster than it enters. Reduced motion zeroes --drop, leaving the fade. */
+  .nav-sheet {
+    position: fixed;
+    inset: 0.5rem 0.5rem auto;
+    width: auto;
+    margin: 0;
+    padding: 0.5rem 1rem 1rem;
+    border: 0;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--elevation-raised);
+    transform-origin: top right;
+    opacity: 0;
+    transform: translateY(var(--drop));
+    transition:
+      opacity var(--d-exit) var(--ease-out),
+      transform var(--d-exit) var(--ease-out),
+      overlay var(--d-exit) allow-discrete,
+      display var(--d-exit) allow-discrete;
+  }
+  .nav-sheet:popover-open {
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--d-ui);
+  }
+  @starting-style {
+    .nav-sheet:popover-open {
+      opacity: 0;
+      transform: translateY(var(--drop));
+    }
+  }
+  .nav-sheet::backdrop {
+    background: rgb(0 0 0 / 0);
+    transition:
+      background-color var(--d-exit) ease,
+      overlay var(--d-exit) allow-discrete,
+      display var(--d-exit) allow-discrete;
+  }
+  .nav-sheet:popover-open::backdrop {
+    background: rgb(0 0 0 / 0.24);
+    transition-duration: var(--d-ui);
+  }
+  @starting-style {
+    .nav-sheet:popover-open::backdrop {
+      background: rgb(0 0 0 / 0);
+    }
   }
 }

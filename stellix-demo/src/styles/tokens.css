@@ -88,6 +88,16 @@
   }
 }
 
+/* Only our colors: Tailwind's default palette is removed so nothing off-token slips in. This
+   reset must come before any color is defined, or it clears those too. */
+@theme {
+  --color-*: initial;
+  --color-white: #fff;
+  --color-black: #000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+}
+
 /* Theme- and motion-dependent tokens, exposed to Tailwind utilities by reference. */
 @theme inline {
   --color-canvas: var(--canvas);
@@ -119,13 +129,6 @@
 }
 
 @theme {
-  /* Only our colors: Tailwind's default palette is removed so nothing off-token slips in. */
-  --color-*: initial;
-  --color-white: #fff;
-  --color-black: #000;
-  --color-transparent: transparent;
-  --color-current: currentColor;
-
   /* Easing (from the Emil Kowalski design-engineering skill). */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);

@@ -1,11 +1,13 @@
-// Placeholder until the layout (step 2) and holding page land. Exercises the tokens only.
+import { Container } from "@/components/ui/container";
+
+// Placeholder until the holding page (phase 1) and the Shield-first home (phase 2) land.
 export default function Home() {
   return (
-    <main className="mx-auto max-w-(--container-page) px-4 py-24 sm:px-6 lg:px-8">
+    <Container className="py-24">
       <h1 className="text-h1 font-semibold">Stellix</h1>
-      <p className="mt-4 max-w-(--container-prose) text-lead text-muted">
+      <p className="mt-4 max-w-(--container-prose) text-lead text-ink-2">
         A non-custodial Stellar wallet for your browser.
       </p>
-    </main>
+    </Container>
   );
 }
