@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:copy": "node scripts/check-copy.mjs",
-    "sync:privacy": "node scripts/sync-privacy.mjs"
+    "sync:privacy": "node scripts/sync-privacy.mjs",
+    "preview": "node scripts/preview.mjs"
   },
   "dependencies": {
     "marked": "18.1.1",
