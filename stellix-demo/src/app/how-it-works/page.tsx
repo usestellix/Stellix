@@ -45,7 +45,7 @@ export default function HowItWorksPage() {
             featured
             media={
               <Screenshot
-                src="/screenshots/review.png"
+                src="/screenshots/review.webp"
                 alt="Stellix review screen: destination address in full, type Send XLM, amount 120 XLM, memo, network fee and total, with Confirm and send."
                 caption="The review screen for a payment on testnet."
                 priority
@@ -79,7 +79,7 @@ export default function HowItWorksPage() {
             title="Send and receive"
             media={
               <Screenshot
-                src="/screenshots/receive.png"
+                src="/screenshots/receive.webp"
                 alt="Stellix receive screen: the account address with a QR code and a payment request link."
                 caption="Receiving with a QR code and a payment link."
               />

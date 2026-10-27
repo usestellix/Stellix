@@ -68,17 +68,17 @@ export function ShieldHome() {
       <Section id="wallet" title="Also a wallet" intro="Send and receive XLM with the same care.">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
           <Screenshot
-            src="/screenshots/review.png"
+            src="/screenshots/review.webp"
             alt="Stellix review screen: destination address in full, type Send XLM, amount 120 XLM, memo, network fee and total, with Confirm and send."
             caption={<Claim id="review-screen" />}
           />
           <Screenshot
-            src="/screenshots/home.png"
+            src="/screenshots/home.webp"
             alt="Stellix home screen on testnet: total balance 10,292.5 XLM with available and reserved amounts, Send and Receive buttons, and recent activity."
             caption={<Claim id="keys-on-device" />}
           />
           <Screenshot
-            src="/screenshots/receive.png"
+            src="/screenshots/receive.webp"
             alt="Stellix receive screen: the account address with a QR code and a payment request link."
             caption={<Claim id="send-receive" />}
           />

@@ -1,11 +1,13 @@
 // Serves out/ locally the way Cloudflare Pages does, to check the real headers (CSP included)
 // and run Lighthouse before deploying: pretty URLs (/privacy → privacy.html), 404.html with a
-// 404 status, and every matching rule from out/_headers applied.
+// 404 status, every matching rule from out/_headers applied, and Brotli for text, as Pages
+// serves it (Lighthouse measures transfer sizes, so an uncompressed preview would mislead).
 //
 //   node scripts/preview.mjs [port] [dir]      (default 4300 and out/; 127.0.0.1 only)
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
+import { brotliCompressSync } from "node:zlib";
 
 const PORT = Number(process.argv[2] ?? 4300);
 const OUT = path.resolve(process.argv[3] ?? path.join(import.meta.dirname, "../out"));
@@ -57,7 +59,17 @@ createServer((req, res) => {
   for (const rule of loadRules()) {
     if (matches(rule.pattern, urlPath)) for (const [k, v] of rule.headers) res.setHeader(k, v);
   }
-  res.writeHead(file ? 200 : 404).end(readFileSync(served));
+  let body = readFileSync(served);
+  const type = String(res.getHeader("Content-Type"));
+  if (
+    /text|javascript|json|xml|svg/.test(type) &&
+    /\bbr\b/.test(req.headers["accept-encoding"] ?? "")
+  ) {
+    body = brotliCompressSync(body);
+    res.setHeader("Content-Encoding", "br");
+    res.setHeader("Vary", "Accept-Encoding");
+  }
+  res.writeHead(file ? 200 : 404).end(body);
 }).listen(PORT, "127.0.0.1", () => {
   process.stdout.write(`preview: http://127.0.0.1:${PORT}\n`);
 });

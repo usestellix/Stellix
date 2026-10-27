@@ -25,8 +25,8 @@
   --primary: #111113;
   --primary-hover: #2b2b30;
   --primary-fg: #ffffff;
-  --danger: #c2341d; /* critical, high, blocked */
-  --danger-fill: rgb(194 52 29 / 0.08);
+  --danger: #b42f1a; /* critical, high, blocked: 4.9:1 even on a doubled danger fill */
+  --danger-fill: rgb(180 47 26 / 0.08);
   --warning: #8a5300; /* medium */
   --warning-fill: rgb(214 140 18 / 0.12);
   --success: #1d7a3c;

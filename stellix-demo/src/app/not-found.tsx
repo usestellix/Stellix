@@ -3,9 +3,9 @@ import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/link-button";
 import { SHIELD_LAUNCHED } from "@/content/shield-status";
 
+// Served by Cloudflare with a 404 status; Next.js also adds noindex to this page on its own.
 export const metadata: Metadata = {
   title: "Page not found",
-  robots: { index: false },
 };
 
 export default function NotFound() {
