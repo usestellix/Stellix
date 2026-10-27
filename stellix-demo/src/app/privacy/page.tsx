@@ -1,16 +1,18 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import { marked } from "marked";
 import { Container } from "@/components/ui/container";
 import { ExternalLink } from "@/components/ui/external-link";
 import { REPO_LINKS } from "@/content/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy policy",
   description:
     "Stellix runs no servers and collects nothing. What stays on your device, and who else receives data.",
-};
+  path: "/privacy",
+});
 
 // The extension's PRIVACY.md, vendored as src/content/privacy.md (pnpm sync:privacy, checked in
 // CI against an extension tag) and rendered at build time. The input is our own file, never user

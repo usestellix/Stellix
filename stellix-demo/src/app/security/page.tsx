@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import type { ReactNode } from "react";
 import { Claim } from "@/components/claims";
 import { PageHeader, Section } from "@/components/section";
@@ -6,11 +7,12 @@ import { ExternalLink } from "@/components/ui/external-link";
 import { TextLink } from "@/components/ui/text-link";
 import { REPO_LINKS } from "@/content/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Security",
   description:
     "How Stellix stores your recovery phrase, what the Horizon server sees, how to verify a release, and how to report a vulnerability.",
-};
+  path: "/security",
+});
 
 // Facts from the extension repo: docs/SECURITY.md, docs/KEY_MANAGEMENT.md, PRIVACY.md and
 // docs/VERIFY_RELEASE.md.

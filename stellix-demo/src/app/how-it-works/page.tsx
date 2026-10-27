@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import type { ReactNode } from "react";
 import { Claim, Statement } from "@/components/claims";
 import { PageHeader } from "@/components/section";
@@ -8,11 +9,12 @@ import { Container } from "@/components/ui/container";
 import { InstallButton } from "@/components/ui/install-button";
 import { LinkButton } from "@/components/ui/link-button";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "How it works",
   description:
     "Create or import a wallet, review exactly what you're about to sign, then send and receive XLM.",
-};
+  path: "/how-it-works",
+});
 
 export default function HowItWorksPage() {
   return (

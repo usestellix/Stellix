@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import type { ReactNode } from "react";
 import { CapabilityList, ComingSoon, Statement } from "@/components/claims";
 import { PageHeader, Section } from "@/components/section";
@@ -9,11 +10,12 @@ import { TextLink } from "@/components/ui/text-link";
 import { RULE_CATEGORIES } from "@/content/rules";
 import { isShipped } from "@/content/shield-status";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Shield",
   description:
     "Shield is Stellix's review before you sign: what it checks, how it decides, why it runs on your device, and what it can't do.",
-};
+  path: "/shield",
+});
 
 export default function ShieldPage() {
   return (

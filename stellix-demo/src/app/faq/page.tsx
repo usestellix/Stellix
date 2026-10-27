@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/section";
 import { Container } from "@/components/ui/container";
 import { TextLink } from "@/components/ui/text-link";
 import { RELEASE } from "@/content/shield-status";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "FAQ",
   description:
     "Recovery phrases, lost passwords, testnet and mainnet, and whether Stellix will ever ask for your phrase.",
-};
+  path: "/faq",
+});
 
 export default function FaqPage() {
   return (
