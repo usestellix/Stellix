@@ -1,13 +1,21 @@
-import { Container } from "@/components/ui/container";
+import type { Metadata } from "next";
+import { HoldingPage } from "@/components/home/holding-page";
+import { ShieldHome } from "@/components/home/shield-home";
+import { SHIELD_LAUNCHED, STATEMENTS, allShipped } from "@/content/shield-status";
 
-// Placeholder until the holding page (phase 1) and the Shield-first home (phase 2) land.
+export const metadata: Metadata = SHIELD_LAUNCHED
+  ? {
+      title: { absolute: "Stellix: the Stellar wallet that shows you what you're signing" },
+      // Only a fully shipped statement may describe the product in search results.
+      description: allShipped(STATEMENTS.heroSupport.requires)
+        ? STATEMENTS.heroSupport.text
+        : "A non-custodial Stellar wallet for your browser.",
+    }
+  : {
+      title: { absolute: "Stellix" },
+      description: "A non-custodial Stellar wallet for your browser.",
+    };
+
 export default function Home() {
-  return (
-    <Container className="py-24">
-      <h1 className="text-h1 font-semibold">Stellix</h1>
-      <p className="mt-4 max-w-(--container-prose) text-lead text-ink-2">
-        A non-custodial Stellar wallet for your browser.
-      </p>
-    </Container>
-  );
+  return SHIELD_LAUNCHED ? <ShieldHome /> : <HoldingPage />;
 }

@@ -34,6 +34,30 @@
     transform: scale(var(--press-scale));
   }
 
+  /* The home example, once on load: operations, then the finding, then the decision
+     (explanation: decode → find → decide). A one-shot sequence that is never interrupted, so
+     keyframes are fine here. Reduced motion: --rise and --stagger are 0, so it's one short fade.
+     Fixed classes instead of a style attribute keep the CSP free of 'unsafe-inline'. */
+  .reveal {
+    animation: reveal var(--d-explain) var(--ease-out) both;
+    animation-delay: 120ms;
+  }
+  .reveal-2 {
+    animation-delay: calc(120ms + var(--stagger));
+  }
+  .reveal-3 {
+    animation-delay: calc(120ms + var(--stagger) * 4);
+  }
+  .reveal-4 {
+    animation-delay: calc(120ms + var(--stagger) * 7);
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(var(--rise));
+    }
+  }
+
   /* Mobile menu (native popover). Enters from just above, from the trigger's side; exits
      faster than it enters. Reduced motion zeroes --drop, leaving the fade. */
   .nav-sheet {
