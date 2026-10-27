@@ -64,7 +64,11 @@ jobs:
       - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm lint
+      # The vendored privacy policy must match the extension's PRIVACY.md. TODO: compare with the
+      # release tag (v0.1.0) once it exists, not this commit.
+      - run: pnpm sync:privacy --repo .. --ref HEAD --check
       - run: pnpm build
+      - run: pnpm check:copy
 
   # SECURITY §8: no committed secrets anywhere in history, every branch and tag included.
   # gitleaks is a release binary, pinned by version and verified against its published
