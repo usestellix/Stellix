@@ -2,7 +2,8 @@
 // rendered from this file; page copy never states a capability on its own. Statements that
 // combine capabilities live here too, each with the capabilities it depends on.
 //
-// "shipped" means: in the released Chrome Web Store build. Merged on main is not shipped.
+// "shipped" means: merged on main in the extension repo. Work on a branch or an open issue is not
+// shipped.
 // This file has no imports, so build scripts can load it directly with Node.
 
 export type CapabilityStatus = "shipped" | "coming";
@@ -11,6 +12,7 @@ export type ShieldPhase = "S1" | "S2" | "S3" | "S4";
 export type ShieldCapabilityId =
   | "decode-classic"
   | "check-sends"
+  | "review-findings"
   | "analyze-pasted"
   | "check-dapp-requests"
   | "simulate-soroban"
@@ -55,11 +57,17 @@ export const SHIELD_CAPABILITIES: readonly ShieldCapability[] = [
     id: "decode-classic",
     claim: "Decodes every classic Stellar operation into plain language",
     phase: "S1",
-    status: "coming",
+    status: "shipped",
   },
   {
     id: "check-sends",
     claim: "Checks transactions you send from Stellix",
+    phase: "S1",
+    status: "shipped",
+  },
+  {
+    id: "review-findings",
+    claim: "Shows Shield's findings on the review screen before you send",
     phase: "S1",
     status: "coming",
   },
@@ -218,7 +226,7 @@ export const STATEMENTS = {
   },
   reviewAddsFindings: {
     text: "Shield adds its findings to the review screen. Some need a confirmation before you can sign, and some block the signature.",
-    requires: ["check-sends"],
+    requires: ["check-sends", "review-findings"],
   },
   analyzeAnything: {
     text: "Paste a transaction from another wallet or a website, and Shield shows what it does, without signing anything.",
@@ -264,8 +272,8 @@ export function allShipped(ids: readonly CapabilityId[]): boolean {
 }
 
 // Launch phases: phase 1 is the home page and /privacy; phase 2, the full Shield-first site,
-// launches with the first store release that ships a Shield S1 capability. Phase 2 pages are
-// built always and removed from the export before launch (scripts/postbuild.mjs).
+// launches once any Shield S1 capability has shipped. Phase 2 pages are built always and removed
+// from the export before launch (scripts/postbuild.mjs).
 export const PHASE2_PAGES: readonly { href: string; label: string }[] = [
   { href: "/shield", label: "Shield" },
   { href: "/how-it-works", label: "How it works" },

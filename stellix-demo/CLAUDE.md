@@ -18,7 +18,7 @@ Kowalski design-engineering skill for motion and component craft.
   Use: shows, decodes, flags, blocks known patterns.
 - Every capability claim comes from `src/content/shield-status.ts`. A "coming" capability
   shows "Coming soon"; never hardcode a claim in page copy.
-- "Shipped" means in the released Chrome Web Store build, not merged on `main`.
+- "Shipped" means merged on `main` in the extension repo, not on a branch or in an open issue.
 - State that the current release is testnet-only, driven by status, not hardcoded.
 - Never imply affiliation with the Stellar Development Foundation.
 - The install button links only to the official Chrome Web Store listing. Never offer a file.
