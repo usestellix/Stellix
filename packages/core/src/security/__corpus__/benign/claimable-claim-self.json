@@ -1,0 +1,63 @@
+{
+  "id": "claimable-claim-self",
+  "description": "User claims the one-XLM claimable balance created for their account.",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "capturedAt": "2026-10-28T16:36:40.890Z",
+  "userAccount": "GAICWG24UYHE7PR2NT4XYWPMT6JPI73PVGJQY3SJNXOEB5EW5GFFSIA4",
+  "presentedDestinations": [],
+  "envelopeXdr": "AAAAAgAAAAAQKxtcpg5Pvjps+XxZ7J+S9H9vqZMMbklt3ED0lumKWQAAA+gAUvO0AAAABgAAAAEAAAAAAAAAAAAAAABq4iVHAAAAAAAAAAEAAAAAAAAADwAAAADEfxj19R0pDqRqcMS0gwHPUaDnWR/RdRIhTgfOvHe0RgAAAAAAAAABlumKWQAAAEDW9USY28+xMU26578OQbfgozH+3CL7V5y62XAK2wDsawPhDFZW1SaPnwrRZ2JBuHlwG6Q7zdhUs2Bha3QW5+AE",
+  "expectedFindings": [],
+  "lookups": {},
+  "hash": "763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4",
+  "transaction": {
+    "status": 200,
+    "body": {
+      "_links": {
+        "self": {
+          "href": "https://horizon-testnet.stellar.org/transactions/763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4"
+        },
+        "account": {
+          "href": "https://horizon-testnet.stellar.org/accounts/GAICWG24UYHE7PR2NT4XYWPMT6JPI73PVGJQY3SJNXOEB5EW5GFFSIA4"
+        },
+        "ledger": { "href": "https://horizon-testnet.stellar.org/ledgers/5436352" },
+        "operations": {
+          "href": "https://horizon-testnet.stellar.org/transactions/763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4/operations{?cursor,limit,order}",
+          "templated": true
+        },
+        "effects": {
+          "href": "https://horizon-testnet.stellar.org/transactions/763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4/effects{?cursor,limit,order}",
+          "templated": true
+        },
+        "precedes": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=asc&cursor=23348954049556480"
+        },
+        "succeeds": {
+          "href": "https://horizon-testnet.stellar.org/transactions?order=desc&cursor=23348954049556480"
+        },
+        "transaction": {
+          "href": "https://horizon-testnet.stellar.org/transactions/763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4"
+        }
+      },
+      "id": "763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4",
+      "paging_token": "23348954049556480",
+      "successful": true,
+      "hash": "763a48ea2f71112fb56ada46151f26d96766a9457bb763083ddbdb45036e83a4",
+      "ledger": 5436352,
+      "created_at": "2026-10-28T16:36:40Z",
+      "source_account": "GAICWG24UYHE7PR2NT4XYWPMT6JPI73PVGJQY3SJNXOEB5EW5GFFSIA4",
+      "source_account_sequence": "23348902509936646",
+      "fee_account": "GAICWG24UYHE7PR2NT4XYWPMT6JPI73PVGJQY3SJNXOEB5EW5GFFSIA4",
+      "fee_charged": "100",
+      "max_fee": "1000",
+      "operation_count": 1,
+      "envelope_xdr": "AAAAAgAAAAAQKxtcpg5Pvjps+XxZ7J+S9H9vqZMMbklt3ED0lumKWQAAA+gAUvO0AAAABgAAAAEAAAAAAAAAAAAAAABq4iVHAAAAAAAAAAEAAAAAAAAADwAAAADEfxj19R0pDqRqcMS0gwHPUaDnWR/RdRIhTgfOvHe0RgAAAAAAAAABlumKWQAAAEDW9USY28+xMU26578OQbfgozH+3CL7V5y62XAK2wDsawPhDFZW1SaPnwrRZ2JBuHlwG6Q7zdhUs2Bha3QW5+AE",
+      "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAPAAAAAAAAAAA=",
+      "fee_meta_xdr": "AAAAAgAAAAMAUvO/AAAAAAAAAAAQKxtcpg5Pvjps+XxZ7J+S9H9vqZMMbklt3ED0lumKWQAAABdGrSKMAFLztAAAAAUAAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAQAAAAAAAAADAAAAAABS878AAAAAauIkkwAAAAAAAAABAFLzwAAAAAAAAAAAECsbXKYOT746bPl8WeyfkvR/b6mTDG5JbdxA9JbpilkAAAAXRq0iKABS87QAAAAFAAAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAEAAAAAAAAAAwAAAAAAUvO/AAAAAGriJJMAAAAA",
+      "memo_type": "none",
+      "signatures": [
+        "1vVEmNvPsTFNuue/DkG34KMx/twi+1ecutlwCtsA7GsD4QxWVtUmj58K0WdiQbh5cBukO83YVLNgYWt0FufgBA=="
+      ],
+      "preconditions": { "timebounds": { "min_time": "0", "max_time": "1793205575" } }
+    }
+  }
+}
