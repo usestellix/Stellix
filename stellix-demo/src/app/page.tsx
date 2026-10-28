@@ -1,24 +1,19 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
-import { HoldingPage } from "@/components/home/holding-page";
-import { ShieldHome } from "@/components/home/shield-home";
-import { SHIELD_LAUNCHED, STATEMENTS, allShipped } from "@/content/shield-status";
+import { Landing } from "@/components/home/landing";
+import { STATEMENTS, allShipped } from "@/content/shield-status";
 
-export const metadata: Metadata = SHIELD_LAUNCHED
-  ? pageMetadata({
-      title: { absolute: "Stellix: the Stellar wallet that shows you what you're signing" },
-      // Only a fully shipped statement may describe the product in search results.
-      description: allShipped(STATEMENTS.heroSupport.requires)
-        ? STATEMENTS.heroSupport.text
-        : "A non-custodial Stellar wallet for your browser.",
-      path: "/",
-    })
-  : pageMetadata({
-      title: { absolute: "Stellix" },
-      description: "A non-custodial Stellar wallet for your browser.",
-      path: "/",
-    });
+// Search results describe the product with the most complete statement that has fully shipped.
+const description = allShipped(STATEMENTS.heroSupport.requires)
+  ? STATEMENTS.heroSupport.text
+  : STATEMENTS.heroWallet.text;
+
+export const metadata: Metadata = pageMetadata({
+  title: { absolute: "Stellix: the Stellar wallet that shows you what you're signing" },
+  description,
+  path: "/",
+});
 
 export default function Home() {
-  return SHIELD_LAUNCHED ? <ShieldHome /> : <HoldingPage />;
+  return <Landing />;
 }

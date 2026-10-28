@@ -27,7 +27,7 @@ export interface NavItem {
   label: string;
 }
 
-// Phase 1 (holding page) has no product pages to link to.
+// Phase 1 publishes only the home page and /privacy, so there are no product pages to link to.
 export const MAIN_NAV: readonly NavItem[] = SHIELD_LAUNCHED ? PHASE2_PAGES : [];
 
 export const FOOTER_NAV: readonly NavItem[] = [

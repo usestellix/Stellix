@@ -1,7 +1,7 @@
 // Runs after `next build` (see the build script). Finishes the static export in out/:
 //
 // 1. Before Shield launches (no S1 capability shipped), removes the phase 2 pages, so phase 1
-//    publishes only the holding page, /privacy and the 404 page. Their HTML, RSC payloads and
+//    publishes only the home page, /privacy and the 404 page. Their HTML, RSC payloads and
 //    folders all go: a request for one gets the 404 page with a 404 status.
 // 2. Writes out/_headers for Cloudflare Pages: one strict CSP for every path, whose script-src
 //    allows 'self' plus the SHA-256 of each inline script Next.js emitted on any published page.

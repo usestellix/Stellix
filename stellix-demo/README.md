@@ -30,8 +30,9 @@ Set `NEXT_TELEMETRY_DISABLED=1` (CI does) so Next.js sends no usage data.
 What the site says is driven by `src/content/shield-status.ts`, the single source of truth for
 capabilities. "Shipped" means in the released Chrome Web Store build.
 
-- **Phase 1** (now): the holding page, `/privacy` and the 404 page. `postbuild.mjs` removes the
-  phase 2 pages from the export.
+- **Phase 1** (now): the home page, `/privacy` and the 404 page. `postbuild.mjs` removes the
+  phase 2 pages from the export. The home page explains the whole product on its own, so it
+  works without them: it links to the inner pages only once they're published.
 - **Phase 2**: the full Shield-first site. It switches on by itself when any Shield S1 capability
   is marked `"shipped"`. Pages show "Coming soon" for everything not shipped.
 

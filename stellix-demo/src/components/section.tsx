@@ -2,15 +2,18 @@ import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
 
 // A page section with an h2 and an optional intro. `id` makes it linkable (e.g. /shield#limits).
+// `band` sets it on the surface color between hairlines, to give long pages a rhythm.
 export function Section({
   id,
   title,
   intro,
   children,
+  band = false,
   className = "",
 }: {
   id?: string;
   title: string;
+  band?: boolean;
   intro?: ReactNode;
   children?: ReactNode;
   className?: string;
@@ -20,7 +23,7 @@ export function Section({
     <section
       id={id}
       aria-labelledby={headingId}
-      className={`scroll-mt-8 py-16 sm:py-20 ${className}`}
+      className={`scroll-mt-8 py-16 sm:py-20 ${band ? "border-y border-line bg-surface" : ""} ${className}`}
     >
       <Container>
         <h2 id={headingId} className="text-h2 font-semibold">

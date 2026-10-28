@@ -18,7 +18,22 @@ export type ShieldCapabilityId =
   | "mainnet-dapps";
 
 export type WalletCapabilityId =
-  "keys-on-device" | "review-screen" | "send-receive" | "memo-required" | "auto-lock";
+  | "keys-on-device"
+  | "review-screen"
+  | "send-receive"
+  | "memo-required"
+  | "auto-lock"
+  | "import-standard"
+  | "multiple-accounts"
+  | "balances"
+  | "full-address"
+  | "first-send-warning"
+  | "secret-key-block"
+  | "max-send"
+  | "live-activity"
+  | "friendbot"
+  | "custom-horizon"
+  | "network-badge";
 
 export type CapabilityId = ShieldCapabilityId | WalletCapabilityId;
 
@@ -80,8 +95,9 @@ export const SHIELD_CAPABILITIES: readonly ShieldCapability[] = [
   },
 ];
 
-// The wallet itself, as released in 0.1.0 (each one is in the store listing, which was checked
-// against the shipped build: docs/store/listing.md).
+// The wallet itself, as released in 0.1.0. Each one is in the store listing (checked against the
+// shipped build: docs/store/listing.md) or is a milestone M1–M4 feature present in the extension's
+// UI (apps/extension/src/ui), all of which 0.1.0 contains.
 export const WALLET_CAPABILITIES: readonly WalletCapability[] = [
   {
     id: "keys-on-device",
@@ -110,6 +126,63 @@ export const WALLET_CAPABILITIES: readonly WalletCapability[] = [
     claim: "Locks itself after 5 to 60 minutes",
     status: "shipped",
   },
+  {
+    id: "import-standard",
+    claim:
+      "Imports 12- and 24-word recovery phrases and finds the same accounts as other standard (SEP-0005) Stellar wallets",
+    status: "shipped",
+  },
+  {
+    id: "multiple-accounts",
+    claim: "Holds several accounts from one recovery phrase, each with its own name",
+    status: "shipped",
+  },
+  {
+    id: "balances",
+    claim: "Shows your total, available and reserved balance, and explains what's reserved",
+    status: "shipped",
+  },
+  {
+    id: "full-address",
+    claim: "Shows the destination address in full, in groups of four characters, before you send",
+    status: "shipped",
+  },
+  {
+    id: "first-send-warning",
+    claim: "Warns you the first time you send to an address",
+    status: "shipped",
+  },
+  {
+    id: "secret-key-block",
+    claim: "Stops you if you paste a secret key where an address belongs",
+    status: "shipped",
+  },
+  {
+    id: "max-send",
+    claim:
+      "“Max” keeps the reserve and the fee aside, so a payment can't take your account below its minimum",
+    status: "shipped",
+  },
+  {
+    id: "live-activity",
+    claim: "Activity updates live while the wallet is open",
+    status: "shipped",
+  },
+  {
+    id: "friendbot",
+    claim: "Funds testnet accounts for free with Friendbot",
+    status: "shipped",
+  },
+  {
+    id: "custom-horizon",
+    claim: "Lets you choose your own Horizon server in Settings",
+    status: "shipped",
+  },
+  {
+    id: "network-badge",
+    claim: "Always shows which network you're on",
+    status: "shipped",
+  },
 ];
 
 // The released store build. `mainnet` flips every "testnet only" notice.
@@ -131,6 +204,10 @@ export const PROJECT = {
 // its dependencies stay together; a statement whose capabilities aren't all shipped renders
 // with "Coming soon".
 export const STATEMENTS = {
+  heroWallet: {
+    text: "Stellix is a non-custodial wallet for the Stellar network that runs in your browser. Your recovery phrase never leaves your device, and before anything is signed, the review screen shows exactly what will be signed, decoded from the transaction itself.",
+    requires: ["keys-on-device", "review-screen"],
+  },
   heroSupport: {
     text: "Stellix decodes every transaction, flags account-takeover and drain patterns, and runs all checks on your device. Nothing is sent to a scanning service.",
     requires: ["decode-classic", "analyze-pasted"],
@@ -186,7 +263,7 @@ export function allShipped(ids: readonly CapabilityId[]): boolean {
   return ids.every(isShipped);
 }
 
-// Launch phases: phase 1 is the holding page and /privacy; phase 2, the full Shield-first site,
+// Launch phases: phase 1 is the home page and /privacy; phase 2, the full Shield-first site,
 // launches with the first store release that ships a Shield S1 capability. Phase 2 pages are
 // built always and removed from the export before launch (scripts/postbuild.mjs).
 export const PHASE2_PAGES: readonly { href: string; label: string }[] = [
