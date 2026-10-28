@@ -1,0 +1,186 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Focus is always visible and never animated. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Anything pressable: scales down on press (feedback), colors ease on hover. Tailwind's
+     hover: variant already applies only on devices that can hover. */
+  .press {
+    transition:
+      transform var(--d-press) var(--ease-out),
+      background-color var(--d-hover) ease,
+      color var(--d-hover) ease,
+      box-shadow var(--d-hover) ease;
+  }
+  .press:active {
+    transform: scale(var(--press-scale));
+  }
+
+  /* FAQ answers fade in when opened. Opacity only: nothing animates height, nothing moves. */
+  .faq[open] .faq-answer {
+    animation: fade-in var(--d-ui) var(--ease-out);
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* The rendered privacy policy (Markdown from the extension repo). */
+  .policy {
+    color: var(--ink-2);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+  .policy > * + * {
+    margin-top: 1rem;
+  }
+  .policy h1 {
+    color: var(--ink);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: 600;
+  }
+  .policy h2 {
+    margin-top: 2.5rem;
+    color: var(--ink);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    font-weight: 600;
+  }
+  .policy strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .policy a {
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 4px;
+  }
+  .policy ul {
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+  .policy li + li {
+    margin-top: 0.5rem;
+  }
+  .policy code {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+  .policy table {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+  .policy th,
+  .policy td {
+    padding: 0.75rem 1rem 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+    min-width: 9rem;
+  }
+  .policy th {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* The home example, once on load: operations, then the finding, then the decision
+     (explanation: decode → find → decide). A one-shot sequence that is never interrupted, so
+     keyframes are fine here. Reduced motion: --rise and --stagger are 0, so it's one short fade.
+     Fixed classes instead of a style attribute keep the CSP free of 'unsafe-inline'. */
+  .reveal {
+    animation: reveal var(--d-explain) var(--ease-out) both;
+    animation-delay: 120ms;
+  }
+  .reveal-2 {
+    animation-delay: calc(120ms + var(--stagger));
+  }
+  .reveal-3 {
+    animation-delay: calc(120ms + var(--stagger) * 4);
+  }
+  .reveal-4 {
+    animation-delay: calc(120ms + var(--stagger) * 7);
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(var(--rise));
+    }
+  }
+
+  /* Mobile menu (native popover). Enters from just above, from the trigger's side; exits
+     faster than it enters. Reduced motion zeroes --drop, leaving the fade. */
+  .nav-sheet {
+    position: fixed;
+    inset: 0.5rem 0.5rem auto;
+    width: auto;
+    margin: 0;
+    padding: 0.5rem 1rem 1rem;
+    border: 0;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--elevation-raised);
+    transform-origin: top right;
+    opacity: 0;
+    transform: translateY(var(--drop));
+    transition:
+      opacity var(--d-exit) var(--ease-out),
+      transform var(--d-exit) var(--ease-out),
+      overlay var(--d-exit) allow-discrete,
+      display var(--d-exit) allow-discrete;
+  }
+  .nav-sheet:popover-open {
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--d-ui);
+  }
+  @starting-style {
+    .nav-sheet:popover-open {
+      opacity: 0;
+      transform: translateY(var(--drop));
+    }
+  }
+  .nav-sheet::backdrop {
+    background: rgb(0 0 0 / 0);
+    transition:
+      background-color var(--d-exit) ease,
+      overlay var(--d-exit) allow-discrete,
+      display var(--d-exit) allow-discrete;
+  }
+  .nav-sheet:popover-open::backdrop {
+    background: rgb(0 0 0 / 0.24);
+    transition-duration: var(--d-ui);
+  }
+  @starting-style {
+    .nav-sheet:popover-open::backdrop {
+      background: rgb(0 0 0 / 0);
+    }
+  }
+}

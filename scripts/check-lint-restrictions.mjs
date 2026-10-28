@@ -37,6 +37,9 @@ const CASES = [
   [EXT_FILE, `console.log("x");`, "no-console"],
   [EXT_FILE, `eval("1");`, "no-eval"],
   [EXT_FILE, `export const f = new Function("return 1");`, "no-new-func"],
+  // The marketing site (stellix-demo/) is isolated: no imports from it, core included.
+  [EXT_FILE, `import "../../../stellix-demo/src/app/fonts";`, "no-restricted-imports"],
+  [CORE_FILE, `import "../../../stellix-demo/src/app/fonts";`, "no-restricted-imports"],
 ];
 
 // Shells may import platform modules; make sure the restriction is scoped to core.

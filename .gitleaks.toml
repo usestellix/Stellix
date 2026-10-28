@@ -1,0 +1,9 @@
+# gitleaks config for the CI `secrets` job (SECURITY §8). Read automatically from the
+# scanned repo root. Keep allowlists narrow: one exact path per entry, with the reason.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "SEP-0005 published test vectors, copied verbatim (CLAUDE.md §7). The seeds are published in the spec itself."
+paths = ['''^packages/core/src/keys/__tests__/sep0005\.vectors\.ts$''']

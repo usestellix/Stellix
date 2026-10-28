@@ -60,6 +60,12 @@ const CORE_RESTRICTED_PROPERTIES = [
   },
 ];
 
+// The marketing site in stellix-demo/ is isolated: nothing here imports from it.
+const NO_SITE_IMPORTS = {
+  group: ["**/stellix-demo", "**/stellix-demo/**"],
+  message: "The extension never imports from the marketing site (stellix-demo/).",
+};
+
 const SHIELD_DEPS_MESSAGE =
   "Shield reads the clock and network only through ShieldDeps / RuleContext (SHIELD §6.4).";
 
@@ -73,6 +79,8 @@ export default defineConfig(
       "**/test-results/**",
       "**/playwright-report/**",
       "**/.e2e-profile/**",
+      // The marketing site has its own toolchain and lint config.
+      "stellix-demo/**",
     ],
   },
 
@@ -102,6 +110,7 @@ export default defineConfig(
       "no-implied-eval": "off",
       "@typescript-eslint/no-implied-eval": "error",
       "no-new-func": "error",
+      "no-restricted-imports": ["error", { patterns: [NO_SITE_IMPORTS] }],
     },
   },
 
@@ -130,6 +139,7 @@ export default defineConfig(
               message: PLATFORM_MESSAGE,
             },
             { group: ["wxt", "wxt/*", "@wxt-dev/*"], message: PLATFORM_MESSAGE },
+            NO_SITE_IMPORTS,
           ],
         },
       ],

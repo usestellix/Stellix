@@ -7,3 +7,6 @@ playwright-report
 
 # Hand-authored docs are not reformatted.
 *.md
+
+# The marketing site has its own Prettier run.
+stellix-demo

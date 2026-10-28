@@ -117,6 +117,7 @@ At SW startup: `chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CO
 - Exact versions only. Lockfile committed and reviewed in every PR that changes it.
 - No version younger than 14 days. Enforced by pnpm's `minimumReleaseAge: 20160` in `pnpm-workspace.yaml`, which also covers transitive dependencies. Dependency build scripts are denied unless listed in `allowBuilds` (currently none).
 - GitHub Actions are pinned by commit SHA, using releases at least 14 days old.
+- CI scans the full git history (all branches and tags) for committed secrets with gitleaks, a release binary pinned by version and SHA-256 (`.github/workflows/ci.yml`, job `secrets`). Everything in the repository is covered, including the marketing site in `stellix-demo/`. `.gitleaks.toml` allowlists only the published SEP-0005 test vectors.
 - Crypto: `@noble/*` and `@scure/*` (audited, zero-dependency) for hashes, KDF, and BIP39. WebCrypto for AES-GCM.
 - `packages/core` deps must be pure JS with no Node built-ins and no postinstall scripts.
 - Run `pnpm audit` in CI; triage findings, don't blindly auto-upgrade.

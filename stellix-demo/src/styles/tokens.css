@@ -1,0 +1,168 @@
+/*
+ * Design tokens: the single source for color, type, spacing, radius, shadow and motion.
+ * Colors follow the extension (apps/extension) so screenshots and site read as one product.
+ * Theme follows the system only (prefers-color-scheme); there is no toggle.
+ *
+ * Values that change with the theme or with reduced motion are raw custom properties on
+ * :root. Everything else lives in @theme. Raw names avoid Tailwind's namespaces (--color-*,
+ * --shadow-*, --ease-*, --font-*) so a mapping never refers to itself.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Color */
+  --canvas: #f6f6f5;
+  --surface: #ffffff;
+  --ink: #111113;
+  --ink-2: #3f3f45;
+  --muted: #6c6c73; /* text: 4.8:1 on canvas */
+  --faint: #a3a3a9; /* decoration only, never text */
+  --line: rgb(17 17 19 / 0.09);
+  --line-strong: rgb(17 17 19 / 0.16);
+  --fill: rgb(17 17 19 / 0.04);
+  --fill-strong: rgb(17 17 19 / 0.07);
+  --primary: #111113;
+  --primary-hover: #2b2b30;
+  --primary-fg: #ffffff;
+  --danger: #b42f1a; /* critical, high, blocked: 4.9:1 even on a doubled danger fill */
+  --danger-fill: rgb(180 47 26 / 0.08);
+  --warning: #8a5300; /* medium */
+  --warning-fill: rgb(214 140 18 / 0.12);
+  --success: #1d7a3c;
+  --focus: #2f6fed;
+
+  /* Elevation */
+  --elevation-ring: 0 0 0 1px var(--line);
+  --elevation-ring-strong: 0 0 0 1px var(--line-strong);
+  --elevation-raised: 0 0 0 1px var(--line), 0 4px 16px -4px rgb(17 17 19 / 0.08);
+
+  /* Motion durations. UI stays under 300ms; only the explanatory hero runs longer. */
+  --d-press: 140ms;
+  --d-hover: 160ms;
+  --d-ui: 200ms;
+  --d-exit: 150ms;
+  --d-explain: 360ms;
+  --stagger: 50ms;
+
+  /* Movement amounts. Components read these instead of hardcoding transforms, so reduced
+     motion removes every transform in one place and keeps the short opacity fades. */
+  --press-scale: 0.97;
+  --rise: 8px;
+  --drop: -4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #0b0b0c;
+    --surface: #141416;
+    --ink: #f2f2f3;
+    --ink-2: #c9c9ce;
+    --muted: #8f8f96; /* text: 5.9:1 on canvas */
+    --faint: #5e5e64;
+    --line: rgb(255 255 255 / 0.1);
+    --line-strong: rgb(255 255 255 / 0.18);
+    --fill: rgb(255 255 255 / 0.05);
+    --fill-strong: rgb(255 255 255 / 0.09);
+    --primary: #f2f2f3;
+    --primary-hover: #ffffff;
+    --primary-fg: #111113;
+    --danger: #ff7a66;
+    --danger-fill: rgb(255 122 102 / 0.12);
+    --warning: #f0b45a;
+    --warning-fill: rgb(240 180 90 / 0.12);
+    --success: #5fd38a;
+    --focus: #6f9bff;
+    --elevation-raised: 0 0 0 1px var(--line), 0 4px 16px -4px rgb(0 0 0 / 0.5);
+  }
+}
+
+/* Reduced motion: no transforms, opacity fades kept and shortened. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --press-scale: 1;
+    --rise: 0px;
+    --drop: 0px;
+    --d-explain: 200ms;
+    --stagger: 0ms;
+  }
+}
+
+/* Only our colors: Tailwind's default palette is removed so nothing off-token slips in. This
+   reset must come before any color is defined, or it clears those too. */
+@theme {
+  --color-*: initial;
+  --color-white: #fff;
+  --color-black: #000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+}
+
+/* Theme- and motion-dependent tokens, exposed to Tailwind utilities by reference. */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-danger: var(--danger);
+  --color-danger-fill: var(--danger-fill);
+  --color-warning: var(--warning);
+  --color-warning-fill: var(--warning-fill);
+  --color-success: var(--success);
+  --color-focus: var(--focus);
+
+  --shadow-ring: var(--elevation-ring);
+  --shadow-ring-strong: var(--elevation-ring-strong);
+  --shadow-raised: var(--elevation-raised);
+
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@theme {
+  /* Easing (from the Emil Kowalski design-engineering skill). */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Type scale: size / line-height / tracking. */
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.625rem;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-h3: 1.5rem;
+  --text-h3--line-height: 2rem;
+  --text-h2: 2rem;
+  --text-h2--line-height: 2.375rem;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h1: clamp(2.5rem, 6vw, 4rem);
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -0.03em;
+
+  /* Spacing base: 4px (p-4 = 16px). */
+  --spacing: 0.25rem;
+
+  /* Layout widths. */
+  --container-page: 70rem; /* 1120px */
+  --container-prose: 42.5rem; /* 680px */
+
+  /* Radius. */
+  --radius-badge: 6px;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-frame: 20px;
+}
