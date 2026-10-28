@@ -1,11 +1,14 @@
 /// <reference types="vite/client" />
 
+import type { RuleId } from "../types.js";
+
 // Test-only access to the testnet fixtures captured by scripts/capture-shield-fixtures.mjs
 // (TESTING §1). `transaction.body` is Horizon's own decoding of the same envelope, so tests can
 // check the decoder against an independent source instead of values we made up.
 
 export interface HorizonTransactionBody {
   hash: string;
+  successful?: boolean;
   source_account: string;
   account_muxed?: string;
   source_account_sequence: string;
@@ -95,4 +98,32 @@ export function lookup(f: MarketFixture, key: string): MarketLookup {
   const l = f.lookups[key];
   if (l === undefined) throw new Error(`${f.name} has no ${key} lookup`);
   return l;
+}
+
+/** A benign corpus case captured from testnet by scripts/capture-benign-corpus.mjs. */
+export interface BenignFixture {
+  id: string;
+  description: string;
+  networkPassphrase: string;
+  capturedAt: string;
+  userAccount: string;
+  presentedDestinations: string[];
+  envelopeXdr: string;
+  expectedFindings: RuleId[];
+  lookups: Record<string, MarketLookup>;
+  hash: string;
+  transaction: { status: number; body: HorizonTransactionBody };
+}
+
+export const BENIGN_FIXTURES: readonly BenignFixture[] = Object.values(
+  import.meta.glob<BenignFixture>("../__corpus__/benign/*.json", {
+    eager: true,
+    import: "default",
+  }),
+);
+
+export function benignFixture(id: string): BenignFixture {
+  const f = BENIGN_FIXTURES.find((x) => x.id === id);
+  if (f === undefined) throw new Error(`no benign fixture ${id}`);
+  return f;
 }
