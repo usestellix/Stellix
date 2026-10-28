@@ -7,3 +7,13 @@ useDefault = true
 [[allowlists]]
 description = "SEP-0005 published test vectors, copied verbatim (CLAUDE.md §7). The seeds are published in the spec itself."
 paths = ['''^packages/core/src/keys/__tests__/sep0005\.vectors\.ts$''']
+
+[[allowlists]]
+description = "SLIP-0010 published ed25519 test vectors, generated from the spec by scripts/extract-test-vectors.mjs (CLAUDE.md §7)."
+paths = ['''^packages/core/src/keys/__tests__/slip0010\.vectors\.ts$''']
+
+[[allowlists]]
+description = "Stellar account IDs (G... public keys) in fixtures and tests. generic-api-key flags them under names like key or paging_token; they are public by design. A secret seed starts with S and never matches."
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = ['''^G[A-Z2-7]{55}$''']
