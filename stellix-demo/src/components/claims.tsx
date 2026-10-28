@@ -12,7 +12,7 @@ export function ComingSoon() {
   return <Badge>Coming soon</Badge>;
 }
 
-// One capability's claim, with "Coming soon" if it isn't in the released build. `lower` starts it
+// One capability's claim, with "Coming soon" if it hasn't shipped. `lower` starts it
 // with a lowercase letter, to follow a subject in running text ("Stellix imports…").
 export function Claim({ id, lower = false }: { id: CapabilityId; lower?: boolean }) {
   const c = capability(id);

@@ -303,7 +303,7 @@ function ShieldStages() {
       id="stages"
       band
       title="Shield is arriving in stages"
-      intro="Each stage ships in a store release. Until then it's marked Coming soon, here and everywhere on this site."
+      intro="Each stage is marked available once it ships. Until then it's marked Coming soon, here and everywhere on this site."
     >
       <ol className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {PHASES.map(({ phase, title, summary }) => {
