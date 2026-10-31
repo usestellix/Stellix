@@ -6,6 +6,7 @@ import {
   NETWORK_IDS,
   RESET_CONFIRMATION,
   RULE_IDS,
+  SHIELD_INPUT_MAX_CHARS,
   SEVERITIES,
   UNAVAILABLE_REASONS,
   VERIFY_WORD_COUNT,
@@ -52,6 +53,7 @@ export const REQUEST_TYPES = [
   "CONFIRM_PAYMENT",
   "CANCEL_PAYMENT",
   "DISMISS_OUTCOME",
+  "SHIELD_ANALYZE",
 ] as const;
 
 export type RequestType = (typeof REQUEST_TYPES)[number];
@@ -75,6 +77,7 @@ function defineRequest<P extends z.ZodType, R extends z.ZodType>(
 }
 
 const BOTH = ["popup", "onboarding"] as const satisfies readonly ExtensionPage[];
+const POPUP_ONLY = ["popup"] as const satisfies readonly ExtensionPage[];
 /** Types that carry or return the recovery phrase (ARCHITECTURE §5, SECURITY §4.3). */
 const ONBOARDING_ONLY = ["onboarding"] as const satisfies readonly ExtensionPage[];
 
@@ -158,6 +161,37 @@ const confirmationSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("click") }),
   z.strictObject({ kind: z.literal("typed"), phrase: z.string().max(64) }),
 ]);
+
+/** SHIELD §8 SHIELD_ANALYZE result: public strings only; request text is data (invariant 17). */
+const analyzeResultSchema = z.strictObject({
+  account: z.string(),
+  spendsFromAccount: z.boolean(),
+  transaction: z.strictObject({
+    envelopeType: z.enum(["tx", "txFeeBump"]),
+    source: z.string(),
+    feeStroops: stroops,
+    feeBump: z.strictObject({ feeSource: z.string(), maxFeeStroops: stroops }).nullable(),
+    memo: z.discriminatedUnion("type", [
+      z.strictObject({ type: z.literal("none") }),
+      z.strictObject({ type: z.literal("text"), text: z.string().nullable(), hex: z.string() }),
+      z.strictObject({ type: z.literal("id"), value: stroops }),
+      z.strictObject({ type: z.enum(["hash", "return"]), hex: z.string() }),
+    ]),
+    operations: z
+      .array(
+        z
+          .array(
+            z.strictObject({
+              template: z.string(),
+              values: z.record(z.string(), z.string()).readonly(),
+            }),
+          )
+          .readonly(),
+      )
+      .readonly(),
+  }),
+  report: reportViewSchema,
+});
 
 const errorCodeSchema = z.enum(ERROR_CODES);
 
@@ -374,6 +408,20 @@ export const REQUESTS = {
     payload: z.strictObject({ hash }),
     result: none,
     allowedFrom: BOTH,
+    countsAsActivity: true,
+  }),
+  /**
+   * Mode C (SHIELD §2, §8): analyzes a pasted transaction XDR or web+stellar:tx link for the
+   * active account. Never signs and stores nothing signable. Popup only, unlocked. The transport
+   * cap is above core's SHIELD_INPUT_MAX_CHARS so oversize input gets SHIELD_INPUT_TOO_LARGE.
+   */
+  SHIELD_ANALYZE: defineRequest({
+    payload: z.strictObject({
+      input: z.string().max(SHIELD_INPUT_MAX_CHARS * 4),
+      network: networkId,
+    }),
+    result: analyzeResultSchema,
+    allowedFrom: POPUP_ONLY,
     countsAsActivity: true,
   }),
   /** Requires unlocked. Appends newly found indices only. */

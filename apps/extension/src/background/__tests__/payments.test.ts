@@ -1,4 +1,4 @@
-import { Keypair, TransactionBuilder } from "@stellar/stellar-sdk/base";
+import { Account, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk/base";
 import {
   DEFAULT_SCRYPT_PARAMS,
   NETWORKS,
@@ -310,5 +310,59 @@ describe("Shield Mode A through the service worker (#24)", () => {
       error: { code: "INVALID_REQUEST" },
     });
     expect(h.count("submitTransactionAsync")).toBe(0);
+  });
+});
+
+describe("SHIELD_ANALYZE through the service worker (Mode C, #35)", () => {
+  /** Adds a signer to G0: ACCT_SIGNER_CHANGE, a non-overridable block. */
+  const addSigner = new TransactionBuilder(new Account(G0, "1"), {
+    fee: "100",
+    networkPassphrase: NETWORKS.testnet.passphrase,
+  })
+    .addOperation(Operation.setOptions({ signer: { ed25519PublicKey: DEST, weight: 1 } }))
+    .setTimeout(180)
+    .build()
+    .toXdr();
+
+  it("the popup gets the report for the active account and nothing signable", async () => {
+    const { platform, h, send } = await setup();
+    const get = vi.spyOn(platform.persistent, "get");
+    const res = await send("SHIELD_ANALYZE", { input: addSigner, network: "testnet" });
+    expect(res).toMatchObject({
+      ok: true,
+      data: {
+        account: G0,
+        spendsFromAccount: true,
+        report: { decision: { state: "blocked", ruleIds: ["ACCT_SIGNER_CHANGE"] } },
+      },
+    });
+    expect(get.mock.calls.map(([key]) => key)).not.toContain("vault");
+    expect((await platform.session.keys()).some((k) => k.startsWith("preparedTx:"))).toBe(false);
+    expect(h.count("submitTransactionAsync")).toBe(0);
+  });
+
+  it("the onboarding page may not send it", async () => {
+    const { send } = await setup();
+    expect(
+      await send("SHIELD_ANALYZE", { input: addSigner, network: "testnet" }, ONBOARDING),
+    ).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED_SENDER" } });
+  });
+
+  it("locked → LOCKED", async () => {
+    const { send } = await setup();
+    await send("LOCK");
+    expect(await send("SHIELD_ANALYZE", { input: addSigner, network: "testnet" })).toMatchObject({
+      ok: false,
+      error: { code: "LOCKED" },
+    });
+  });
+
+  it("a link for another network: SHIELD_INPUT_INVALID with linkNetwork", async () => {
+    const { send } = await setup();
+    const link = `web+stellar:tx?xdr=${encodeURIComponent(addSigner)}`;
+    expect(await send("SHIELD_ANALYZE", { input: link, network: "testnet" })).toMatchObject({
+      ok: false,
+      error: { code: "SHIELD_INPUT_INVALID", details: { linkNetwork: "mainnet" } },
+    });
   });
 });

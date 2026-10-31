@@ -1,3 +1,4 @@
+import { SHIELD_INPUT_MAX_CHARS } from "@stellix/core";
 import { describe, expect, it } from "vitest";
 import { REQUESTS, REQUEST_TYPES, requestEnvelopeSchema, responseSchema } from "../protocol.js";
 
@@ -183,6 +184,22 @@ describe("payload schemas for every request type", () => {
     },
     CANCEL_PAYMENT: { valid: [{ preparedId: "0".repeat(32) }], invalid: [{}] },
     DISMISS_OUTCOME: { valid: [{ hash: "f".repeat(64) }], invalid: [{ hash: "nothex" }] },
+    SHIELD_ANALYZE: {
+      valid: [
+        { input: "AAAA", network: "testnet" },
+        { input: "web+stellar:tx?xdr=AAAA", network: "mainnet" },
+        // Over core's limit but within the transport cap: core answers SHIELD_INPUT_TOO_LARGE.
+        { input: "A".repeat(SHIELD_INPUT_MAX_CHARS + 1), network: "testnet" },
+      ],
+      invalid: [
+        { input: "AAAA" },
+        { input: "AAAA", network: "futurenet" },
+        { input: 42, network: "testnet" },
+        { input: "A".repeat(SHIELD_INPUT_MAX_CHARS * 4 + 1), network: "testnet" },
+        { input: "AAAA", network: "testnet", origin: { type: "stellix" } },
+        { input: "AAAA", network: "testnet", presented: { destinations: [] } },
+      ],
+    },
   };
 
   for (const [type, { valid, invalid }] of Object.entries(cases)) {
