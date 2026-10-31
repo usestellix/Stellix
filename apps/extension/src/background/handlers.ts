@@ -1,5 +1,6 @@
 import {
   addAccount,
+  analyzePasted,
   awaitOutcome,
   cancelPayment,
   changePassword,
@@ -36,7 +37,7 @@ import { migrate } from "../storage/migrations.js";
 import type { AutoLock } from "./autolock.js";
 import type { InflightResolver } from "./inflight.js";
 import { createSerialQueue } from "./serial-queue.js";
-import { modeAShieldDeps } from "./shield.js";
+import { modeAShieldDeps, modeCTomlFetcher } from "./shield.js";
 
 // Thin handlers: each calls a core service (MOBILE_MIGRATION §4.3), plus the shell's lifecycle
 // work (alarms, tabs). Everything except GET_STATUS runs through one serial queue.
@@ -161,6 +162,20 @@ export function createHandlers(deps: HandlerDeps): Handlers {
           enabledNetworks: deps.enabledNetworks,
         }),
       ),
+    // Not in the serial queue: it touches no secrets or wallet state, and a slow stellar.toml
+    // must not hold up a send.
+    SHIELD_ANALYZE: async ({ input, network }) => {
+      const settings = await readSettings(platform.persistent);
+      return analyzePasted(
+        platform,
+        {
+          horizonFor: (n: NetworkId) => makeClient(horizonUrlFor(n, settings.horizonOverrides)),
+          toml: modeCTomlFetcher(platform),
+          enabledNetworks: deps.enabledNetworks,
+        },
+        { input, network },
+      );
+    },
     DISCOVER_ACCOUNTS: () => serial(async () => discoverAccounts(platform, await currentHorizon())),
     RESET_WALLET: ({ confirmation }) =>
       serial(async () => {

@@ -70,6 +70,8 @@ export type ErrorCode = (typeof ERROR_CODES)[number];
 export const ERROR_DETAIL_KEYS = {
   INSUFFICIENT_BALANCE: ["maxSendableStroops"],
   UNKNOWN_TX_ERROR: ["resultCode"],
+  // Mode C: a web+stellar:tx link naming a network other than the one selected.
+  SHIELD_INPUT_INVALID: ["linkNetwork"],
 } as const satisfies Partial<Record<ErrorCode, readonly string[]>>;
 
 export type ErrorDetails = Readonly<Record<string, string>>;

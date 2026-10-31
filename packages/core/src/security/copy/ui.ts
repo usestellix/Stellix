@@ -59,6 +59,16 @@ export const FINDINGS_UI_TEXT = {
   typedLabel: "Confirmation",
   /** Blocked, where Stellix is the signer (Modes A and B). Nothing overrides it. */
   blockedSign: "Stellix won't sign this. The findings above say why.",
+  /** Mode C, blocked (§6.5): nothing pasted is signed, so it says what Stellix would do. */
+  wouldBlockTitle: "Stellix would block this",
+  wouldBlockBody:
+    "If a site asked Stellix to sign this, Stellix would refuse, and nothing would let you " +
+    "override it. The findings below say why.",
+  /** Mode C's perspective (#35): rules run relative to the active account. */
+  analyzedFor: "Analyzed for account {account}",
+  notSpending:
+    "This transaction doesn't spend from your active account. Findings are relative to that " +
+    "account.",
 } as const;
 
 /** Labels for evidence keys; a key without one is shown as written. */

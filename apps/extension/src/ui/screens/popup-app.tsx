@@ -11,6 +11,7 @@ import { useAccounts } from "../hooks/use-accounts.js";
 import { useHorizon, useSettings } from "../hooks/use-settings.js";
 import { useStatus } from "../hooks/use-status.js";
 import { AccountsScreen } from "./accounts-screen.js";
+import { AnalyzeScreen } from "./analyze/analyze-screen.js";
 import { useHistory } from "../hooks/use-history.js";
 import { ActivityDetailScreen } from "./activity-detail-screen.js";
 import { HistoryScreen } from "./history-screen.js";
@@ -59,6 +60,7 @@ type Route =
   | { kind: "home" }
   | { kind: "send"; availableStroops: bigint }
   | { kind: "receive" }
+  | { kind: "analyze" }
   | { kind: "history" }
   | { kind: "activity"; item: HistoryItem; back: "home" | "history" }
   | { kind: "accounts" }
@@ -134,6 +136,9 @@ function UnlockedApp({
           onReceive={() => {
             setRoute({ kind: "receive" });
           }}
+          onAnalyze={() => {
+            setRoute({ kind: "analyze" });
+          }}
           history={history.snapshot}
           onViewAll={() => {
             setRoute({ kind: "history" });
@@ -182,6 +187,8 @@ function UnlockedApp({
           onBack={home}
         />
       );
+    case "analyze":
+      return <AnalyzeScreen network={settings.network} onBack={home} />;
     case "send":
       return (
         <SendFlow

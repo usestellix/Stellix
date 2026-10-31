@@ -85,7 +85,7 @@ export type ErrorCode =
   - `SHIELD_INPUT_INVALID` / `SHIELD_INPUT_TOO_LARGE`: pasted or dapp input that doesn't decode, or exceeds the size limit.
 - Throw `StellixError` from core. Catch at boundaries (message handler, React error boundary) and convert.
 - Unknown thrown values become `INTERNAL_ERROR` with a sanitized message; the original is logged at `debug` (never containing secrets — see SECURITY §7).
-- Errors may carry **details**, but only the keys a code declares in `ERROR_DETAIL_KEYS` (`core/errors.ts`), with units in the name, e.g. `INSUFFICIENT_BALANCE → { maxSendableStroops }`. Unknown keys are stripped on both sides of messaging. Details are public values only.
+- Errors may carry **details**, but only the keys a code declares in `ERROR_DETAIL_KEYS` (`core/errors.ts`), with units in the name, e.g. `INSUFFICIENT_BALANCE → { maxSendableStroops }`, `SHIELD_INPUT_INVALID → { linkNetwork }` (a `web+stellar:tx` link for another network than the selected one). Unknown keys are stripped on both sides of messaging. Details are public values only.
 - Add a code only when the UI or caller would behave differently for it. Update `ui/errorCopy.ts` in the same change; a test asserts every `ErrorCode` has copy.
 
 ## 5. Async and side effects
