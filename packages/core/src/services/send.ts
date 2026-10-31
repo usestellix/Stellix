@@ -1,6 +1,6 @@
 import { MuxedAccount } from "@stellar/stellar-sdk/base";
 import { StellixError, isStellixError, type ErrorCode, type ErrorDetails } from "../errors.js";
-import { readAccounts } from "../accounts.js";
+import { readActiveAccount } from "../accounts.js";
 import { deriveKeypair, mnemonicToSeed } from "../keys/derive.js";
 import { getBaseReserveStroops } from "../network/base-reserve.js";
 import { NETWORKS, type NetworkId } from "../network/config.js";
@@ -146,7 +146,7 @@ export async function preparePayment(
   (await requireUnlocked(platform)).fill(0);
   const settings = await readSettings(platform.persistent);
   const network = settings.network;
-  const source = await activeAccount(platform);
+  const source = await readActiveAccount(platform.persistent);
 
   if (
     (await readInflight(platform)).some((r) => r.source === source.publicKey && r.status !== "done")
@@ -605,18 +605,6 @@ async function readInflight(platform: Pick<Platform, "session">): Promise<Inflig
     if (r !== undefined) records.push(r);
   }
   return records;
-}
-
-async function activeAccount(
-  platform: SendPlatform,
-): Promise<{ index: number; publicKey: string }> {
-  const [accounts, active] = await Promise.all([
-    readAccounts(platform.persistent),
-    platform.persistent.get<unknown>(PERSISTENT_KEYS.activeAccountIndex),
-  ]);
-  const meta = accounts.find((a) => a.index === active) ?? accounts[0];
-  if (meta === undefined) throw new StellixError("INTERNAL_ERROR", "No accounts");
-  return { index: meta.index, publicKey: meta.publicKey };
 }
 
 async function chooseFee(

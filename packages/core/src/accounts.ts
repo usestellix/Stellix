@@ -42,6 +42,17 @@ export async function readAccounts(store: KeyValueStore): Promise<AccountMeta[]>
   return parsed.data;
 }
 
+/** The active account (or the first, if the stored index is missing). Public data only. */
+export async function readActiveAccount(store: KeyValueStore): Promise<AccountMeta> {
+  const [accounts, active] = await Promise.all([
+    readAccounts(store),
+    store.get<unknown>(PERSISTENT_KEYS.activeAccountIndex),
+  ]);
+  const meta = accounts.find((a) => a.index === active) ?? accounts[0];
+  if (meta === undefined) throw new StellixError("INTERNAL_ERROR", "No accounts");
+  return meta;
+}
+
 export function writeAccounts(
   store: KeyValueStore,
   accounts: readonly AccountMeta[],
