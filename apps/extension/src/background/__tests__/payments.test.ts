@@ -28,6 +28,8 @@ const ONBOARDING = { id: "abcdefghijklmnop", url: `${BASE}onboarding.html` };
 const TEST5 = SEP0005_VECTORS.find((v) => v.test === 5)!;
 const G0 = TEST5.accounts[0]!.publicKey;
 const DEST = Keypair.random().publicKey();
+/** What the Review screen sends when the user presses Confirm (#36). */
+const CLICK = { kind: "click" } as const;
 
 const hashOf = (xdr: string) =>
   Buffer.from(TransactionBuilder.fromXdr(xdr, NETWORKS.testnet.passphrase).hash()).toString("hex");
@@ -114,7 +116,7 @@ describe("payments through the service worker", () => {
       data: { summary: { kind: "payment", amountStroops: "30000000" } },
     });
     const { preparedId } = (prepared as { data: { preparedId: string } }).data;
-    expect(await send("CONFIRM_PAYMENT", { preparedId })).toMatchObject({
+    expect(await send("CONFIRM_PAYMENT", { preparedId, confirmation: CLICK })).toMatchObject({
       ok: true,
       data: { status: "success", ledger: 900 },
     });
@@ -133,8 +135,8 @@ describe("payments through the service worker", () => {
       data: { preparedId: string };
     };
     const [a, b] = await Promise.all([
-      send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId }),
-      send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId }),
+      send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId, confirmation: CLICK }),
+      send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId, confirmation: CLICK }),
     ]);
     const results = [a, b]
       .map((r) => (r.ok ? `ok:${(r.data as { status: string }).status}` : r.error.code))
@@ -165,9 +167,9 @@ describe("payments through the service worker", () => {
     const prepared = (await send("PREPARE_PAYMENT", { destination: DEST, amount: "3" })) as {
       data: { preparedId: string };
     };
-    expect(await send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId })).toEqual(
-      expect.objectContaining({ ok: true, data: { status: "pending", hash } }),
-    );
+    expect(
+      await send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId, confirmation: CLICK }),
+    ).toEqual(expect.objectContaining({ ok: true, data: { status: "pending", hash } }));
     expect(fakeAlarms.alarms.has(RESOLVE_ALARM)).toBe(true);
     expect(await send("PREPARE_PAYMENT", { destination: DEST, amount: "1" })).toMatchObject({
       ok: false,
@@ -194,7 +196,10 @@ describe("payments through the service worker", () => {
     const prepared = (await send("PREPARE_PAYMENT", { destination: DEST, amount: "3" })) as {
       data: { preparedId: string };
     };
-    const confirmed = (await send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId })) as {
+    const confirmed = (await send("CONFIRM_PAYMENT", {
+      preparedId: prepared.data.preparedId,
+      confirmation: CLICK,
+    })) as {
       data: { hash: string };
     };
     expect(await send("DISMISS_OUTCOME", { hash: confirmed.data.hash })).toMatchObject({
@@ -210,7 +215,7 @@ describe("payments through the service worker", () => {
     const prepared = (await send("PREPARE_PAYMENT", { destination: DEST, amount: "3" })) as {
       data: { preparedId: string };
     };
-    await send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId });
+    await send("CONFIRM_PAYMENT", { preparedId: prepared.data.preparedId, confirmation: CLICK });
     await send("LOCK");
     expect(await send("GET_STATUS")).toMatchObject({
       data: { unlocked: false, inflight: [{ status: "resolving" }] },
@@ -262,14 +267,14 @@ describe("Shield Mode A through the service worker (#24)", () => {
       { fee: "200" },
     ).build();
     await platform.session.set(key, { ...stored, xdr: tampered.toXdr() });
-    expect(await send("CONFIRM_PAYMENT", { preparedId })).toMatchObject({
+    expect(await send("CONFIRM_PAYMENT", { preparedId, confirmation: CLICK })).toMatchObject({
       ok: false,
       error: { code: "SHIELD_DIGEST_MISMATCH" },
     });
     expect(h.count("submitTransactionAsync")).toBe(0);
   });
 
-  it("a review decision fails closed until #36 → SHIELD_CONFIRMATION_REQUIRED", async () => {
+  it("a typed review refuses a click → SHIELD_CONFIRMATION_REQUIRED", async () => {
     const { platform, h, send } = await setup();
     landOnSubmit(h);
     const preparedId = await prepare(send);
@@ -277,9 +282,15 @@ describe("Shield Mode A through the service worker (#24)", () => {
     const stored = (await platform.session.get<{ report: object }>(key))!;
     await platform.session.set(key, {
       ...stored,
-      report: { ...stored.report, checksUnavailable: [{ ruleId: "HIGH_FEE", reason: "internal" }] },
+      // UNNAMED_OUTFLOW: review, typed, in Mode A too.
+      report: {
+        ...stored.report,
+        findings: [
+          { ruleId: "UNNAMED_OUTFLOW", severity: "high", confidence: "high", evidence: {} },
+        ],
+      },
     });
-    expect(await send("CONFIRM_PAYMENT", { preparedId })).toMatchObject({
+    expect(await send("CONFIRM_PAYMENT", { preparedId, confirmation: CLICK })).toMatchObject({
       ok: false,
       error: { code: "SHIELD_CONFIRMATION_REQUIRED" },
     });
@@ -287,9 +298,10 @@ describe("Shield Mode A through the service worker (#24)", () => {
   });
 
   it.each([
-    ["a report", { report: { findings: [], decision: { state: "ready" } } }],
-    ["a confirmation", { confirmation: { kind: "click" } }],
-  ])("CONFIRM_PAYMENT can't carry %s: the SW uses only what it stored", async (_label, extra) => {
+    ["a report", { confirmation: CLICK, report: { findings: [], decision: { state: "ready" } } }],
+    ["a decision", { confirmation: CLICK, decision: { state: "ready" } }],
+    ["no confirmation", {}],
+  ])("CONFIRM_PAYMENT with %s is invalid: the SW uses only what it stored", async (_l, extra) => {
     const { h, send } = await setup();
     landOnSubmit(h);
     const preparedId = await prepare(send);

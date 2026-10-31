@@ -128,7 +128,7 @@ const reportViewSchema = z.strictObject({
         ruleId: ruleIdSchema,
         severity: z.enum(SEVERITIES),
         confidence: z.enum(["high", "medium", "low"]),
-        opIndex: z.number().int().nonnegative().optional(),
+        opIndex: z.number().int().nonnegative().exactOptional(),
         evidence: z.record(z.string(), z.string()).readonly(),
       }),
     )
@@ -141,7 +141,7 @@ const reportViewSchema = z.strictObject({
     z.strictObject({
       state: z.literal("review"),
       requires: z.enum(["click", "typed"]),
-      typedPhrase: z.string().optional(),
+      typedPhrase: z.string().exactOptional(),
     }),
     z.strictObject({
       state: z.literal("blocked"),
@@ -152,6 +152,12 @@ const reportViewSchema = z.strictObject({
   createdAt: z.number().int(),
   expiresAt: z.number().int(),
 });
+
+/** SHIELD §6.5: a click on Confirm, or the phrase the decision asked for, as typed. */
+const confirmationSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("click") }),
+  z.strictObject({ kind: z.literal("typed"), phrase: z.string().max(64) }),
+]);
 
 const errorCodeSchema = z.enum(ERROR_CODES);
 
@@ -343,9 +349,16 @@ export const REQUESTS = {
     allowedFrom: BOTH,
     countsAsActivity: true,
   }),
-  /** TRANSACTIONS §4: signs exactly the stored tx. Returns within ~20 s, possibly "pending". */
+  /**
+   * TRANSACTIONS §4: signs exactly the stored tx. Returns within ~20 s, possibly "pending".
+   * `confirmation` is what the user did on the Review screen that showed the findings; the SW
+   * checks it against its own stored report (assertSignable), never against the UI's view.
+   */
   CONFIRM_PAYMENT: defineRequest({
-    payload: z.strictObject({ preparedId: z.string().regex(/^[0-9a-f]{32}$/) }),
+    payload: z.strictObject({
+      preparedId: z.string().regex(/^[0-9a-f]{32}$/),
+      confirmation: confirmationSchema,
+    }),
     result: submitOutcomeSchema,
     allowedFrom: BOTH,
     countsAsActivity: true,

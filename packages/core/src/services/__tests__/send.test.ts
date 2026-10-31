@@ -23,7 +23,7 @@ import {
   submitPrepared,
 } from "../send.js";
 import { lock } from "../session.js";
-import { ABANDON, ABANDON_G0, FAST_SCRYPT, PASSWORD, codeOf } from "./helpers.js";
+import { ABANDON, ABANDON_G0, CLICK, FAST_SCRYPT, PASSWORD, codeOf } from "./helpers.js";
 
 const template = accountSchema.parse(fixture("account-funded").body);
 const success = fixture("transaction-success").body as TransactionRecord;
@@ -207,7 +207,7 @@ describe("preparePayment (TRANSACTIONS §3)", () => {
     const { p, h, deps } = await setup();
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
     h.submitScript.push({ tx_status: "PENDING", hash: "0".repeat(64) });
-    await submitPrepared(p, deps, preparedId);
+    await submitPrepared(p, deps, preparedId, CLICK);
     expect(await codeOf(preparePayment(p, deps, { destination: dest, amount: "2" }))).toBe(
       "TX_IN_FLIGHT",
     );
@@ -217,7 +217,7 @@ describe("preparePayment (TRANSACTIONS §3)", () => {
     const { p, deps } = await setup();
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
     await cancelPayment(p, preparedId);
-    expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe("PREPARED_TX_NOT_FOUND");
+    expect(await codeOf(submitPrepared(p, deps, preparedId, CLICK))).toBe("PREPARED_TX_NOT_FOUND");
   });
 });
 
@@ -232,7 +232,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       signedXdr = xdr;
       original(xdr);
     };
-    const outcome = await confirmPayment(p, deps, preparedId);
+    const outcome = await confirmPayment(p, deps, preparedId, CLICK);
     expect(outcome).toMatchObject({ status: "success", ledger: 777 });
     expect(h.count("submitTransactionAsync")).toBe(1);
     const tx = TransactionBuilder.fromXdr(signedXdr, NETWORKS.testnet.passphrase);
@@ -248,8 +248,8 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
     const { p, h, deps } = await setup();
     landOnSubmit(h);
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    await submitPrepared(p, deps, preparedId);
-    expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe("PREPARED_TX_NOT_FOUND");
+    await submitPrepared(p, deps, preparedId, CLICK);
+    expect(await codeOf(submitPrepared(p, deps, preparedId, CLICK))).toBe("PREPARED_TX_NOT_FOUND");
     expect(h.count("submitTransactionAsync")).toBe(1);
   });
 
@@ -257,15 +257,15 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
     const { p, deps } = await setup();
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
     p.advance(171_000);
-    expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe("PREPARED_TX_EXPIRED");
-    expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe("PREPARED_TX_NOT_FOUND");
+    expect(await codeOf(submitPrepared(p, deps, preparedId, CLICK))).toBe("PREPARED_TX_EXPIRED");
+    expect(await codeOf(submitPrepared(p, deps, preparedId, CLICK))).toBe("PREPARED_TX_NOT_FOUND");
   });
 
   it("a network switch after review → NETWORK_MISMATCH, nothing submitted", async () => {
     const { p, h, deps } = await setup();
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
     await p.persistent.set("settings", { network: "mainnet" });
-    expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe("NETWORK_MISMATCH");
+    expect(await codeOf(submitPrepared(p, deps, preparedId, CLICK))).toBe("NETWORK_MISMATCH");
     expect(h.count("submitTransactionAsync")).toBe(0);
   });
 
@@ -279,7 +279,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       return Promise.resolve({ tx_status: "DUPLICATE" as const, hash });
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    expect((await confirmPayment(p, deps, preparedId)).status).toBe("success");
+    expect((await confirmPayment(p, deps, preparedId, CLICK)).status).toBe("success");
   });
 
   it("TRY_AGAIN_LATER → resubmits the SAME XDR with backoff, then resolves", async () => {
@@ -300,7 +300,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       }
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    expect((await confirmPayment(p, deps, preparedId)).status).toBe("success");
+    expect((await confirmPayment(p, deps, preparedId, CLICK)).status).toBe("success");
     expect(xdrs.length).toBeGreaterThanOrEqual(2);
     expect(new Set(xdrs).size).toBe(1);
   });
@@ -314,7 +314,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       error_result_xdr: body.error_result_xdr,
     });
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    expect(await confirmPayment(p, deps, preparedId)).toEqual({
+    expect(await confirmPayment(p, deps, preparedId, CLICK)).toEqual({
       status: "rebuild",
       reason: "bad_seq",
     });
@@ -326,7 +326,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
     const { p, h, deps } = await setup();
     landOnSubmit(h, failedTx);
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    expect(await confirmPayment(p, deps, preparedId)).toEqual({
+    expect(await confirmPayment(p, deps, preparedId, CLICK)).toEqual({
       status: "rebuild",
       reason: "destination_changed",
     });
@@ -347,7 +347,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       return Promise.resolve(pending(hash));
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    expect((await confirmPayment(p, deps, preparedId)).status).toBe("success");
+    expect((await confirmPayment(p, deps, preparedId, CLICK)).status).toBe("success");
     expect(xdrs.length).toBeGreaterThanOrEqual(2);
     expect(new Set(xdrs).size).toBe(1);
   });
@@ -361,7 +361,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       h.submitScript.push(pending(hash));
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    const { hash } = await submitPrepared(p, deps, preparedId);
+    const { hash } = await submitPrepared(p, deps, preparedId, CLICK);
     expect(await awaitOutcome(p, deps, hash, 20_000)).toEqual({ status: "pending", hash });
     p.advance(200_000);
     expect(await awaitOutcome(p, deps, hash, 30_000)).toMatchObject({
@@ -379,7 +379,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       h.submitScript.push(pending(hash));
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    const { hash } = await submitPrepared(p, deps, preparedId);
+    const { hash } = await submitPrepared(p, deps, preparedId, CLICK);
     await lock(p);
     expect(await listInflight(p)).toHaveLength(1);
     h.transactions.set(hash, { ...success, hash });
@@ -402,7 +402,7 @@ describe("confirm (TRANSACTIONS §4–5, ADR 0007)", () => {
       h.submitScript.push(pending(hash));
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    const { hash } = await submitPrepared(p, deps, preparedId);
+    const { hash } = await submitPrepared(p, deps, preparedId, CLICK);
     expect(await codeOf(dismissOutcome(p, hash))).toBe("INVALID_REQUEST");
     h.transactions.set(hash, { ...success, hash });
     await awaitOutcome(p, deps, hash, 10_000);

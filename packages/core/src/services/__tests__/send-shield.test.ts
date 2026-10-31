@@ -16,15 +16,16 @@ import {
 import { fixture } from "../../network/__tests__/fixtures.js";
 import { assertSignable } from "../../security/assert-signable.js";
 import type * as AssertSignableModule from "../../security/assert-signable.js";
+import type { Confirmation } from "../../security/assert-signable.js";
 import { decodeTransactionEnvelope } from "../../security/decode/index.js";
-import { evaluate } from "../../security/policy/policy.js";
+import { TYPED_CONFIRMATION_PHRASE, evaluate } from "../../security/policy/policy.js";
 import { fromStoredReport, type StoredReport } from "../../security/report.js";
 import type { AnalysisReport, PolicyDecision } from "../../security/types.js";
 import { FakeHorizonClient } from "../../testing/fake-horizon.js";
 import { createFakePlatform, type FakePlatform } from "../../testing/fake-platform.js";
 import { importWallet } from "../onboarding.js";
 import { blockedAtPrepare, confirmPayment, preparePayment, submitPrepared } from "../send.js";
-import { ABANDON, ABANDON_G0, FAST_SCRYPT, PASSWORD, codeOf } from "./helpers.js";
+import { ABANDON, ABANDON_G0, CLICK, FAST_SCRYPT, PASSWORD, codeOf } from "./helpers.js";
 
 // Shield Mode A in the send service (SHIELD §2, §5; #24): PREPARE analyzes the built tx and
 // stores the report beside it; CONFIRM runs assertSignable on what's stored before signing.
@@ -112,10 +113,11 @@ async function expectRefused(
   deps: Awaited<ReturnType<typeof setup>>["deps"],
   preparedId: string,
   code: ErrorCode,
+  confirmation: Confirmation = CLICK,
 ) {
-  expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe(code);
+  expect(await codeOf(submitPrepared(p, deps, preparedId, confirmation))).toBe(code);
   expect(h.calls.filter((c) => c.method === "submitTransactionAsync")).toEqual([]);
-  expect(await codeOf(submitPrepared(p, deps, preparedId))).toBe("PREPARED_TX_NOT_FOUND");
+  expect(await codeOf(submitPrepared(p, deps, preparedId, CLICK))).toBe("PREPARED_TX_NOT_FOUND");
 }
 
 beforeEach(() => {
@@ -192,13 +194,13 @@ describe("CONFIRM_PAYMENT calls assertSignable on the stored tx", () => {
     return { ...s, preparedId };
   }
 
-  it("ready report: signs once, with no confirmation recorded until #36", async () => {
+  it("ready report: signs once, passing on the Review screen's confirmation", async () => {
     const { p, deps, preparedId } = await prepared();
-    expect((await confirmPayment(p, deps, preparedId)).status).toBe("success");
+    expect((await confirmPayment(p, deps, preparedId, CLICK)).status).toBe("success");
     expect(vi.mocked(assertSignable).mock.calls).toHaveLength(1);
     const [req, , confirmation] = vi.mocked(assertSignable).mock.calls[0]!;
     expect(req).toMatchObject({ network: "testnet", origin: { type: "stellix" } });
-    expect(confirmation).toBeNull();
+    expect(confirmation).toEqual(CLICK);
   });
 
   it("a tampered stored tx (fee) is refused: SHIELD_DIGEST_MISMATCH", async () => {
@@ -285,13 +287,73 @@ describe("CONFIRM_PAYMENT calls assertSignable on the stored tx", () => {
     await expectRefused(p, h, deps, preparedId, "SHIELD_BLOCKED");
   });
 
-  it("a review decision fails closed until #36: SHIELD_CONFIRMATION_REQUIRED", async () => {
+  /** An unavailable check: review, click (SHIELD §6.5). */
+  const clickReview = (s: Stored): Stored => ({
+    ...s,
+    report: { ...s.report!, checksUnavailable: [{ ruleId: "HIGH_FEE", reason: "internal" }] },
+  });
+  /** UNNAMED_OUTFLOW: review, typed, in Mode A too. */
+  const typedReview = (s: Stored): Stored => ({
+    ...s,
+    report: {
+      ...s.report!,
+      findings: [
+        {
+          ruleId: "UNNAMED_OUTFLOW",
+          severity: "high",
+          confidence: "high",
+          opIndex: 0,
+          evidence: { opNumber: "1", destination: dest },
+        },
+      ],
+    },
+  });
+
+  it("a click review signs on a click", async () => {
+    const { p, deps, preparedId } = await prepared();
+    await patchStored(p, preparedId, clickReview);
+    expect((await confirmPayment(p, deps, preparedId, CLICK)).status).toBe("success");
+  });
+
+  it("a typed review refuses a click: SHIELD_CONFIRMATION_REQUIRED", async () => {
+    const { p, h, deps, preparedId } = await prepared();
+    await patchStored(p, preparedId, typedReview);
+    await expectRefused(p, h, deps, preparedId, "SHIELD_CONFIRMATION_REQUIRED");
+  });
+
+  it("a typed review refuses another phrase: SHIELD_CONFIRMATION_REQUIRED", async () => {
+    const { p, h, deps, preparedId } = await prepared();
+    await patchStored(p, preparedId, typedReview);
+    const wrong: Confirmation = { kind: "typed", phrase: "confirm" };
+    await expectRefused(p, h, deps, preparedId, "SHIELD_CONFIRMATION_REQUIRED", wrong);
+  });
+
+  it("a typed review signs on the decision's phrase", async () => {
+    const { p, deps, preparedId } = await prepared();
+    await patchStored(p, preparedId, typedReview);
+    const typed: Confirmation = { kind: "typed", phrase: TYPED_CONFIRMATION_PHRASE };
+    expect((await confirmPayment(p, deps, preparedId, typed)).status).toBe("success");
+  });
+
+  it("a block refuses even the typed phrase: SHIELD_BLOCKED", async () => {
     const { p, h, deps, preparedId } = await prepared();
     await patchStored(p, preparedId, (s) => ({
       ...s,
-      report: { ...s.report!, checksUnavailable: [{ ruleId: "HIGH_FEE", reason: "internal" }] },
+      report: {
+        ...s.report!,
+        findings: [
+          {
+            ruleId: "ACCT_SIGNER_CHANGE",
+            severity: "critical",
+            confidence: "high",
+            opIndex: 0,
+            evidence: {},
+          },
+        ],
+      },
     }));
-    await expectRefused(p, h, deps, preparedId, "SHIELD_CONFIRMATION_REQUIRED");
+    const typed: Confirmation = { kind: "typed", phrase: TYPED_CONFIRMATION_PHRASE };
+    await expectRefused(p, h, deps, preparedId, "SHIELD_BLOCKED", typed);
   });
 
   it("resubmitting the signed tx (ADR 0007) doesn't re-check or re-sign", async () => {
@@ -311,7 +373,7 @@ describe("CONFIRM_PAYMENT calls assertSignable on the stored tx", () => {
       }
     };
     const { preparedId } = await preparePayment(p, deps, { destination: dest, amount: "2" });
-    expect((await confirmPayment(p, deps, preparedId)).status).toBe("success");
+    expect((await confirmPayment(p, deps, preparedId, CLICK)).status).toBe("success");
     expect(xdrs.length).toBeGreaterThanOrEqual(2);
     expect(new Set(xdrs).size).toBe(1);
     expect(TransactionBuilder.fromXdr(xdrs[0]!, passphrase).signatures).toHaveLength(1);
