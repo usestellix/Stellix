@@ -75,6 +75,7 @@ export default defineConfig(
       "**/node_modules/**",
       "**/.output/**",
       "**/.output-screenshots/**",
+      "**/.output-harness/**",
       "**/.wxt/**",
       "**/test-results/**",
       "**/playwright-report/**",

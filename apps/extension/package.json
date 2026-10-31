@@ -14,7 +14,8 @@
     "typecheck": "wxt prepare && tsc --noEmit -p tsconfig.json",
     "test": "wxt prepare && vitest run",
     "test:testnet": "echo 'No testnet tests in apps/extension'",
-    "test:e2e": "wxt build && playwright test --grep-invert @mainnet",
+    "test:e2e": "wxt build && playwright test --grep-invert @mainnet && pnpm test:harness",
+    "test:harness": "vite build -c harness/review/vite.config.ts && playwright test -c harness/playwright.config.ts",
     "test:e2e:mainnet": "STELLIX_MAINNET_ENABLED=true wxt build && STELLIX_MAINNET_ENABLED=true playwright test --grep @mainnet",
     "store:assets": "wxt build && playwright test -c store/playwright.config.ts",
     "screenshots:findings": "vite build -c screenshots/findings/vite.config.ts && playwright test -c screenshots/playwright.config.ts"

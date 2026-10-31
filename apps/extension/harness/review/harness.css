@@ -1,0 +1,4 @@
+/* The extension's own theme; @source points Tailwind at the components it renders, since this
+   page's Vite root (harness/review) is outside src/. */
+@import "../../src/ui/theme.css";
+@source "../../src";

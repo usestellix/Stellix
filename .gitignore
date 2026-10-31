@@ -7,3 +7,4 @@ playwright-report/
 .DS_Store
 *.log
 .output-screenshots/
+.output-harness/
