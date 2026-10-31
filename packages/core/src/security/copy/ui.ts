@@ -54,6 +54,11 @@ export const FINDINGS_UI_TEXT = {
     "for. Treat them as not checked.",
   /** A finding whose rule has no copy yet: its check name is the title. */
   missingCopyBody: "Stellix flagged this, but has no description for it yet. See the details.",
+  /** Review, typed: `phrase` is the decision's typedPhrase, never a constant in the UI. */
+  typedPrompt: "To continue, type {phrase} below.",
+  typedLabel: "Confirmation",
+  /** Blocked, where Stellix is the signer (Modes A and B). Nothing overrides it. */
+  blockedSign: "Stellix won't sign this. The findings above say why.",
 } as const;
 
 /** Labels for evidence keys; a key without one is shown as written. */
