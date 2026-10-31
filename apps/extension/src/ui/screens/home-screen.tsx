@@ -63,6 +63,7 @@ const COPY = {
   viewAll: "View all",
   send: "Send",
   receive: "Receive",
+  analyze: "Analyze",
   copyAddress: "Copy address",
   copied: "Copied",
 } as const;
@@ -78,6 +79,7 @@ export function HomeScreen({
   onInflightChange,
   onSend,
   onReceive,
+  onAnalyze,
   history,
   onViewAll,
   onOpenActivity,
@@ -95,6 +97,8 @@ export function HomeScreen({
   onSend: (availableStroops: bigint) => void;
   /** Always offered, in every balance state. */
   onReceive: () => void;
+  /** Mode C (SHIELD §2): always offered, the way to try Shield on any transaction. */
+  onAnalyze: () => void;
   history: HistorySnapshot | null;
   onViewAll: () => void;
   onOpenActivity: (item: HistoryItem) => void;
@@ -295,6 +299,9 @@ export function HomeScreen({
             onClick={onReceive}
           >
             {COPY.receive}
+          </Button>
+          <Button variant="secondary" className="flex-1" onClick={onAnalyze}>
+            {COPY.analyze}
           </Button>
         </div>
 
