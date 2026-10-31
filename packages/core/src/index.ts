@@ -229,6 +229,7 @@ export {
 export { SEP7_SCHEME, encodePayRequest, type PayRequest } from "./uri/sep7.js";
 export {
   NO_TOML,
+  createTomlFetcher,
   REPORT_TTL_MS,
   RULES,
   RULE_POLICY,
@@ -302,3 +303,12 @@ export {
   type SendDeps,
   type SubmitOutcome,
 } from "./services/send.js";
+export {
+  analyzePasted,
+  type AnalyzeDeps,
+  type AnalyzeResult,
+  type MemoView,
+  type TransactionView,
+} from "./services/analyze.js";
+export { SHIELD_INPUT_MAX_CHARS, parseAnalyzeInput, type AnalyzeInput } from "./security/input.js";
+export { spendsFromAccount } from "./security/involvement.js";
