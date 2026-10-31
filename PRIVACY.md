@@ -18,6 +18,7 @@ Last updated: TODO (release date of 0.1.0)
 | Your password | Not stored | Used only to unlock. While unlocked, a derived key sits in the browser's in-memory session storage, cleared when you lock or close the browser. |
 | Account names, settings (network, auto-lock time, custom Horizon URL) | Local storage | Not encrypted. Contains no secrets. |
 | Recently viewed balances and activity | In-memory session storage | Public blockchain data, cleared when the browser closes. |
+| Transactions you paste into Analyze | Not stored | Analyzed and shown, then discarded. Issuers' `stellar.toml` lists are cached in session storage for an hour. |
 
 None of this is sent to Stellix Labs: there is nowhere to send it. Uninstalling the extension deletes it. Keep your recovery phrase: it's the only way back into your wallet.
 
@@ -25,7 +26,8 @@ None of this is sent to Stellix Labs: there is nowhere to send it. Uninstalling 
 
 | Recipient | When | What they receive |
 |---|---|---|
-| **The Horizon server operator.** By default the **Stellar Development Foundation** (`horizon-testnet.stellar.org`). If you set a custom Horizon URL, its operator instead. | While you use the wallet (balances, history, live updates, fees, sending), and in the background while a payment you sent is still confirming, even if the wallet is locked or closed | Your **IP address**, the **Stellar account addresses** you look up, and the transactions you submit. Their own privacy terms apply. |
+| **The Horizon server operator.** By default the **Stellar Development Foundation** (`horizon-testnet.stellar.org`). If you set a custom Horizon URL, its operator instead. | While you use the wallet (balances, history, live updates, fees, sending, and the accounts, order books and payment paths **Analyze** looks up), and in the background while a payment you sent is still confirming, even if the wallet is locked or closed | Your **IP address**, the **Stellar account addresses** you look up, and the transactions you submit. Their own privacy terms apply. |
+| **An asset issuer's website** (the issuer's own home domain, as its Stellar account declares it) | Only when you use **Analyze** on a transaction that adds or changes a trustline: Stellix fetches `https://<that domain>/.well-known/stellar.toml` to see whether the issuer lists the asset. Cached for an hour, in memory only | Your **IP address**, and that someone requested that file. No account address, no cookies, no other data. |
 | **Friendbot** (testnet faucet, operated by the Stellar Development Foundation) | Only when you tap "Fund with Friendbot" | Your IP address and the account address to fund |
 | **StellarExpert** (block explorer) | Only when you tap "View on explorer" | It opens in a new tab like any website you visit |
 

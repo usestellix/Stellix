@@ -113,6 +113,10 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
   - **M4 exit:** with the popup open and never reloaded, a payment sent from Node appears with its memo, and the balance updates. Its detail shows no fee (the sender paid it) and an explorer link.
   - A payment made while the popup was closed appears on reopen (cached page, then page 1).
   - Pagination: a 25-operation incoming payment → Home shows 10, Activity 20, scrolling reaches 26 and "This is where your account started."
+- **Shield Mode C (`e2e/shield-analyze.spec.ts`, live testnet Horizon, nothing submitted):**
+  - A `setOptions` adding a signer to the E2E wallet's own account, built offline: "Stellix would block this", the `ACCT_SIGNER_CHANGE` finding, "Analyzed for account …", no "safe". The screen offers only Back, Clear and Analyze, and an init script records every message the popup sends: `SHIELD_ANALYZE` is among them, `PREPARE_PAYMENT` and `CONFIRM_PAYMENT` never are.
+  - A payment between two other accounts shows "This transaction doesn't spend from your active account."
+  - A mainnet link while testnet is selected shows "This link is for Mainnet…" and no report.
 - **Also covered:**
   - the SW-enforced unlock throttle, checked from a fresh popup
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`

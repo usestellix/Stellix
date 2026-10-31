@@ -61,7 +61,7 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 ## 4. Home (popup)
 
 - **Balance card**: total XLM (large; steps down from 28 to 22 to 18 px for long values so even the int64 maximum fits, never truncated), below it "Available: X XLM   Reserved: Y XLM ⓘ" (two groups that never break internally; on a long balance the Reserved group, icon included, wraps to the next line). Tooltip: "Stellar keeps a small amount of XLM locked in every account. You can't send it, but you get it back if you close the account."
-- Buttons: **Send**, **Receive** (Send only for funded single-signer accounts; Receive always).
+- Buttons: **Send**, **Receive**, **Analyze** (Send only for funded single-signer accounts; Receive and Analyze always; Analyze is secondary, §11).
 - **Recent activity**: last 10 normalized history items; "View all" opens History (§7). The full address lives on Receive (§6); the header shows it truncated.
 - States:
   - loading (skeletons)
@@ -135,6 +135,21 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 - Security: Reveal recovery phrase (opens tab, password), Change password.
 - Danger zone: Reset wallet (typed "RESET").
 - About: version, commit hash, source link, privacy note.
+
+## 11. Analyze (popup, Shield Mode C)
+- Opened from Home's Analyze button. Advisory only: nothing is signed or sent, and the screen has no action that signs or prepares anything (SHIELD §8).
+- Intro: "Paste a transaction or a web+stellar:tx link to see what it does and what Stellix would do if a site asked you to sign it. Nothing is signed or sent."
+- Network selector (only when the build offers more than one network), defaulting to the current network; a monospace textarea "Transaction XDR or link"; **Clear** / **Analyze**.
+- Report:
+  - Blocked: a danger banner "Stellix would block this", then "If a site asked Stellix to sign this, Stellix would refuse, and nothing would let you override it. The findings below say why."
+  - "Analyzed for account GABC…WXYZ".
+  - When nothing in the transaction acts as the active account: "This transaction doesn't spend from your active account. Findings are relative to that account."
+  - What Shield found (findings components), checks that couldn't run.
+  - What it does: each operation's plain-language sentences, then source, fee bid (or fee-bump payer and maximum), memo quoted as the transaction's words.
+  - Never "safe". Reviews show their findings only, never a confirm control.
+- Errors under the input: `errorCopy` for the code, except a link for another network: "This link is for Mainnet. Choose Mainnet above to analyze it." or, when the build doesn't offer it, "This link is for Mainnet, which this version of Stellix doesn't offer."
+- Editing the input or changing the network drops the report: a report always describes exactly what was analyzed.
+- States: empty, analyzing, error, report (blocked / review / ready, each with or without the not-spending notice).
 
 ## 10. Accessibility & polish
 - All interactive elements keyboard-reachable; visible focus rings.
