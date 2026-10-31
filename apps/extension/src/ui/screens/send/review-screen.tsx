@@ -1,9 +1,19 @@
-import type { NetworkId, PaymentSummary } from "@stellix/core";
+import {
+  FINDINGS_UI_TEXT,
+  type Confirmation,
+  type NetworkId,
+  type PaymentSummary,
+  type ReportView,
+} from "@stellix/core";
 import { useEffect, useState } from "react";
 import { GroupedAddress } from "../../components/address.js";
 import { Button } from "../../components/button.js";
 import { Callout } from "../../components/callout.js";
 import { ErrorText } from "../../components/error-text.js";
+import { FindingList } from "../../components/findings/finding-list.js";
+import { reviewConfirmation } from "../../components/findings/model.js";
+import { TypedConfirmation } from "../../components/findings/typed-confirmation.js";
+import { UnavailableChecks } from "../../components/findings/unavailable-checks.js";
 import { NetworkBadge } from "../../components/network-badge.js";
 import { SubScreen } from "../../components/sub-screen.js";
 import { errorCopy } from "../../errorCopy.js";
@@ -11,7 +21,8 @@ import { displayXlm } from "../../lib/xlm.js";
 import type { ErrorCode } from "@stellix/core";
 
 // Review (UI_FLOWS §5.2). Everything shown is from the SW's summary of the BUILT transaction
-// (ADR 0003), never from what the user typed.
+// (ADR 0003), never from what the user typed, plus Shield's report on it (SHIELD §8, #36).
+// The report's decision only gates the button here; the SW enforces it (invariant 15).
 
 const COPY = {
   title: "Review",
@@ -41,6 +52,7 @@ const COPY = {
 export function ReviewScreen({
   network,
   summary,
+  report,
   expiresAt,
   rebuilt,
   error,
@@ -51,15 +63,19 @@ export function ReviewScreen({
 }: {
   network: NetworkId;
   summary: PaymentSummary;
+  report: ReportView;
   expiresAt: number;
   rebuilt: boolean;
   error: ErrorCode | null;
   busy: boolean;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: (confirmation: Confirmation) => void;
   onReviewAgain: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
+  const [typed, setTyped] = useState("");
+  const { decision } = report;
+  const confirmation = reviewConfirmation(decision, typed);
   useEffect(() => {
     const t = window.setInterval(() => {
       setNow(Date.now());
@@ -110,7 +126,14 @@ export function ReviewScreen({
                 {COPY.reviewAgain}
               </Button>
             ) : (
-              <Button className="flex-1" busy={busy} onClick={onConfirm}>
+              <Button
+                className="flex-1"
+                busy={busy}
+                disabled={confirmation === null}
+                onClick={() => {
+                  if (confirmation !== null) onConfirm(confirmation);
+                }}
+              >
                 {busy ? COPY.confirming : COPY.confirm}
               </Button>
             )}
@@ -172,6 +195,23 @@ export function ReviewScreen({
           )}
           {summary.firstTimeDestination && <Callout tone="warning">{COPY.firstTime}</Callout>}
           {summary.feeEstimated && <Callout>{COPY.feeEstimated}</Callout>}
+        </div>
+        <div className="space-y-3" data-testid="review-shield" data-decision={decision.state}>
+          <FindingList findings={report.findings} />
+          <UnavailableChecks checks={report.checksUnavailable} />
+          {decision.state === "blocked" && (
+            <Callout tone="warning">{FINDINGS_UI_TEXT.blockedSign}</Callout>
+          )}
+          {decision.state === "review" &&
+            decision.requires === "typed" &&
+            decision.typedPhrase !== undefined && (
+              <TypedConfirmation
+                phrase={decision.typedPhrase}
+                value={typed}
+                onChange={setTyped}
+                disabled={busy || expired}
+              />
+            )}
         </div>
       </div>
     </SubScreen>

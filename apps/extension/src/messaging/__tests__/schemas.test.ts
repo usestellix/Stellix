@@ -165,8 +165,21 @@ describe("payload schemas for every request type", () => {
       ],
     },
     CONFIRM_PAYMENT: {
-      valid: [{ preparedId: "a".repeat(32) }],
-      invalid: [{ preparedId: "xyz" }, { preparedId: "a".repeat(32), xdr: "AAAA" }, {}],
+      valid: [
+        { preparedId: "a".repeat(32), confirmation: { kind: "click" } },
+        { preparedId: "a".repeat(32), confirmation: { kind: "typed", phrase: "CONFIRM" } },
+        { preparedId: "a".repeat(32), confirmation: { kind: "typed", phrase: "" } },
+      ],
+      invalid: [
+        { preparedId: "a".repeat(32) },
+        { preparedId: "xyz", confirmation: { kind: "click" } },
+        { preparedId: "a".repeat(32), confirmation: { kind: "click" }, xdr: "AAAA" },
+        { preparedId: "a".repeat(32), confirmation: { kind: "typed" } },
+        { preparedId: "a".repeat(32), confirmation: { kind: "typed", phrase: "x".repeat(65) } },
+        { preparedId: "a".repeat(32), confirmation: { kind: "click", phrase: "CONFIRM" } },
+        { preparedId: "a".repeat(32), confirmation: { kind: "override" } },
+        {},
+      ],
     },
     CANCEL_PAYMENT: { valid: [{ preparedId: "0".repeat(32) }], invalid: [{}] },
     DISMISS_OUTCOME: { valid: [{ hash: "f".repeat(64) }], invalid: [{ hash: "nothex" }] },

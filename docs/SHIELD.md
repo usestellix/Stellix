@@ -336,7 +336,7 @@ How `evaluate` decides (`policy/policy.ts`; settled in #13):
 |---|---|---|---|---|
 | `SHIELD_ANALYZE` | `{ input: string; network }` (XDR or `web+stellar:tx` URI) | `AnalysisReport` (public data) | S1 | Mode C. Never signs. Size-limited input. |
 | `PREPARE_PAYMENT` | unchanged | adds `report` to the result | S1 | Mode A runs `analyze` on the built tx and stores the report beside the prepared tx. `report` is a `ReportView`: no decoded request; `decision` is display-only |
-| `CONFIRM_PAYMENT` | unchanged | unchanged | S1 | calls `assertSignable` on the stored tx and stored report before signing; confirmation `null` until #36 renders findings |
+| `CONFIRM_PAYMENT` | adds `confirmation`: `{ kind: "click" }` or `{ kind: "typed", phrase }` | unchanged | S1 | calls `assertSignable` on the stored tx and stored report before signing, with the confirmation from the Review screen that showed the findings (#36) |
 | Provider request types | SEP-43 methods | per SEP-43 | S2/S3 | separate ADR; content-script origin |
 
 New error codes (add to CONVENTIONS §4 and `errorCopy`): `SHIELD_DIGEST_MISMATCH`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED`, `SHIELD_CONFIRMATION_REQUIRED`, `SHIELD_INPUT_INVALID`, `SHIELD_INPUT_TOO_LARGE`.
@@ -344,7 +344,8 @@ New error codes (add to CONVENTIONS §4 and `errorCopy`): `SHIELD_DIGEST_MISMATC
 Mode A (#24; `services/send.ts`, wired by `background/shield.ts`):
 - The full report is stored in session storage beside the prepared tx (`StoredReport`: without the decoded request, which holds bigints; it's decoded again from the stored XDR at confirm). Reports never travel toward the SW in a message; the UI gets a `ReportView` (`report.ts`), whose `decision` is display-only.
 - Analysis reuses the account records `PREPARE_PAYMENT` already fetched, and has no `stellar.toml` source (`NO_TOML`: every lookup unavailable, `no_source`). Stellix's own flows build no `changeTrust`, so a Stellix payment has no unavailable checks.
-- `CONFIRM_PAYMENT` passes confirmation `null` until the Review screen renders findings (#36), so `review` fails closed; #36 records `{ kind: "click" }` (and a typed phrase if needed) in the same PR that shows them.
+- The Review screen renders the `ReportView` (#36). Pressing Confirm sends `{ kind: "click" }`; a typed review sends `{ kind: "typed", phrase }`, with Confirm disabled until the input equals the decision's `typedPhrase` (the UI shows that phrase, never a constant). The payload carries no report and no decision, so `assertSignable` checks the confirmation against the SW's own stored report. A blocked decision disables Confirm; PREPARE already refuses it.
+- A payment Stellix builds produces no finding on Review today: the destination is the one entered, the fee is capped below `HIGH_FEE`, timebounds are 180 s and `MEMO_REQUIRED` blocks at prepare. Review's findings are defense in depth for future Mode A flows (swaps, trustlines), so their states are tested in a harness (`apps/extension/harness/`), not through the SW.
 
 ---
 

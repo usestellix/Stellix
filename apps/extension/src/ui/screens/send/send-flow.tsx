@@ -5,7 +5,9 @@ import {
   type ErrorCode,
   type HorizonClient,
   type NetworkId,
+  type Confirmation,
   type PaymentSummary,
+  type ReportView,
 } from "@stellix/core";
 import { useEffect, useState } from "react";
 import { request } from "../../../messaging/client.js";
@@ -27,6 +29,7 @@ type Step =
       kind: "review";
       preparedId: string;
       summary: PaymentSummary;
+      report: ReportView;
       expiresAt: number;
       rebuilt: boolean;
       error: ErrorCode | null;
@@ -77,6 +80,7 @@ export function SendFlow({
         kind: "review",
         preparedId: res.preparedId,
         summary: res.summary,
+        report: res.report,
         expiresAt: res.expiresAt,
         rebuilt,
         error: null,
@@ -94,10 +98,13 @@ export function SendFlow({
     setStep({ kind: "input", error: null, busy: false });
   };
 
-  const confirm = async (review: Extract<Step, { kind: "review" }>) => {
+  const confirm = async (review: Extract<Step, { kind: "review" }>, confirmation: Confirmation) => {
     setStep({ ...review, busy: true });
     try {
-      const outcome = await request("CONFIRM_PAYMENT", { preparedId: review.preparedId });
+      const outcome = await request("CONFIRM_PAYMENT", {
+        preparedId: review.preparedId,
+        confirmation,
+      });
       if (outcome.status === "rebuild") {
         await prepare(draft, true); // UI_FLOWS §5.3: auto re-prepare, back to review with a note
         return;
@@ -178,12 +185,13 @@ export function SendFlow({
         <ReviewScreen
           network={network}
           summary={step.summary}
+          report={step.report}
           expiresAt={step.expiresAt}
           rebuilt={step.rebuilt}
           error={step.error}
           busy={step.busy}
           onCancel={() => void cancel(step.preparedId)}
-          onConfirm={() => void confirm(step)}
+          onConfirm={(confirmation) => void confirm(step, confirmation)}
           onReviewAgain={() => void prepare(draft)}
         />
       );

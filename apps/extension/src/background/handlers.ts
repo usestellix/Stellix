@@ -114,11 +114,11 @@ export function createHandlers(deps: HandlerDeps): Handlers {
     },
     PREPARE_PAYMENT: (input) =>
       serial(async () => preparePayment(platform, await sendDeps(), toPaymentInput(input))),
-    CONFIRM_PAYMENT: async ({ preparedId }) => {
+    CONFIRM_PAYMENT: async ({ preparedId, confirmation }) => {
       const send = await sendDeps();
       // Phase 1 is exclusive: consume → sign → submit. A concurrent confirm for the same id
       // finds nothing to consume (PREPARED_TX_NOT_FOUND).
-      const { hash } = await serial(() => submitPrepared(platform, send, preparedId));
+      const { hash } = await serial(() => submitPrepared(platform, send, preparedId, confirmation));
       const outcome = await awaitOutcome(platform, send, hash, CONFIRM_BUDGET_MS);
       if (outcome.status === "pending") await deps.inflight?.ensureAlarm();
       return outcome;

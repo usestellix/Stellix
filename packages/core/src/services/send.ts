@@ -7,7 +7,7 @@ import { NETWORKS, type NetworkId } from "../network/config.js";
 import type { HorizonClient } from "../network/horizon-client.js";
 import type { AccountRecord, PaymentRecord } from "../network/horizon-schemas.js";
 import type { Platform } from "../platform.js";
-import { assertSignable } from "../security/assert-signable.js";
+import { assertSignable, type Confirmation } from "../security/assert-signable.js";
 import { decodeTransactionEnvelope } from "../security/decode/index.js";
 import { analyze } from "../security/index.js";
 import { NO_TOML } from "../security/intel/no-toml.js";
@@ -257,6 +257,7 @@ export async function submitPrepared(
   platform: SendPlatform,
   deps: SendDeps,
   preparedId: string,
+  confirmation: Confirmation,
 ): Promise<{ hash: string }> {
   const key = await requireUnlocked(platform);
   try {
@@ -277,8 +278,8 @@ export async function submitPrepared(
     // re-check asserts it matches what was reviewed.
     const passphrase = NETWORKS[settings.network].passphrase;
     const tx = rehydrateTransaction(prepared.xdr, passphrase);
-    // Shield (invariant 15): the stored tx against the report this SW stored with it. Until the
-    // Review screen shows findings (#36), no confirmation is recorded: a review fails closed.
+    // Shield (invariant 15): the stored tx against the report this SW stored with it, and what
+    // the user did on the Review screen that showed its findings (a click, or the typed phrase).
     if (prepared.report === undefined) {
       throw new StellixError("SHIELD_REPORT_EXPIRED", "No analysis for this transaction");
     }
@@ -294,7 +295,7 @@ export async function submitPrepared(
         prepared.report,
         decodeTransactionEnvelope(prepared.xdr, settings.network).decoded,
       ),
-      null,
+      confirmation,
       platform.now(),
     );
     assertSameSummary(
@@ -421,9 +422,10 @@ export async function confirmPayment(
   platform: SendPlatform,
   deps: SendDeps,
   preparedId: string,
+  confirmation: Confirmation,
   budgetMs = 20_000,
 ): Promise<SubmitOutcome> {
-  const { hash } = await submitPrepared(platform, deps, preparedId);
+  const { hash } = await submitPrepared(platform, deps, preparedId, confirmation);
   return awaitOutcome(platform, deps, hash, budgetMs);
 }
 

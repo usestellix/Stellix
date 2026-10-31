@@ -14,6 +14,7 @@ import { MemoryKeyValueStore } from "../../testing/memory-key-value-store.js";
 import { importWallet } from "../onboarding.js";
 import { confirmPayment, preparePayment, type SubmitOutcome } from "../send.js";
 import { DEFAULT_SCRYPT_PARAMS } from "../../vault/kdf.js";
+import { CLICK } from "./helpers.js";
 
 // TESTING §2 scenarios 1–6 against live testnet, through the real send service.
 // Fresh keys every run; Friendbot retried up to 3 times.
@@ -60,7 +61,7 @@ async function send(
   input: Parameters<typeof preparePayment>[2],
 ): Promise<SubmitOutcome> {
   const { preparedId } = await preparePayment(platform, deps, input);
-  return confirmPayment(platform, deps, preparedId, 60_000);
+  return confirmPayment(platform, deps, preparedId, CLICK, 60_000);
 }
 
 const nativeBalance = async (id: string) =>
@@ -151,10 +152,10 @@ describe("testnet: send (TESTING §2)", () => {
     await fund(b);
     const first = await preparePayment(platform, deps, { destination: b, amount: "1" });
     const second = await preparePayment(platform, deps, { destination: b, amount: "1" });
-    expect(await confirmPayment(platform, deps, first.preparedId, 60_000)).toMatchObject({
+    expect(await confirmPayment(platform, deps, first.preparedId, CLICK, 60_000)).toMatchObject({
       status: "success",
     });
-    expect(await confirmPayment(platform, deps, second.preparedId, 60_000)).toEqual({
+    expect(await confirmPayment(platform, deps, second.preparedId, CLICK, 60_000)).toEqual({
       status: "rebuild",
       reason: "bad_seq",
     });
@@ -177,7 +178,7 @@ describe("testnet: send (TESTING §2)", () => {
       destination: b,
       amount,
     });
-    expect(await confirmPayment(platform, deps, preparedId, 60_000)).toMatchObject({
+    expect(await confirmPayment(platform, deps, preparedId, CLICK, 60_000)).toMatchObject({
       status: "success",
     });
     const reserve = BigInt((await horizon.getLatestLedger()).base_reserve_in_stroops);
