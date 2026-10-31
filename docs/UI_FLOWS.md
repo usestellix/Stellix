@@ -84,9 +84,14 @@ Two options: **Create a new wallet** / **I already have a recovery phrase**.
 - Title: "Review" plus network badge repeated large.
 - Rows: Type ("Send XLM" / "Activate new account"), To (full address in 4-char groups, monospace), Amount, Memo (or "None"), Network fee, **Total**.
 - Warnings (if applicable): first-time destination; activating a new account ("This address isn't active yet. Sending will activate it — minimum 1 XLM."); fee estimated.
+- **What Shield found** (#36): the report from PREPARE_PAYMENT, with the findings components (SHIELD §3.1): findings by severity, or "The checks that ran flagged nothing.", then "Checks that couldn't run" when any didn't. Never "safe". The decision shown only gates the button; the SW re-checks its own stored report at confirm (invariant 15).
+  - Review, click: Confirm as usual; pressing it is the click.
+  - Review, typed: "To continue, type {phrase} below." with the decision's `typedPhrase` (never a constant in the UI) and an input; Confirm stays disabled until the input matches exactly.
+  - Blocked: "Stellix won't sign this. The findings above say why." and Confirm disabled, with no override. PREPARE refuses blocked payments today, so this is defense in depth.
+  - A payment Stellix builds produces no findings today (the destination is the one entered, the fee is capped below `HIGH_FEE`, timebounds are 180 s, `MEMO_REQUIRED` blocks at prepare). The findings states exist for future flows (swaps, trustlines) and are tested in a harness (TESTING §3).
 - Expiry countdown (from `expiresAt`); when it hits zero, the Confirm button becomes "Review again" (re-prepare).
-- Buttons: Cancel (CANCEL_PAYMENT) / **Confirm and send**.
-- States: ready, expired, confirming.
+- Buttons: Cancel (CANCEL_PAYMENT) / **Confirm and send** (CONFIRM_PAYMENT with `{ kind: "click" }`, or `{ kind: "typed", phrase }` for a typed review).
+- States: ready, review-click, review-typed (input empty / not matching / matching), blocked, expired, confirming.
 
 ### 5.3 Result
 - Submitting: "Sending…".

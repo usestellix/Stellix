@@ -118,6 +118,12 @@ M1 runs these as follows (`apps/extension/e2e/m1-flows.spec.ts`). They use the p
   - the popup being refused `ONBOARD_GENERATE` / `REVEAL_PHRASE`
   - `RESET_WALLET` wiping storage and reopening onboarding without the `tabs` permission
 
+### Harness E2E (`pnpm --filter @stellix/extension test:harness`, run at the end of `test:e2e`)
+
+Screen states the real extension can't reach today are driven in a real browser through a harness page (`apps/extension/harness/`, outside `src/`, own Vite config, never in the extension build). Each harness renders the real screen component with crafted input.
+
+- `harness/review`: the Send Review screen with Shield reports (#36). A typed review enables Confirm only for the decision's exact phrase (tested with a phrase other than `CONFIRM`) and sends `{ kind: "typed", phrase }`; a block keeps Confirm disabled with nothing to type; a click review sends `{ kind: "click" }`. It also writes light and dark PNGs to `apps/extension/.output-harness/png/` for PRs. The SW side (the confirmation checked against the stored report) is covered by `payments.test.ts` and `send-shield.test.ts`.
+
 ### Release-related checks
 
 - `reproducible` CI job: two runners build the zip, and their `SHA256SUMS` must be identical (SECURITY §9.3).

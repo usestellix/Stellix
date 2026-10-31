@@ -122,7 +122,7 @@ No message is handled until SW startup work (access level, migrations) has finis
 | `RENAME_ACCOUNT` | `{ index, label }` | — | No |
 | `SET_ACTIVE_ACCOUNT` | `{ index }` | — | No |
 | `PREPARE_PAYMENT` | `{ destination, amount, memo? }` | `{ preparedId, summary, expiresAt, report }` (`report`: Shield's `ReportView`). `TX_IN_FLIGHT` while the account has an unresolved tx. | Yes |
-| `CONFIRM_PAYMENT` | `{ preparedId }` | `SubmitOutcome`, possibly `{ status: "pending", hash }` after ~20 s (ADR 0007) | Yes |
+| `CONFIRM_PAYMENT` | `{ preparedId, confirmation }` | `SubmitOutcome`, possibly `{ status: "pending", hash }` after ~20 s (ADR 0007) | Yes |
 | `CANCEL_PAYMENT` | `{ preparedId }` | — | No |
 | `DISMISS_OUTCOME` | `{ hash }` | — (removes a finished outcome after the popup has shown it) | No |
 | `REVEAL_PHRASE` | `{ password }` | `{ words }` (onboarding page only) | Re-auth |
@@ -140,7 +140,7 @@ No message is handled until SW startup work (access level, migrations) has finis
 |---|---|---|---|
 | `SHIELD_ANALYZE` | `{ input: string; network }`: a transaction XDR or a `web+stellar:tx` URI | `AnalysisReport` (public data only) | Mode C. Never signs and creates nothing that can be signed. Input is size-limited: too large → `SHIELD_INPUT_TOO_LARGE`, undecodable → `SHIELD_INPUT_INVALID`. Allowed pages and whether it needs the wallet unlocked are set in its S1 plan. |
 | `PREPARE_PAYMENT` | unchanged | adds `report` to the result: a `ReportView` (digest, network, rule-set version, findings, checks that couldn't run, display-only decision, times; no decoded request) | Mode A: runs `analyze` on the built transaction and stores the full report beside the prepared tx. Blocked → `MEMO_REQUIRED`, `NETWORK_ERROR` (memo check couldn't run) or `SHIELD_BLOCKED`. |
-| `CONFIRM_PAYMENT` | unchanged (no report, no confirmation) | unchanged | Calls `assertSignable` on the stored tx and stored report before signing, with no confirmation until #36 shows findings: `NETWORK_MISMATCH`, `SHIELD_DIGEST_MISMATCH`, `SHIELD_INPUT_INVALID`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure (SHIELD §4 lists the order). |
+| `CONFIRM_PAYMENT` | adds `confirmation`: `{ kind: "click" }` or `{ kind: "typed", phrase }` (no report, no decision) | unchanged | Calls `assertSignable` on the stored tx and stored report before signing, with the confirmation the Review screen recorded (#36): `NETWORK_MISMATCH`, `SHIELD_DIGEST_MISMATCH`, `SHIELD_INPUT_INVALID`, `SHIELD_REPORT_EXPIRED`, `SHIELD_BLOCKED` or `SHIELD_CONFIRMATION_REQUIRED` on failure (SHIELD §4 lists the order). |
 
 Provider request types (SEP-43, S2/S3) come with their own ADR; they arrive from a content script, so the sender rules above get an origin-grant check for them.
 
@@ -178,9 +178,10 @@ Popup                               Service worker                         Horiz
   │                                  │ store preparedTx:<id> + report in session (expires = maxTime)
   │◀── {preparedId, summary, report} │
   │  [user reviews summary]
-  │ CONFIRM_PAYMENT{preparedId} ────▶│
+  │ CONFIRM_PAYMENT{preparedId,      │
+  │   confirmation} ────────────────▶│
   │                                  │ load preparedTx, check not expired, network matches
-  │                                  │ assertSignable(stored tx, stored report)
+  │                                  │ assertSignable(stored tx, stored report, confirmation)
   │                                  │ decrypt vault with session key → mnemonic → keypair(index)
   │                                  │ sign, zero buffers
   │                                  │ submit ──────────────────────────────▶ POST /transactions
